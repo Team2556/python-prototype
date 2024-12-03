@@ -36,7 +36,7 @@ written in **Python** using the [robotpy](https://robotpy.readthedocs.io/) modul
 
 1. Check if Python 12.5 (or higher) is installed
     ```sh
-    python -v
+    python --version
     ```    
     If not, install [Python 12.6](https://www.python.org/downloads/release/python-3126/) here
 
