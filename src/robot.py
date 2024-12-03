@@ -10,7 +10,7 @@ import wpimath
 import wpilib.drive
 import wpimath.filter
 import wpimath.controller
-import drivetrain
+import commands.drivetrain as drivetrain
 
 class MyRobot(wpilib.TimedRobot):
     def robotInit(self) -> None:
