@@ -6,15 +6,19 @@
 
 import math
 import wpilib
+
 import wpimath.geometry
 import wpimath.kinematics
-import subsystems.swervemodule as swervemodule
+import wpimath.filter
+import commands2
+
+from subsystems.swervemodule import SwerveModule
 
 kMaxSpeed = 3.0  # 3 meters per second
 kMaxAngularSpeed = math.pi  # 1/2 rotation per second
 
 
-class Drivetrain:
+class DriveTrain(commands2.Subsystem):
     """
     Represents a swerve drive style drivetrain.
     """
@@ -25,10 +29,10 @@ class Drivetrain:
         self.backLeftLocation = wpimath.geometry.Translation2d(-0.381, 0.381)
         self.backRightLocation = wpimath.geometry.Translation2d(-0.381, -0.381)
 
-        self.frontLeft = swervemodule.SwerveModule(1, 2, 0, 1, 2, 3)
-        self.frontRight = swervemodule.SwerveModule(3, 4, 4, 5, 6, 7)
-        self.backLeft = swervemodule.SwerveModule(5, 6, 8, 9, 10, 11)
-        self.backRight = swervemodule.SwerveModule(7, 8, 12, 13, 14, 15)
+        self.frontLeft = SwerveModule.SwerveModule(1, 2, 0, 1, 2, 3)
+        self.frontRight = SwerveModule.SwerveModule(3, 4, 4, 5, 6, 7)
+        self.backLeft = SwerveModule.SwerveModule(5, 6, 8, 9, 10, 11)
+        self.backRight = SwerveModule.SwerveModule(7, 8, 12, 13, 14, 15)
 
         self.gyro = wpilib.AnalogGyro(0)
 
@@ -50,7 +54,47 @@ class Drivetrain:
             ),
         )
 
+        # Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
+        self.xspeedLimiter = wpimath.filter.SlewRateLimiter(3)
+        self.yspeedLimiter = wpimath.filter.SlewRateLimiter(3)
+        self.rotLimiter = wpimath.filter.SlewRateLimiter(3)
+
         self.gyro.reset()
+    
+    def driveWithJoystick(self, controller) -> None:
+        # Get the x speed. We are inverting this because Xbox controllers return
+        # negative values when we push forward.
+        xSpeed = (
+            -self.xspeedLimiter.calculate(
+                wpimath.applyDeadband(controller.getLeftY(), 0.02)
+            )
+            * kMaxSpeed
+        )
+
+        # Get the y speed or sideways/strafe speed. We are inverting this because
+        # we want a positive value when we pull to the left. Xbox controllers
+        # return positive values when you pull to the right by default.
+        ySpeed = (
+            -self.yspeedLimiter.calculate(
+                wpimath.applyDeadband(controller.getLeftX(), 0.02)
+            )
+            * kMaxSpeed
+        )
+
+        # Get the rate of angular rotation. We are inverting this because we want a
+        # positive value when we pull to the left (remember, CCW is positive in
+        # mathematics). Xbox controllers return positive values when you pull to
+        # the right by default.
+        rot = (
+            -self.rotLimiter.calculate(
+                wpimath.applyDeadband(controller.getRightX(), 0.02)
+            )
+            * kMaxSpeed
+        )
+
+        fieldRelative = False
+
+        self.drive(xSpeed, ySpeed, rot, fieldRelative, self.getPeriod())
 
     def drive(
         self,
