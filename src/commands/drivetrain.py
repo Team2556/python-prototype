@@ -29,10 +29,10 @@ class DriveTrain(commands2.Subsystem):
         self.backLeftLocation = wpimath.geometry.Translation2d(-0.381, 0.381)
         self.backRightLocation = wpimath.geometry.Translation2d(-0.381, -0.381)
 
-        self.frontLeft = SwerveModule.SwerveModule(1, 2, 0, 1, 2, 3)
-        self.frontRight = SwerveModule.SwerveModule(3, 4, 4, 5, 6, 7)
-        self.backLeft = SwerveModule.SwerveModule(5, 6, 8, 9, 10, 11)
-        self.backRight = SwerveModule.SwerveModule(7, 8, 12, 13, 14, 15)
+        self.frontLeft = SwerveModule(1, 2, 0, 1, 2, 3)
+        self.frontRight = SwerveModule(3, 4, 4, 5, 6, 7)
+        self.backLeft = SwerveModule(5, 6, 8, 9, 10, 11)
+        self.backRight = SwerveModule(7, 8, 12, 13, 14, 15)
 
         self.gyro = wpilib.AnalogGyro(0)
 

@@ -12,7 +12,6 @@ import commands2
 from commands2 import CommandScheduler
 
 from commands.drivetrain import DriveTrain
-
 from constants import *
 
 
@@ -40,7 +39,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous."""
-        self.driveWithJoystick(False)
         self.robotDrive.updateOdometry()
 
     def teleopInit(self):
@@ -48,7 +46,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during teleoperated mode."""
-        self.driveWithJoystick(True)
 
     def ConfigureButtonBindings(self):
         pass
@@ -58,5 +55,5 @@ class MyRobot(commands2.TimedCommandRobot):
             commands2.cmd.run(
                 lambda: self.robotDrive.driveWithJoystick(self.driveController)
             ),
-            self.robotDrive,
+            # self.robotDrive,
         )
