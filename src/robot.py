@@ -6,54 +6,74 @@
 #
 
 import wpilib
-import wpilib.drive
-
 import commands2
-from commands2 import CommandScheduler
+import typing
 
-from commands.drivetrain import DriveTrain
-from constants import *
+from robotcontainer import RobotContainer
 
 
 class MyRobot(commands2.TimedCommandRobot):
+    """
+    Command v2 robots are encouraged to inherit from TimedCommandRobot, which
+    has an implementation of robotPeriodic which runs the scheduler for you
+    """
+
+    autonomousCommand: typing.Optional[commands2.Command] = None
+
     def robotInit(self) -> None:
-        """Robot initialization function"""
-        CommandScheduler.getInstance().run()
-        self.timer = wpilib.Timer()
+        """
+        This function is run when the robot is first started up and should be used for any
+        initialization code.
+        """
 
-        # Subsystems
-        self.robotDrive = DriveTrain()
+        # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+        # autonomous chooser on the dashboard.
+        self.container = RobotContainer()
 
-        # User Inputs
-        self.driveController = commands2.button.CommandXboxController(
-            OIConstants.driver_1_port
-        )
+    def robotPeriodic(self) -> None:
+        """This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+        that you want ran during disabled, autonomous, teleoperated and test.
 
-        self.ConfigureButtonBindings()
-        self.ConfigureDefaultCommands()
+        This runs after the mode specific periodic functions, but before LiveWindow and
+        SmartDashboard integrated updating."""
 
+        # Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
+        # commands, running already-scheduled commands, removing finished or interrupted commands,
+        # and running subsystem periodic() methods.  This must be called from the robot's periodic
+        # block in order for anything in the Command-based framework to work.
+        commands2.CommandScheduler.getInstance().run()
 
-    def autonomousInit(self):
-        """This function is run once each time the robot enters autonomous mode."""
-        self.timer.restart()
-
-    def autonomousPeriodic(self) -> None:
-        """This function is called periodically during autonomous."""
-        self.robotDrive.updateOdometry()
-
-    def teleopInit(self):
-        """This function is called once each time the robot enters teleoperated mode."""
-
-    def teleopPeriodic(self) -> None:
-        """This function is called periodically during teleoperated mode."""
-
-    def ConfigureButtonBindings(self):
+    def disabledInit(self) -> None:
+        """This function is called once each time the robot enters Disabled mode."""
         pass
 
-    def ConfigureDefaultCommands(self):
-        self.robotDrive.setDefaultCommand(
-            commands2.cmd.run(
-                lambda: self.robotDrive.driveWithJoystick(self.driveController)
-            ),
-            # self.robotDrive,
-        )
+    def disabledPeriodic(self) -> None:
+        """This function is called periodically when disabled"""
+        pass
+
+    def autonomousInit(self) -> None:
+        """This autonomous runs the autonomous command selected by your RobotContainer class."""
+        self.autonomousCommand = self.container.getAutonomousCommand()
+
+        if self.autonomousCommand:
+            self.autonomousCommand.schedule()
+
+    def autonomousPeriodic(self) -> None:
+        """This function is called periodically during autonomous"""
+        pass
+
+    def teleopInit(self) -> None:
+        # This makes sure that the autonomous stops running when
+        # teleop starts running. If you want the autonomous to
+        # continue until interrupted by another command, remove
+        # this line or comment it out.
+        if self.autonomousCommand:
+            self.autonomousCommand.cancel()
+
+    def teleopPeriodic(self) -> None:
+        """This function is called periodically during operator control"""
+        pass
+
+    def testInit(self) -> None:
+        # Cancels all running commands at the start of test mode
+        commands2.CommandScheduler.getInstance().cancelAll()
