@@ -2,11 +2,12 @@ import wpilib
 from wpilib import SmartDashboard
 import wpilib.simulation
 from wpimath.kinematics import SwerveDrive4Kinematics
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
 from phoenix6.unmanaged import feed_enable
 from phoenix6.hardware import TalonFX
 # import generated.tuner_constants as tc
-from wpimath.units import inchesToMeters
+from wpimath.units import inchesToMeters, feetToMeters
 
 
 class PhysicsEngine:
@@ -68,8 +69,10 @@ class PhysicsEngine:
         _back_right_y_pos: units.meter = inchesToMeters(-11.75)
 
         #simulated motors and encoders
-        sim_front_left_drive = TalonFX(_front_left_drive_motor_id).sim_state
-        sim_front_left_steer = TalonFX(_front_left_steer_motor_id).sim_state
+        self.sim_front_left_drive = TalonFX(_front_left_drive_motor_id).sim_state
+        self.sim_front_left_drive.set_supply_voltage(12.0)
+        self.sim_front_left_steer = TalonFX(_front_left_steer_motor_id).sim_state
+        self.sim_front_left_steer.set_supply_voltage(12.0)
         # sim_front_left_encoder = CANCoder(hardware._front_left_encoder_id).sim_state
 
         sim_front_right_drive = TalonFX(_front_right_drive_motor_id).sim_state
@@ -84,6 +87,12 @@ class PhysicsEngine:
         sim_back_right_steer = TalonFX(_back_right_steer_motor_id).sim_state
         # sim_back_right_encoder = CANCoder(_back_right_encoder_id).sim_state
 
+        swerve_kinematics = SwerveDrive4Kinematics(Translation2d(_front_left_x_pos, _front_left_y_pos),
+                                                   Translation2d(_front_right_x_pos, _front_right_y_pos),
+                                                   Translation2d(_back_left_x_pos, _back_left_y_pos),
+                                                   Translation2d(_back_right_x_pos, _back_right_y_pos))
+        
+
 
             
         
@@ -96,8 +105,15 @@ class PhysicsEngine:
         #refer to https://api.ctr-electronics.com/phoenix6/release/python/autoapi/phoenix6/sim/talon_fx_sim_state/index.html
 
         # drivetrainKinematics = SwerveDrive4Kinematics([module.pose for module in self.drivetrain.modules])
-        self.physics_controller.setPose(self.drivetrain.pose)
-
+        # self.physics_controller.setPose(self.drivetrain.pose)
+        # print("------------------------------------------------\n",f'{self.sim_front_left_drive.motor_voltage=}',
+        #       "------------------------------------------------\n",f'{self.sim_front_left_steer.motor_voltage=}/n/n')
+        # for module in self.drivetrain.modules:
+        #     for module_locations in module.module_locations:
+        #         print("------------------------------------------------\n",f'{module}at{module_locations=}',
+        #         "------------------------------------------------\n")
+        # print("------------------------------------------------\n",f'{feetToMeters(self.drivetrain.get_state().speeds)=}',"------------------------------------------------\n",f'{(self.drivetrain.get_state().speeds)=}')  
+        self.physics_controller.drive(feetToMeters(self.drivetrain.get_state().speeds), 0.020)
 
             
 
