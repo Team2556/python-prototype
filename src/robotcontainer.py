@@ -62,9 +62,18 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
-        def square_input(value: float) -> float:
-            #squares but keeps the sign
-            return value * abs(value)
+        def curve_off_input(value: float, bend_factor: float = 0.90) -> float:
+            """The bend_factor is the factor that determines how much the curve is applied.
+            The higher the bend_factor, the more the curve is applied, and thus more 'deadband' is added.
+            """
+            value_update = bend_factor * value ** 3 + (1 - bend_factor) * value
+            #limit value to -1 to 1
+            if value_update > 1:
+                return 1
+            elif value_update < -1:
+                return -1
+            else:
+                return value_update
 
         # Note that X is defined as forward according to WPILib convention,
         # and Y is defined as to the left according to WPILib convention.
@@ -73,13 +82,14 @@ class RobotContainer:
             self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -square_input(self._joystick.getLeftY()) * self._max_speed
+                        -curve_off_input(self._joystick.getLeftY()) * self._max_speed
                     )  # Drive forward with negative Y (forward)
                     .with_velocity_y(
-                        -square_input(self._joystick.getLeftX()) * self._max_speed
+                        -curve_off_input(self._joystick.getLeftX()) * self._max_speed
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
-                        -square_input(self._joystick.getRightX()) * self._max_angular_rate
+                        -curve_off_input(self._joystick.getRightX(), 
+                                         bend_factor=.7) * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
                 )
             )
