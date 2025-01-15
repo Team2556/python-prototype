@@ -62,11 +62,11 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
-        def curve_off_input(value: float, bend_factor: float = 0.90) -> float:
+        def curve_off_input(value: float, blend_factor: float = 0.60) -> float:
             """The bend_factor is the factor that determines how much the curve is applied.
             The higher the bend_factor, the more the curve is applied, and thus more 'deadband' is added.
             """
-            value_update = bend_factor * value ** 3 + (1 - bend_factor) * value
+            value_update = blend_factor * value ** 9 + (1 - blend_factor) * value
             #limit value to -1 to 1
             if value_update > 1:
                 return 1
@@ -89,7 +89,7 @@ class RobotContainer:
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
                         -curve_off_input(self._joystick.getRightX(), 
-                                         bend_factor=.7) * self._max_angular_rate
+                                         blend_factor=.7) * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
                 )
             )
