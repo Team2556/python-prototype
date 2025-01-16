@@ -2,12 +2,13 @@ import wpilib
 from wpilib import SmartDashboard
 import wpilib.simulation
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.geometry import Pose2d, Rotation2d, Translation2d
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d
 
 from phoenix6.unmanaged import feed_enable
 from phoenix6.hardware import TalonFX
 # import generated.tuner_constants as tc
-from wpimath.units import inchesToMeters, feetToMeters
+# from wpimath.units import inchesToMeters, feetToMeters, metersToFeet
+# from pyfrc.physics.drivetrains import four_motor_swerve_drivetrain
 
 
 class PhysicsEngine:
@@ -16,6 +17,7 @@ class PhysicsEngine:
         self.robot = robot
         self.container = self.robot.container
         self.drivetrain = self.container.drivetrain
+        self.prev_pose = self.drivetrain.get_state().pose
 
 
         #doesn't work ... temp = self.container.drivetrain.get_module(0).sim_state
@@ -24,7 +26,7 @@ class PhysicsEngine:
         #     for motor in module:
         #         temp = motor.sim_state
 
-        # Front Left
+        '''# Front Left
         _front_left_drive_motor_id = 10
         _front_left_steer_motor_id = 11
         _front_left_encoder_id = 12
@@ -75,16 +77,16 @@ class PhysicsEngine:
         self.sim_front_left_steer.set_supply_voltage(12.0)
         # sim_front_left_encoder = CANCoder(hardware._front_left_encoder_id).sim_state
 
-        sim_front_right_drive = TalonFX(_front_right_drive_motor_id).sim_state
-        sim_front_right_steer = TalonFX(_front_right_steer_motor_id).sim_state
+        self.sim_front_right_drive = TalonFX(_front_right_drive_motor_id).sim_state
+        self.sim_front_right_steer = TalonFX(_front_right_steer_motor_id).sim_state
         # sim_front_right_encoder = CANCoder(_front_right_encoder_id).sim_state
 
-        sim_back_left_drive = TalonFX(_back_left_drive_motor_id).sim_state
-        sim_back_left_steer = TalonFX(_back_left_steer_motor_id).sim_state
+        self.sim_back_left_drive = TalonFX(_back_left_drive_motor_id).sim_state
+        self.sim_back_left_steer = TalonFX(_back_left_steer_motor_id).sim_state
         # sim_back_left_encoder = CANCoder(_back_left_encoder_id).sim_state
 
-        sim_back_right_drive = TalonFX(_back_right_drive_motor_id).sim_state
-        sim_back_right_steer = TalonFX(_back_right_steer_motor_id).sim_state
+        self.sim_back_right_drive = TalonFX(_back_right_drive_motor_id).sim_state
+        self.sim_back_right_steer = TalonFX(_back_right_steer_motor_id).sim_state
         # sim_back_right_encoder = CANCoder(_back_right_encoder_id).sim_state
 
         swerve_kinematics = SwerveDrive4Kinematics(Translation2d(_front_left_x_pos, _front_left_y_pos),
@@ -92,7 +94,13 @@ class PhysicsEngine:
                                                    Translation2d(_back_left_x_pos, _back_left_y_pos),
                                                    Translation2d(_back_right_x_pos, _back_right_y_pos))
         
-
+        self.swerve_drivetrain_speeds = four_motor_swerve_drivetrain(
+            self.sim_front_left_drive, sim_front_left_steer,
+            sim_front_right_drive, sim_front_right_steer,
+            sim_back_left_drive, sim_back_left_steer,
+            sim_back_right_drive, sim_back_right_steer,
+            swerve_kinematics, 0.381, 0.381, 0.381, 0.381
+        )'''
 
             
         
@@ -113,7 +121,15 @@ class PhysicsEngine:
         #         print("------------------------------------------------\n",f'{module}at{module_locations=}',
         #         "------------------------------------------------\n")
         # print("------------------------------------------------\n",f'{feetToMeters(self.drivetrain.get_state().speeds)=}',"------------------------------------------------\n",f'{(self.drivetrain.get_state().speeds)=}')  
-        self.physics_controller.drive(feetToMeters(self.drivetrain.get_state().speeds), 0.020)
+        #may need unit conversion, may not..? metersToFeet or feetToMeters
+        # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
+        # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
+        do_nothing = True
+        if do_nothing:
+            pass
+        else:
+            self.physics_controller.move_robot(Transform2d(self.prev_pose, self.drivetrain.get_state().pose))
+            self.prev_pose = self.drivetrain.get_state().pose
 
             
 
