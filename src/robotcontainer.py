@@ -5,15 +5,16 @@
 #
 
 import commands2
-import commands2.button
-import commands2.cmd
+import commands2.button, commands2.cmd
 from commands2.sysid import SysIdRoutine
 
 from generated.tuner_constants import TunerConstants
 from telemetry import Telemetry
 from generated import drive_smoothing
 
+from pathplannerlib.auto import AutoBuilder
 from phoenix6 import swerve
+from wpilib import SmartDashboard
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
 
@@ -47,6 +48,12 @@ class RobotContainer:
         )
         self._brake = swerve.requests.SwerveDriveBrake()
         self._point = swerve.requests.PointWheelsAt()
+        self._forward_straight = (
+            swerve.requests.RobotCentric()
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+            )
+        )
 
         self._logger = Telemetry(self._max_speed)
 
@@ -54,6 +61,10 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
+        # Path follower
+        self._auto_chooser = AutoBuilder.buildAutoChooser("Tests")
+        SmartDashboard.putData("Auto Mode", self._auto_chooser)
+        
         # Configure the button bindings
         self.configureButtonBindings()
 
@@ -91,6 +102,17 @@ class RobotContainer:
                 )
             )
         )
+        
+        self._joystick.pov(0).whileTrue(
+            self.drivetrain.apply_request(
+                lambda: self._forward_straight.with_velocity_x(0.5).with_velocity_y(0)
+            )
+        )
+        self._joystick.pov(180).whileTrue(
+            self.drivetrain.apply_request(
+                lambda: self._forward_straight.with_velocity_x(-0.5).with_velocity_y(0)
+            )
+        )
 
         # Run SysId routines when holding back/start and X/Y.
         # Note that each routine should be run exactly once in a single log.
@@ -121,4 +143,5 @@ class RobotContainer:
 
         :returns: the command to run in autonomous
         """
-        return commands2.cmd.print_("No autonomous command configured")
+        # return commands2.cmd.print_("No autonomous command configured")
+        return self._auto_chooser.getSelected()
