@@ -14,6 +14,8 @@ class Telemetry:
         """
         self._max_speed = max_speed
         SignalLogger.start()
+        # direct to a USB
+        SignalLogger.set_path("/media/sda1/ctre-logs/")
 
         # What to publish over networktables for telemetry
         self._inst = NetworkTableInstance.getDefault()
