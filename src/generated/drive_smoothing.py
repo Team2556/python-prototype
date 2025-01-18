@@ -13,7 +13,16 @@ def smooth(joystick_value: float, blend = 0.6):
     #     smoothed_value = -1
     
     # return smoothed_value
-    return joystick_value ** 3
+    smoothed_value = joystick_value ** 3
+    
+    
+    
+    # if smoothed_value < 0.001:
+    #     return 0
+    # if smoothed_value < 0.01:
+    #     return 0.01
+    
+    return smoothed_value
     
 if __name__ == '__main__':
     while True:
