@@ -133,9 +133,9 @@ class RobotContainer:
         self._joystick.leftBumper().onTrue(
             self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
         )
-        self._joystick.rightBumper().onTrue(
-            self.com.runOnce(lambda: self.ma.seed_field_centric())
-        )
+        '''self._joystick.rightBumper().onTrue(
+            self.drivetrain.runOnce(lambda: self.ma.seed_field_centric())
+        )'''
 
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
