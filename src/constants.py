@@ -62,7 +62,7 @@ class Rio_Analog(IntEnum):
 
 #region CAN Constants
 class CAN_Address(IntEnum):
-    ZERRO = 0
+    ZERO = 0 # Fixing the spelling (from ZERRO) might cause problems later
     ONE = auto()
     TWO = auto()
     THREE = auto()
@@ -79,3 +79,6 @@ class CAN_Address(IntEnum):
 #endregion
 class Override_DriveConstant:
     ...
+    
+class AlgaeConstants:
+    kIntakeCANAddress = 100 # TODO: Correct the intake CAN Address
