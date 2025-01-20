@@ -5,14 +5,16 @@
 #
 
 import commands2
-import commands2.button
-import commands2.cmd
+import commands2.button, commands2.cmd
 from commands2.sysid import SysIdRoutine
 
 from generated.tuner_constants import TunerConstants
 from telemetry import Telemetry
+from generated import drive_smoothing
 
+from pathplannerlib.auto import AutoBuilder
 from phoenix6 import swerve
+from wpilib import SmartDashboard
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
 
@@ -36,16 +38,22 @@ class RobotContainer:
         # Setting up bindings for necessary control of the swerve drive platform
         self._drive = (
             swerve.requests.FieldCentric()
-            .with_deadband(self._max_speed * 0.1)
+            .with_deadband(self._max_speed * 0.05)
             .with_rotational_deadband(
-                self._max_angular_rate * 0.1
-            )  # Add a 10% deadband
+                self._max_angular_rate * 0.05
+            )  # Add a 5% deadband
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
-            )  # Use open-loop control for drive motors
+            )  # Use open-loop control for drive 
         )
         self._brake = swerve.requests.SwerveDriveBrake()
         self._point = swerve.requests.PointWheelsAt()
+        self._forward_straight = (
+            swerve.requests.RobotCentric()
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+            )
+        )
 
         self._logger = Telemetry(self._max_speed)
 
@@ -53,6 +61,10 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
+        # Path follower
+        self._auto_chooser = AutoBuilder.buildAutoChooser("Tests")
+        SmartDashboard.putData("Auto Mode", self._auto_chooser)
+        
         # Configure the button bindings
         self.configureButtonBindings()
 
@@ -62,18 +74,6 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
-        def curve_off_input(value: float, blend_factor: float = 0.60) -> float:
-            """The bend_factor is the factor that determines how much the curve is applied.
-            The higher the bend_factor, the more the curve is applied, and thus more 'deadband' is added.
-            """
-            value_update = blend_factor * value ** 9 + (1 - blend_factor) * value
-            #limit value to -1 to 1
-            if value_update > 1:
-                return 1
-            elif value_update < -1:
-                return -1
-            else:
-                return value_update
 
         # Note that X is defined as forward according to WPILib convention,
         # and Y is defined as to the left according to WPILib convention.
@@ -82,14 +82,13 @@ class RobotContainer:
             self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -curve_off_input(self._joystick.getLeftY()) * self._max_speed
+                        -drive_smoothing.smooth(self._joystick.getLeftY()) * self._max_speed
                     )  # Drive forward with negative Y (forward)
                     .with_velocity_y(
-                        -curve_off_input(self._joystick.getLeftX()) * self._max_speed
+                        -drive_smoothing.smooth(self._joystick.getLeftX()) * self._max_speed
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
-                        -curve_off_input(self._joystick.getRightX(), 
-                                         blend_factor=.7) * self._max_angular_rate
+                        -drive_smoothing.smooth(self._joystick.getRightX()) * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
                 )
             )
@@ -101,6 +100,17 @@ class RobotContainer:
                 lambda: self._point.with_module_direction(
                     Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
                 )
+            )
+        )
+        
+        self._joystick.pov(0).whileTrue(
+            self.drivetrain.apply_request(
+                lambda: self._forward_straight.with_velocity_x(0.5).with_velocity_y(0)
+            )
+        )
+        self._joystick.pov(180).whileTrue(
+            self.drivetrain.apply_request(
+                lambda: self._forward_straight.with_velocity_x(-0.5).with_velocity_y(0)
             )
         )
 
@@ -123,6 +133,9 @@ class RobotContainer:
         self._joystick.leftBumper().onTrue(
             self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
         )
+        self._joystick.rightBumper().onTrue(
+            self.com.runOnce(lambda: self.ma.seed_field_centric())
+        )
 
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
@@ -133,4 +146,5 @@ class RobotContainer:
 
         :returns: the command to run in autonomous
         """
-        return commands2.cmd.print_("No autonomous command configured")
+        # return commands2.cmd.print_("No autonomous command configured")
+        return self._auto_chooser.getSelected()

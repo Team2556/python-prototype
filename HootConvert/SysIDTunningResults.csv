@@ -1,0 +1,11 @@
+Date, TestType, Anomalies, Mechanism, CAnID,SysIDsettings, Units, WindowSize, TestDuration, LoopType,Results, Ks, Kv, Ka, Kp, Kd, 
+1/18/25, linear, cut out of data, FL Drive,1, , rotations, 10, .15, Velocity, , .082353,.11445,.0019357,.0017907,.0000000,
+1/18/25, linear, cut out of data, FR Drive,4, ,rotations, 10,.11,Velocity, , .07113,.11426,.0026367,.0057586,.0000000,
+1/18/25, linear, cut out of data, RL Drive,7, ,rotations, 10,.01,Velocity, , .07919,.11408,.0015121,.00017388,.0000000,
+1/18/25, linear, cut out of data, RR Drive,10, ,rotations, 10,.17,Velocity, , .073476,.11456,.0031741,.016202,.0000000,
+
+1/18/25, linear, cut out of data, FL Drive,1, , rotations, 10, 5.2, Velocity, , .071964,.11431,.0028298,.044494,.0000000,
+1/18/25, linear, cut out of data, FR Drive,4, ,rotations, 10,.5.2,Velocity, , .07113,.11426,.0026367,.0057586,.0000000,
+1/18/25, linear, cut out of data, RL Drive,7, ,rotations, 10,5.19,Velocity, , .037794,.11483,.0031224,.0061339,.0000000,
+1/18/25, linear, cut out of data, RR Drive,10, ,rotations, 10,.19,Velocity, , .04644,.11498,.0036287,.021827,.0000000,
+
