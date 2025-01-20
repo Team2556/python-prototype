@@ -16,6 +16,7 @@ from phoenix6 import swerve
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
 
+from subsystems import algae
 
 class RobotContainer:
     """
@@ -46,6 +47,8 @@ class RobotContainer:
         )
         self._brake = swerve.requests.SwerveDriveBrake()
         self._point = swerve.requests.PointWheelsAt()
+        
+        self.algae = algae.AlgaeHandler()
 
         self._logger = Telemetry(self._max_speed)
 
@@ -103,6 +106,11 @@ class RobotContainer:
                 )
             )
         )
+        
+        # I'm doing algae input here because I don't know how to move it to the commands folder
+        # Also the input can be changed from x to some other thing
+        # Cycle function should intake the algae or spit it out if algae is already stored
+        self._joystick.x().whileTrue(self.drivetrain.apply_request(lambda: self.algae.cycle))
 
         # Run SysId routines when holding back/start and X/Y.
         # Note that each routine should be run exactly once in a single log.
