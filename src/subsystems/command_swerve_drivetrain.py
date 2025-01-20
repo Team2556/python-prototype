@@ -233,6 +233,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         """
 
         self._sys_id_routine_to_apply = self._sys_id_routine_translation
+        # self._sys_id_routine_translation
+        #self._steer_characterization
+        # self._rotation_characterization
         """The SysId routine to test"""
 
         if utils.is_simulation():

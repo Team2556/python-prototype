@@ -27,11 +27,11 @@ class TunerConstants:
     # output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     _drive_gains = (
         configs.Slot0Configs()
-        .with_k_p(0.1)
+        .with_k_p(0.00442645)
         .with_k_i(0)
         .with_k_d(0)
-        .with_k_s(0)
-        .with_k_v(0.124)
+        .with_k_s(0.07664325)
+        .with_k_v(0.11421)
     )
 
     # The closed-loop output type to use for the steer motors;
@@ -48,10 +48,11 @@ class TunerConstants:
 
     # The remote sensor feedback type to use for the steer motors;
     # When not Pro-licensed, FusedCANcoder/SyncCANcoder automatically fall back to RemoteCANcoder
-    _steer_feedback_type = swerve.SteerFeedbackType.FUSED_CANCODER
+    # _steer_feedback_type = swerve.SteerFeedbackType.FUSED_CANCODER #giving us errors
+    _steer_feedback_type = swerve.SteerFeedbackType.REMOTE_CANCODER 
 
     # The stator current at which the wheels start to slip;
-    # This needs to be tuned to your individual robot
+    # This needs to be tuned to your individual robot #TODO: #12 _slip_current needs to be tuned
     _slip_current: units.ampere = 120.0
 
     # Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
@@ -73,7 +74,9 @@ class TunerConstants:
 
     # Theoretical free speed (m/s) at 12 V applied output;
     # This needs to be tuned to your individual robot
-    speed_at_12_volts: units.meters_per_second = 4.73
+    speed_at_12_volts: units.meters_per_second = 4.73 # TODO: #10 Change this to the actual speed 
+    #getting 34.5 rotations/sec at 4 volts .'. 34.5 * 2 * pi * 0.0508 = 10.9 m/s
+    
 
     # Every 1 rotation of the azimuth results in _couple_ratio drive motor turns;
     # This may need to be tuned to your individual robot
