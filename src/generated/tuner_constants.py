@@ -1,6 +1,7 @@
 from phoenix6 import CANBus, configs, hardware, signals, swerve, units
 from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from wpimath.units import inchesToMeters
+from networktables import NetworkTables
 
 
 class TunerConstants:
@@ -53,7 +54,8 @@ class TunerConstants:
 
     # The stator current at which the wheels start to slip;
     # This needs to be tuned to your individual robot #TODO: #12 _slip_current needs to be tuned
-    _slip_current: units.ampere = 120.0
+    splip_curremt_degrade = 7
+    _slip_current: units.ampere = 120.0 / splip_curremt_degrade
 
     # Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     # Some configs will be overwritten; check the `with_*_initial_configs()` API documentation.
