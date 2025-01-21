@@ -176,5 +176,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-/.venv
-src/ctre_sim/*.dat
+*.dat
+src/ctre_sim/*
+ctre_sim/*
+
+
