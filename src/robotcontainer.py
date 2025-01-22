@@ -28,9 +28,12 @@ class RobotContainer:
     """
 
     def __init__(self) -> None:
-        self._max_speed = (
+        SmartDashboard.putNumber("Max Speed", TunerConstants.speed_at_12_volts)
+        self._max_speed = SmartDashboard.getNumber("Max Speed", TunerConstants.speed_at_12_volts)
+        '''self._max_speed = (
             TunerConstants.speed_at_12_volts
-        )  # speed_at_12_volts desired top speed
+        )  # speed_at_12_volts desired top speed'''
+        print(f"Max speed: {self._max_speed}")
         self._max_angular_rate = rotationsToRadians(
             0.75
         )  # 3/4 of a rotation per second max angular velocity

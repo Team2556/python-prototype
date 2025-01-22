@@ -1,0 +1,187 @@
+{
+  "hubs": [
+    {
+      "x": 9,
+      "y": 4,
+      "width": 1499,
+      "height": 567,
+      "state": {
+        "sidebar": {
+          "width": 373,
+          "expanded": [
+            "/SmartDashboard/Field/Robot",
+            "/Pose/robotPose",
+            "/SmartDashboard/Module 0/RootSpeed",
+            "/SmartDashboard/Module 0/RootDirection",
+            "/SmartDashboard/Module 0/RootDirection/Direction",
+            "/DriveState/ModuleStates/0",
+            "/DriveState/ModuleStates/3",
+            "/DriveState/ModuleTargets/1",
+            "/SmartDashboard/Module 0/RootSpeed/Speed",
+            "/SmartDashboard/Auto Mode/options",
+            "/PathPlanner",
+            "/SmartDashboard"
+          ]
+        },
+        "tabs": {
+          "selected": 1,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "8jotn5be5b6tetp7t2mhrhsvt6ic3he1",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/DriveState/Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "2025 KitBot"
+                    }
+                  },
+                  {
+                    "type": "ghostLegacy",
+                    "logKey": "NT:/Pose/robotPose",
+                    "logType": "NumberArray",
+                    "visible": true,
+                    "options": {
+                      "model": "Bot-Bot Awakens",
+                      "color": "#ffff00",
+                      "format": "Pose2d",
+                      "units": "radians"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "origin": "blue"
+              },
+              "controllerUUID": "atkw82xbnjk76h58q8670idshmt6ulzz",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  13.690688427157985,
+                  6.162932230891988,
+                  -0.5569269539325303
+                ],
+                "cameraTarget": [
+                  -0.8680433117415023,
+                  -1.155990101589167,
+                  -0.9219297522624529
+                ]
+              },
+              "controlsHeight": 100
+            },
+            {
+              "type": 9,
+              "title": "Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "NT:/DriveState/Speeds",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleTargets",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  }
+                ],
+                "maxSpeed": 5,
+                "sizeX": 0.65,
+                "sizeY": 0.65,
+                "orientation": 1
+              },
+              "controllerUUID": "p22uk81sg0k3uyiby523wmbwlolinvza",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/DriveState/Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/PathPlanner/activePath",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "bumpers": "auto",
+                "origin": "auto",
+                "orientation": 0,
+                "size": 27
+              },
+              "controllerUUID": "vl3pq1caxg7jgu2gjtxfq4b189qjqx7k",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 4,
+              "title": "Table",
+              "controller": [
+                "NT:/SmartDashboard/Max Speed"
+              ],
+              "controllerUUID": "mv3h9zxdbm9uh9amzb1lw53fnmq3h79c",
+              "renderer": null,
+              "controlsHeight": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.1"
+}
