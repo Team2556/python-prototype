@@ -8,6 +8,8 @@
 import wpilib
 import commands2
 import typing
+from wpilib import SmartDashboard
+
 
 from robotcontainer import RobotContainer
 
@@ -42,6 +44,8 @@ class MyRobot(commands2.TimedCommandRobot):
         # and running subsystem periodic() methods.  This must be called from the robot's periodic
         # block in order for anything in the Command-based framework to work.
         commands2.CommandScheduler.getInstance().run()
+
+        self.container._max_speed = SmartDashboard.getNumber("Max Speed",0.0)
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
