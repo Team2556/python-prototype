@@ -1,4 +1,3 @@
-import pheonix6
 import numpy
 from enum import (IntEnum, auto)
 from phoenix6.units import *
