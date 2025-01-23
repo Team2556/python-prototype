@@ -2,7 +2,10 @@ import wpilib
 from wpilib import SmartDashboard
 import wpilib.simulation
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d, Pose3d
+import robotpy_apriltag as apriltag
+import ntcore
+
 
 from phoenix6.unmanaged import feed_enable
 from phoenix6.hardware import TalonFX
@@ -18,8 +21,7 @@ class PhysicsEngine:
         self.container = self.robot.container
         self.drivetrain = self.container.drivetrain
         self.prev_pose = self.drivetrain.get_state().pose
-
-
+        
         #doesn't work ... temp = self.container.drivetrain.get_module(0).sim_state
         # for each motor in each module in the drivetrain, create a simulated motor and encoder
         # for module in self.drivetrain.modules:
