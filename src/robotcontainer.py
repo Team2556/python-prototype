@@ -18,6 +18,10 @@ from wpilib import SmartDashboard
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
 
+from subsystems import limelight
+from commands.odometry_fuse import VisOdoFuseCommand
+
+
 
 class RobotContainer:
     """
@@ -48,6 +52,7 @@ class RobotContainer:
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive 
+
         )
         self._brake = swerve.requests.SwerveDriveBrake()
         self._point = swerve.requests.PointWheelsAt()
@@ -58,11 +63,23 @@ class RobotContainer:
             )
         )
 
+
         self._logger = Telemetry(self._max_speed)
 
         self._joystick = commands2.button.CommandXboxController(0)
 
         self.drivetrain = TunerConstants.create_drivetrain()
+
+        # Vision
+        self.limelight = limelight.LimelightSubsystem()
+
+        # Run the VisOdoFuseCommand --- put it where?
+        self.current_pose_swerve = self.drivetrain.get_state_copy().pose #SwerveDriveState.pose #swerve_drive_state.pose
+        trust_vision_data, latest_parsed_result = self.limelight.trust_target(self.current_pose_swerve)
+        self.vis_odo_fuse_command =  commands2.ConditionalCommand(VisOdoFuseCommand(self.drivetrain, latest_parsed_result),
+                                                                  commands2.PrintCommand("Not Updating Odometer with Vision Data"),
+                                                                  lambda: trust_vision_data)
+        # self.vis_odo_fuse_command.schedule()
 
         # Path follower
         self._auto_chooser = AutoBuilder.buildAutoChooser("Tests")
@@ -77,12 +94,11 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
-
         # Note that X is defined as forward according to WPILib convention,
         # and Y is defined as to the left according to WPILib convention.
+        # Drivetrain will execute this command periodically
         self.drivetrain.setDefaultCommand(
-            # Drivetrain will execute this command periodically
-            self.drivetrain.apply_request(
+                self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
                         -drive_smoothing.smooth(self._joystick.getLeftY()) * self._max_speed
@@ -94,8 +110,11 @@ class RobotContainer:
                         -drive_smoothing.smooth(self._joystick.getRightX()) * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
                 )
-            )
+            )#.alongWith(commands2.PrintCommand("Running default command. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n")),
         )
+        
+        #
+        self._joystick.x().negate().whileTrue( self.vis_odo_fuse_command) #.negate()
 
         self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
@@ -136,9 +155,6 @@ class RobotContainer:
         self._joystick.leftBumper().onTrue(
             self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
         )
-        '''self._joystick.rightBumper().onTrue(
-            self.drivetrain.runOnce(lambda: self.ma.seed_field_centric())
-        )'''
 
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)

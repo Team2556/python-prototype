@@ -11,9 +11,7 @@ import typing
 from wpilib import SmartDashboard, Field2d 
 import constants
 
-
 from robotcontainer import RobotContainer
-
 
 class MyRobot(commands2.TimedCommandRobot):
     """
@@ -57,7 +55,7 @@ class MyRobot(commands2.TimedCommandRobot):
         # and running subsystem periodic() methods.  This must be called from the robot's periodic
         # block in order for anything in the Command-based framework to work.
         commands2.CommandScheduler.getInstance().run()
-
+        
         self.container._max_speed = SmartDashboard.getNumber("Max Speed",0.0)
 
     def disabledInit(self) -> None:
@@ -77,6 +75,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""
+        # Run the VisOdoFuseCommand ???
         pass
 
     def teleopInit(self) -> None:
@@ -89,6 +88,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
+        
         pass
 
     def testInit(self) -> None:
