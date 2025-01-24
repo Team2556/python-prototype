@@ -29,10 +29,12 @@
       "/Pose": "Field2d",
       "/SmartDashboard/Auto Mode": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Field-Vision": "Field2d",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",
       "/SmartDashboard/Module 2": "Mechanism2d",
-      "/SmartDashboard/Module 3": "Mechanism2d"
+      "/SmartDashboard/Module 3": "Mechanism2d",
+      "/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field": "Field2d"
     },
     "windows": {
       "/SmartDashboard/Auto Mode": {
@@ -69,6 +71,18 @@
     "transitory": {
       "SmartDashboard": {
         "open": true
+      },
+      "photonvision": {
+        "open": true,
+        "photonvision": {
+          "Transform3d##v_/photonvision/photonvision/targetPose": {
+            "Rotation3d##v_rotation": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        }
       }
     }
   },
