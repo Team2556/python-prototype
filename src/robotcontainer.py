@@ -9,7 +9,9 @@ import commands2.button
 import commands2.cmd
 from commands2.sysid import SysIdRoutine
 
+import constants
 from generated.tuner_constants import TunerConstants
+from subsystems import ElevatorSubsystem
 from telemetry import Telemetry
 
 from phoenix6 import swerve
@@ -53,6 +55,9 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
+        self.elevator = ElevatorSubsystem()
+
+
         # Configure the button bindings
         self.configureButtonBindings()
 
@@ -74,6 +79,17 @@ class RobotContainer:
                 return -1
             else:
                 return value_update
+        self._joystick.rightTrigger().onTrue(
+            commands2.cmd.run(self.moveElevator(1.27), [self.elevator])
+        )
+        self._joystick.leftTrigger().onTrue(
+            commands2.cmd.run(
+                self.moveElevator(constants.ElevatorConstants.kElevatorOffsetMeters), [self.elevator]
+            )
+        )
+        self._joystick.rightBumper().onTrue(
+            commands2.cmd.runOnce(lambda: self.elevator.disable())
+        )
 
         # Note that X is defined as forward according to WPILib convention,
         # and Y is defined as to the left according to WPILib convention.
@@ -127,6 +143,10 @@ class RobotContainer:
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
         )
+    def disablePIDSubsystems(self) -> None:
+        """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
+        This should be called on robot disable to prevent integral windup."""
+        self.elevator.disable()
 
     def getAutonomousCommand(self) -> commands2.Command:
         """Use this to pass the autonomous command to the main {@link Robot} class.
@@ -134,3 +154,6 @@ class RobotContainer:
         :returns: the command to run in autonomous
         """
         return commands2.cmd.print_("No autonomous command configured")
+    def moveElevator(self, meters: int) -> None:
+        self.elevator.setGoal(meters)
+        self.elevator.enable()

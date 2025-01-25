@@ -12,8 +12,10 @@ import typing
 import math
 from wpilib import (SmartDashboard, Field2d)
 import wpimath.controller
+import wpimath.trajectory
 
 from robotcontainer import RobotContainer
+from constants import ElevatorConstants
 
 
 
@@ -24,22 +26,11 @@ class MyRobot(commands2.TimedCommandRobot):
     has an implementation of robotPeriodic which runs the scheduler for you
     """
     class Elevator(wpilib.Elevator):
-        kMotorPort = 0
-        kEncoderAChannel = 0
-        kEncoderBChannel = 1
-        kJoystickPort = 0
-
-        kElevatorKp = 5.0
-        kElevatorGearing = 10.0
-        kElevatorDrumRadius = 0.0508  # 2 inches in meters
-        kCarriageMass = 4
-
-        kMinElevatorHeight = 0.0508  # 2 inches
-        kMaxElevatorHeight = 1.27  # 50 inches
-
+        ElevatorConstants.kElevatorDrumRadius = 0.0508
+        
         # distance per pulse = (distance per revolution) / (pulses per revolution)
         #  = (Pi * D) / ppr
-        kElevatorEncoderDistPerPulse = 2.0 * math.pi * kElevatorDrumRadius / 4096.0
+        kElevatorEncoderDistPerPulse = 2.0 * math.pi * 0.0508 / 4096.0
 
     autonomousCommand: typing.Optional[commands2.Command] = None
 
@@ -49,12 +40,13 @@ class MyRobot(commands2.TimedCommandRobot):
         initialization code.
         """
         self.elevconstraints = wpimath.trajectory.TrapezoidProfile.Constraints(1.75, 0.75)
-        self.elevcontroller = wpimath.controller.PIDController(self.kElevatorKp, 0, 0)
-        self.elevencoder = wpilib.Encoder(self.kEncoderAChannel, self.kEncoderBChannel)
-        self.elevmotor = phoenix6.hardware.TalonFX(self.kMotorPort)
-        self.joystick = wpilib.XboxController(self.kJoystickPort)
+        self.elevcontroller = wpimath.controller.PIDController(5.0, 0, 0)
+        self.elevencoder = wpilib.Encoder(0, 1)
+        self.leftelevmotor = phoenix6.hardware.TalonFX(0)
+        self.rightelevmotor = phoenix6.hardware.TalonFX(1)
+        self.joystick = wpilib.XboxController(0)
 
-        self.elevencoder.setDistancePerPulse(self.kElevatorEncoderDistPerPulse)
+        self.elevencoder.setDistancePerPulse(2.0 * math.pi * 0.0508 / 4096.0)
 
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
@@ -75,18 +67,20 @@ class MyRobot(commands2.TimedCommandRobot):
         # block in order for anything in the Command-based framework to work.
         commands2.CommandScheduler.getInstance().run()
 
-        if self.joystick.getTrigger():
+        if self.joystick.rightTrigger():
             # Here, we run PID control like normal, with a constant setpoint of 30in (0.762 meters).
             pidOutput = self.elevcontroller.calculate(self.elevencoder.getDistance(), 0.762)
-            self.elevmotor.setVoltage(pidOutput)
+            self.leftelevmotor.setVoltage(pidOutput)
+            self.rightelevmotor.setVoltage(pidOutput)
         else:
             # Otherwise we disable the motor
-            self.elevmotor.set(0.0)
-
+            self.leftelevmotor.set(0.0)
+            self.rightelevmotor.set(0.0)
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
-        self.elevmotor.set(0)
+        self.leftelevmotor.set(0)
+        self.rightelevmotor.set(0)
 
     def disabledPeriodic(self) -> None:
         """This function is called periodically when disabled"""

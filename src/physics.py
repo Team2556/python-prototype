@@ -1,14 +1,15 @@
 import wpilib
-from wpilib import SmartDashboard
 import wpilib.simulation
-from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d
+from wpimath.geometry import Transform2d
 
 from phoenix6.unmanaged import feed_enable
 from phoenix6.hardware import TalonFX
 import typing
-
 import wpimath.system.plant
+
+import constants
+from constants import ElevatorConstants
+
 if typing.TYPE_CHECKING:
     from robot import MyRobot
 
@@ -18,13 +19,19 @@ if typing.TYPE_CHECKING:
 
 
 class PhysicsEngine:
-    def __init__(self, physics_controller, robot: "RobotContainer"):
+    def __init__(self, physics_controller, robot: "MyRobot"):
         self.physics_controller = physics_controller
         self.robot = robot
         self.container = self.robot.container
         self.drivetrain = self.container.drivetrain
         self.prev_pose = self.drivetrain.get_state().pose
         self.elevatorGearbox = wpimath.system.plant.DCMotor.krakenX60FOC(2)
+
+        """
+        :param physics_controller: `pyfrc.physics.core.Physics` object
+                                   to communicate simulation effects to
+        :param robot: your robot object
+        """
 
 
 
@@ -110,20 +117,20 @@ class PhysicsEngine:
             sim_back_right_drive, sim_back_right_steer,
             swerve_kinematics, 0.381, 0.381, 0.381, 0.381
         )'''
-        self.elevator = wpilib.MyRobot(
+        self.elevator = constants.ElevatorConstants(
             self.elevatorGearbox,
-            robot.kElevatorGearing,
-            robot.kCarriageMass,
-            robot.kElevatorDrumRadius,
-            robot.kMinElevatorHeight,
-            robot.kMaxElevatorHeight,
+            ElevatorConstants.kElevatorGearing,
+            ElevatorConstants.kCarriageMass,
+            ElevatorConstants.kElevatorDrumRadius,
+            ElevatorConstants.kMinElevatorHeight,
+            ElevatorConstants.kMaxElevatorHeight,
             True,
             0,
             [0.01, 0.0],
         )
         self.elevencoder = wpilib.Encoder(robot.elevencoder)
-        self.elevmotor = TalonFX(robot.elevmotor.getChannel())
-
+        self.leftelevmotor = TalonFX(robot.leftelevmotor.get())
+        self.rightelevmotor = TalonFX(robot.rightelevmotor.get())
         # Create a Mechanism2d display of an elevator
         self.mech2d = wpilib.Mechanism2d(20, 50)
         self.elevatorRoot = self.mech2d.getRoot("Elevator Root", 10, 0)
@@ -157,7 +164,10 @@ class PhysicsEngine:
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
         self.elevator.setInput(
-            0, self.motor.getSpeed() * wpilib.RobotController.getInputVoltage()
+            0, self.leftelevmotor.getSpeed() * wpilib.RobotController.getInputVoltage()
+        )
+        self.elevator.setInput(
+            1, self.rightelevmotor.getSpeed() * wpilib.RobotController.getInputVoltage()
         )
 
         # Next, we update it
@@ -165,20 +175,20 @@ class PhysicsEngine:
 
         # Finally, we set our simulated encoder's readings and simulated battery
         # voltage
-        self.encoder.setDistance(self.elevator.getPosition())
+        self.elevencoder.getDistance(self.elevator.getPosition())
         # SimBattery estimates loaded battery voltage
         # wpilib.simulation.RoboRioSim.setVInVoltage(
         #     wpilib.simulation.BatterySim
         # )
 
         # Update the Elevator length based on the simulated elevator height
-        self.elevatorMech2d.setLength(self.elevatorSim.getPositionInches())
+        self.elevatorMech2d.setLength(self.elevator.getPositionInches())
 
         do_nothing = True
         if do_nothing:
             pass
         else:
-            self.physics_controller.move_robot(Transform2d(self.prev_pose, self.drivetrain.get_state().pose))
+            self.physics_controller.move_elevator(Transform2d(self.prev_pose, self.drivetrain.get_state().pose))
             self.prev_pose = self.drivetrain.get_state().pose
 
             
