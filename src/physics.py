@@ -2,9 +2,12 @@ import wpilib
 from wpilib import SmartDashboard
 import wpilib.simulation
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d, Pose3d
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d, Pose3d, Rotation3d, Transform3d
 import robotpy_apriltag as apriltag
 import ntcore
+from photonlibpy import PhotonCamera
+from photonlibpy.simulation import VisionSystemSim, VisionTargetSim, PhotonCameraSim
+from constants import AprilTags, AprilTagField
 
 
 from phoenix6.unmanaged import feed_enable
@@ -21,6 +24,20 @@ class PhysicsEngine:
         self.container = self.robot.container
         self.drivetrain = self.container.drivetrain
         self.prev_pose = self.drivetrain.get_state().pose
+
+        self.field = self.robot.field #wpilib.Field2d()#already put a field on smartdashboard from robot or container..
+        # SmartDashboard.putData("Field-Vision", self.field)
+
+        #init photon camera
+        self.photon_camera = PhotonCamera('photonvision')
+        #setup photon camera physical location on robot
+        #init simvision 
+        self.photon_camera_sim =PhotonCameraSim(self.photon_camera)
+        self.photon_camera_sim.setMaxSightRange(4)#meters
+        self.sim_vision = VisionSystemSim("SimPhoton_system")
+        self.sim_vision.addCamera(self.photon_camera_sim, Transform3d(x=0.25, y=0, z=.50, rotation=Rotation3d(0, 0, 0)))
+        self.sim_vision.addAprilTags(AprilTagField)
+
         
         #doesn't work ... temp = self.container.drivetrain.get_module(0).sim_state
         # for each motor in each module in the drivetrain, create a simulated motor and encoder
@@ -111,6 +128,12 @@ class PhysicsEngine:
         # Sim driverstation status and enable the signals. So, for now, manually
         # feed the enable signal for double the set robot period.
         feed_enable(0.020 * 2)
+
+        robot_pose = self.drivetrain.get_state().pose
+        self.field.setRobotPose(robot_pose) 
+        # self.photon_camera_sim.  .setRobotPose(robot_pose)
+        self.sim_vision.update(robotPose=robot_pose)
+
 
         #refer to https://api.ctr-electronics.com/phoenix6/release/python/autoapi/phoenix6/sim/talon_fx_sim_state/index.html
 

@@ -10,7 +10,7 @@ CAM_MOUNT_PITCH = 25
 
 
 AprilTagField=apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField(3))
-AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField(3)).getTags() #recomend using this instead of the class below
+AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField(3)).getTags() #recommend using this instead of the class below
 class AprilTags_height:
     def tag_heights(): #height of apriltags by order of number, in centimeters
         heights = numpy.array([135, 135, 117, 178, 178, 17, 17, 17, 17, 17, 17, 135, 135, 117, 178, 178, 17, 17, 17, 17, 17, 17])
@@ -43,7 +43,7 @@ class AprilTags_height:
 #region RoboRio Constants
 # included to help with communication and readability
 class Rio_DIO(IntEnum):
-    ZERRO = 0
+    ZERO = 0
     ONE = auto()
     TWO = auto()
     THREE = auto()
@@ -64,7 +64,7 @@ class Rio_DIO(IntEnum):
     SEVENTEEN = auto()
 
 class Rio_Pnue(IntEnum):
-    ZERRO = 0
+    ZERO = 0
     ONE = auto()
     TWO = auto()
     THREE = auto()
@@ -101,7 +101,7 @@ class Rio_Analog(IntEnum):
 
 #region CAN Constants
 class CAN_Address(IntEnum):
-    ZERRO = 0
+    ZERO = 0
     ONE = auto()
     TWO = auto()
     THREE = auto()
