@@ -87,10 +87,10 @@ class RobotContainer:
         # TODO: replace with command import : swerve.requests.DriveAtTargetCommand
         # TODO: create error terms for vision data and target location
         # TODO: implement a PID controller to drive to the target
-        self._driveTargetRelative = (swerve.requests.RobotCentric()
-                                .with_velocity_x(.1)
-                                .with_velocity_y(0.2)
-                                .with_rotational_rate(0.3))
+        # self._driveTargetRelative = (swerve.requests.RobotCentric()
+        #                         .with_velocity_x(.1)
+        #                         .with_velocity_y(0.2)
+        #                         .with_rotational_rate(0.3))
 
         # Path follower
         self._auto_chooser = AutoBuilder.buildAutoChooser("Tests")
@@ -128,9 +128,9 @@ class RobotContainer:
         #take in vision data and update the odometery... there has to be a better way in crte code...
         self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command) #.negate()
         #Focus in on the target and move relative to it
-        self._joystick.rightStick().whileTrue(
-            self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values
-        )
+        # self._joystick.rightStick().whileTrue(
+        #     self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values
+        # )
 
 
         #endsection vision related commands
