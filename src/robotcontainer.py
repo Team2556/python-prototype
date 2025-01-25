@@ -97,6 +97,13 @@ class RobotContainer:
                 )
             )
         )
+        
+        # Do the default command thing
+        self.algae.setDefaultCommand(
+            self.algae.apply_request(
+                lambda: self.algae.disable()
+            )
+        )
 
         self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
@@ -110,7 +117,11 @@ class RobotContainer:
         # I'm doing algae input here because I don't know how to move it to the commands folder
         # Also the input can be changed from x to some other thing
         # Cycle function should intake the algae or spit it out if algae is already stored
-        self._joystick.x().whileTrue(self.drivetrain.apply_request(lambda: self.algae.cycle))
+        self._joystick.x().whileTrue(
+            self.algae.apply_request(
+                lambda: self.algae.cycle()
+            )
+        )
 
         # Run SysId routines when holding back/start and X/Y.
         # Note that each routine should be run exactly once in a single log.

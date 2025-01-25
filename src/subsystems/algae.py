@@ -1,7 +1,11 @@
 import wpilib
 from constants import AlgaeConstants
 
-class AlgaeHandler():
+from commands2.subsystem import Subsystem
+from commands2.command import Command
+import commands2.cmd
+
+class AlgaeHandler(Subsystem):
     
     def __init__(self):
         # We don't know the motor channel yet
@@ -19,6 +23,14 @@ class AlgaeHandler():
         # Setup the timer
         self.timer = wpilib.Timer()
         
+    def disable(self):
+        self.AlgaeMotor1.set(0)
+        self.AlgaeMotor2.set(0)
+        print("DEFAULT COMMAND")
+        
+    def apply_request(self, function):
+        return commands2.cmd.run(function, self)
+    
     def cycle(self):
         '''Activates when algae button is pressed'''
         # Figure out some way to detect if holding algae (limit switch or something)
@@ -33,8 +45,12 @@ class AlgaeHandler():
         else: 
             self.spinMotors(1) # Intake
         
+        # Later replace this with some code at the start of the function that
+        # sets self.holdingAlgae based on if the robot is actually holding algae
         self.holdingAlgae = not self.holdingAlgae
         
+        print("BUTTON PRESSED")
+                
     def checkCycle(self):
         '''If motors have been spinning for a set amount of time (AlgaeConstants.intakeTime), stop the motors'''
         if self.timer.hasElapsed(AlgaeConstants.intakeTime):
