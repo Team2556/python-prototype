@@ -12,7 +12,6 @@ from wpilib import (SmartDashboard, Field2d)
 
 from robotcontainer import RobotContainer
 
-
 class MyRobot(commands2.TimedCommandRobot):
     """
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
@@ -26,7 +25,7 @@ class MyRobot(commands2.TimedCommandRobot):
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
-
+        
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
         self.container = RobotContainer()
@@ -75,6 +74,9 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
+        
+        self.container.algae.checkCycle()
+        
         pass
 
     def testInit(self) -> None:
