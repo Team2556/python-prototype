@@ -9,7 +9,6 @@ import wpilib
 import commands2
 import typing
 from wpilib import SmartDashboard, Field2d 
-import constants
 
 from robotcontainer import RobotContainer
 
@@ -36,13 +35,7 @@ class MyRobot(commands2.TimedCommandRobot):
         SmartDashboard.putData("Field", self.field)
         #endregion Glass field viewer
 
-        #just for demonstration purposes.. TODO: remove
-        for tag in constants.AprilTags:
-            print(f'{tag.ID=}, {constants.AprilTagField.getTagPose(tag.ID)}', 
-                  f'{constants.AprilTagField.getTagPose(tag.ID).toPose2d()}',
-                  f'{constants.AprilTags_height.tag_heights()[tag.ID]=}','----------------\n-----------\n-----\n')
-          
-
+ 
     def robotPeriodic(self) -> None:
         """This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
         that you want ran during disabled, autonomous, teleoperated and test.

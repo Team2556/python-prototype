@@ -2,6 +2,7 @@ import numpy
 import robotpy_apriltag as apriltag
 from enum import (IntEnum, auto)
 from phoenix6.units import *
+from wpimath.units import degrees, radians, degreesToRadians, radiansToDegrees, inchesToMeters, inches
 VISION_DES_ANGLE_deg = 25
 VISION_TURN_kP = 0
 VISION_STRAFE_kP = 26
@@ -118,3 +119,6 @@ class CAN_Address(IntEnum):
 #endregion
 class Override_DriveConstant:
     ...
+
+class RobotDimensions:
+    WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)

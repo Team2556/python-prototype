@@ -43,6 +43,10 @@
         }
       },
       "/SmartDashboard/Field": {
+        "Robot": {
+          "length": 0.9143999814987183,
+          "width": 0.9143999814987183
+        },
         "bottom": 1638,
         "builtin": "2025 Reefscape",
         "height": 8.051901817321777,
