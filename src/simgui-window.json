@@ -6,13 +6,13 @@
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "991",
-      "maximized": "1",
+      "height": "720",
+      "maximized": "0",
       "style": "0",
       "userScale": "2",
       "width": "1920",
-      "xpos": "0",
-      "ypos": "29"
+      "xpos": "16",
+      "ypos": "74"
     }
   },
   "Table": {

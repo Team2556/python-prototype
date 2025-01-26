@@ -20,6 +20,7 @@ from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians
 
 from subsystems import limelight
 from commands.odometry_fuse import VisOdoFuseCommand
+from commands.odometry_snap2Line import SnapToLineCommand
 
 
 
@@ -131,6 +132,7 @@ class RobotContainer:
         # self._joystick.rightStick().whileTrue(
         #     self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values
         # )
+        self._joystick.x().onTrue(SnapToLineCommand(self.drivetrain))
 
 
         #endsection vision related commands
