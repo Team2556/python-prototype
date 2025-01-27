@@ -176,8 +176,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-*.dat
-src/ctre_sim/*
-ctre_sim/*
+#needed to clean out index by running this: git rm -r --cached ctre_sim/
+ctre_sim/
 
 
