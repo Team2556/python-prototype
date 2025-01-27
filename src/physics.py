@@ -3,11 +3,13 @@ from wpilib import SmartDashboard
 import wpilib.simulation
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d, Pose3d, Rotation3d, Transform3d
+from wpimath.units import degrees, radians, degreesToRadians, radiansToDegrees, inchesToMeters, inches, meters, feetToMeters, metersToFeet
 import robotpy_apriltag as apriltag
 import ntcore
 from photonlibpy import PhotonCamera
 from photonlibpy.simulation import VisionSystemSim, VisionTargetSim, PhotonCameraSim
 from constants import AprilTags, AprilTagField
+# TODO: add the camera location to constants and import
 
 
 from phoenix6.unmanaged import feed_enable
@@ -29,13 +31,23 @@ class PhysicsEngine:
         # SmartDashboard.putData("Field-Vision", self.field)
 
         #init photon camera
-        self.photon_camera = PhotonCamera('photonvision')
+        self.photon_camera_left = PhotonCamera('photonvision_left')
+        self.photon_camera_right = PhotonCamera('photonvision_right')
         #setup photon camera physical location on robot
         #init simvision 
-        self.photon_camera_sim =PhotonCameraSim(self.photon_camera)
-        self.photon_camera_sim.setMaxSightRange(4)#meters
+        self.photon_camera_sim_left =PhotonCameraSim(self.photon_camera_left)
+        self.photon_camera_sim_right =PhotonCameraSim(self.photon_camera_right)
+        self.photon_camera_sim_left.setMaxSightRange(4)#meters
+        self.photon_camera_sim_right.setMaxSightRange(4)#meters
         self.sim_vision = VisionSystemSim("SimPhoton_system")
-        self.sim_vision.addCamera(self.photon_camera_sim, Transform3d(x=0.25, y=0, z=.50, rotation=Rotation3d(0, 0, 0)))
+        self.sim_vision.addCamera(self.photon_camera_sim_left, Transform3d(x=inchesToMeters(4), 
+                                                                           y=inchesToMeters((28/2)-2), 
+                                                                           z=inchesToMeters(8), 
+                                                                           rotation=Rotation3d(0, 0, degreesToRadians(90))))
+        self.sim_vision.addCamera(self.photon_camera_sim_right, Transform3d(x=inchesToMeters(4), 
+                                                                            y=inchesToMeters(-((28/2)-2)), 
+                                                                            z=inchesToMeters(8), 
+                                                                            rotation=Rotation3d(0, 0, degreesToRadians(-90))))
         self.sim_vision.addAprilTags(AprilTagField)
 
         

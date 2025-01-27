@@ -34,6 +34,7 @@ class RobotContainer:
 
     def __init__(self) -> None:
         SmartDashboard.putNumber("Max Speed", TunerConstants.speed_at_12_volts)
+
         self._max_speed = SmartDashboard.getNumber("Max Speed", TunerConstants.speed_at_12_volts)
         '''self._max_speed = (
             TunerConstants.speed_at_12_volts
@@ -114,9 +115,11 @@ class RobotContainer:
                 lambda: (
                     self._drive.with_velocity_x(
                         -drive_smoothing.smooth(self._joystick.getLeftY()) * self._max_speed
+                        * self.invertBlueRedDrive 
                     )  # Drive forward with negative Y (forward)
                     .with_velocity_y(
                         -drive_smoothing.smooth(self._joystick.getLeftX()) * self._max_speed
+                        * self.invertBlueRedDrive 
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
                         -drive_smoothing.smooth(self._joystick.getRightX()) * self._max_angular_rate
@@ -141,7 +144,8 @@ class RobotContainer:
         self._joystick.b().whileTrue(
             self.drivetrain.apply_request(
                 lambda: self._point.with_module_direction(
-                    Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
+                    Rotation2d(-self._joystick.getLeftY() * self.invertBlueRedDrive , 
+                               -self._joystick.getLeftX() * self.invertBlueRedDrive )
                 )
             )
         )

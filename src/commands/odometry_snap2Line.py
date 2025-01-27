@@ -8,7 +8,7 @@ class SnapToLineCommand(Command):
     '''This command does not fully snap the robot to the closest point on a line segment. It actually uses the closest point a a nav update. The error distance si passed as the uncertainty.
     The line segments are based on the hard walls around the april tags at feed stations and reef. There the robot could potentially push against the hard walls.
     The location inputs are from the wall by the robot's width and length. !!! The robot is currently assumed to be square. !!!'''
-    
+
     def __init__(self, drivetrain, segments: list[tuple[Translation2d, Translation2d]]=None):
         super().__init__()
         self.drivetrain = drivetrain
@@ -27,7 +27,7 @@ class SnapToLineCommand(Command):
     def execute(self):
         current_pose = self.drivetrain.get_state_copy().pose
         square_robot_key_size = inchesToMeters(RobotDimensions.WIDTH_w_bumpers/2)
-        offset_segments = [self.rightHand_offset_segment(start, end, square_robot_key_size, square_robot_key_size) for start, end in self.segments]
+        offset_segments = [self.rightHand_offset_segment(start, end, square_robot_key_size, square_robot_key_size/2) for start, end in self.segments]
         # print(f'segment compare: {[(f"wall:{wall}",f"offset:{off}") for wall, off in zip(self.segments,offset_segments)]}')
         (trust_snap, snap_dist, closest_point) = self.get_closest_point_on_segments(current_pose.translation(), segments=offset_segments)
         #TODO: add way to address the rotation of the robot or use self.drivetrain.reset_translation()

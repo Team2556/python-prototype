@@ -8,7 +8,8 @@
 import wpilib
 import commands2
 import typing
-from wpilib import SmartDashboard, Field2d 
+from wpilib import SmartDashboard, DriverStation, Field2d
+
 
 from robotcontainer import RobotContainer
 
@@ -50,6 +51,11 @@ class MyRobot(commands2.TimedCommandRobot):
         commands2.CommandScheduler.getInstance().run()
         
         self.container._max_speed = SmartDashboard.getNumber("Max Speed",0.0)
+                # The origin is always blue. When our alliance is red, X and Y need to be inverted
+        self.container.invertBlueRedDrive = 1
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            self.container.invertBlueRedDrive = -1
+        print(f"Robot is on the {DriverStation.getAlliance()} alliance.\n -\n-\n-\n- {self.container.invertBlueRedDrive =}")
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
