@@ -10,17 +10,19 @@ from commands2.sysid import SysIdRoutine
 
 from generated.tuner_constants import TunerConstants
 from telemetry import Telemetry
-from generated import drive_smoothing
+from robotUtils import controlAugment
 
 from pathplannerlib.auto import AutoBuilder
 from phoenix6 import swerve
 from wpilib import SmartDashboard
-from wpimath.geometry import Rotation2d
-from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees
+from wpimath.geometry import Rotation2d, Translation2d, Transform2d
+from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
 
 from subsystems import limelight
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
+
+from constants import RobotDimensions
 
 
 
@@ -33,6 +35,7 @@ class RobotContainer:
     """
 
     def __init__(self) -> None:
+        self.robotWidthBumpered = inchesToMeters(RobotDimensions.WIDTH_w_bumpers)
         SmartDashboard.putNumber("Max Speed", TunerConstants.speed_at_12_volts)
 
         self._max_speed = SmartDashboard.getNumber("Max Speed", TunerConstants.speed_at_12_volts)
@@ -114,16 +117,26 @@ class RobotContainer:
                 self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -drive_smoothing.smooth(self._joystick.getLeftY()) * self._max_speed
+                        -controlAugment.smooth(self._joystick.getLeftY()) * self._max_speed
                         * self.invertBlueRedDrive 
                     )  # Drive forward with negative Y (forward)
                     .with_velocity_y(
-                        -drive_smoothing.smooth(self._joystick.getLeftX()) * self._max_speed
+                        -controlAugment.smooth(self._joystick.getLeftX()) * self._max_speed
                         * self.invertBlueRedDrive 
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
-                        -drive_smoothing.smooth(self._joystick.getRightX()) * self._max_angular_rate
+                        -controlAugment.smooth(self._joystick.getRightX()) * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
+                    .with_center_of_rotation(Translation2d(self.robotWidthBumpered*(controlAugment
+                                                                                    .smooth(controlAugment
+                                                                                            .one_side_control_only( self._joystick.getRightY(), 'Pos'))),
+                                                            # want y translation to depend on direction of turn
+                                                            self._joystick.getRightX()/abs(self._joystick.getRightX()) *
+                                                                self.robotWidthBumpered*(controlAugment
+                                                                                            .smooth(controlAugment
+                                                                                                    .one_side_control_only( self._joystick.getRightY(), 'Pos')))))
+                    # shift the center of rotation to opposite front corner, if the driver pulls down on the right stick in addition to the side. 
+                    # This should allow some nice defensive roll-off maneuvers                        
                 )
             )#.alongWith(commands2.PrintCommand("Running default command. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n")),
         )
