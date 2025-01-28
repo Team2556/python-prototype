@@ -1,3 +1,4 @@
+import phoenix6
 import wpilib
 import wpilib.simulation
 from wpimath.geometry import Transform2d
@@ -7,8 +8,10 @@ from phoenix6.hardware import TalonFX
 import typing
 import wpimath.system.plant
 
-import constants
+
 from constants import ElevatorConstants
+import subsystems
+import subsystems.ElevatorSubsystem
 
 if typing.TYPE_CHECKING:
     from robot import MyRobot
@@ -25,7 +28,7 @@ class PhysicsEngine:
         self.container = self.robot.container
         self.drivetrain = self.container.drivetrain
         self.prev_pose = self.drivetrain.get_state().pose
-        self.elevatorGearbox = wpimath.system.plant.DCMotor.krakenX60FOC(2)
+        self.elevatorGearbox = wpimath.system.plant.DCMotor.krakenX60(2)
 
         """
         :param physics_controller: `pyfrc.physics.core.Physics` object
@@ -117,7 +120,7 @@ class PhysicsEngine:
             sim_back_right_drive, sim_back_right_steer,
             swerve_kinematics, 0.381, 0.381, 0.381, 0.381
         )'''
-        self.elevator = constants.ElevatorConstants(
+        self.elevator = subsystems.ElevatorSubsystem(
             self.elevatorGearbox,
             ElevatorConstants.kElevatorGearing,
             ElevatorConstants.kCarriageMass,
@@ -128,7 +131,7 @@ class PhysicsEngine:
             0,
             [0.01, 0.0],
         )
-        self.elevencoder = wpilib.Encoder(robot.elevencoder)
+        self.elevencoder = wpilib.Encoder(robot.elevencoder) #not sure if i need to add another encoder, will find out later
         self.leftelevmotor = TalonFX(robot.leftelevmotor.get())
         self.rightelevmotor = TalonFX(robot.rightelevmotor.get())
         # Create a Mechanism2d display of an elevator
@@ -164,10 +167,10 @@ class PhysicsEngine:
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
         self.elevator.setInput(
-            0, self.leftelevmotor.getSpeed() * wpilib.RobotController.getInputVoltage()
+            0, self.leftelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
         )
         self.elevator.setInput(
-            1, self.rightelevmotor.getSpeed() * wpilib.RobotController.getInputVoltage()
+            1, self.rightelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
         )
 
         # Next, we update it

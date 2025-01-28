@@ -55,7 +55,7 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        self.elevator = ElevatorSubsystem()
+        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 
 
         # Configure the button bindings
@@ -80,11 +80,11 @@ class RobotContainer:
             else:
                 return value_update
         self._joystick.rightTrigger().onTrue(
-            commands2.cmd.run(self.moveElevator(1.27), [self.elevator])
+            commands2.cmd.runOnce(lambda: self.elevator.moveElevator(1.27), self.elevator)
         )
         self._joystick.leftTrigger().onTrue(
-            commands2.cmd.run(
-                self.moveElevator(constants.ElevatorConstants.kElevatorOffsetMeters), [self.elevator]
+            commands2.cmd.runOnce(
+                lambda: self.elevator.moveElevator(), self.elevator
             )
         )
         self._joystick.rightBumper().onTrue(
@@ -143,10 +143,7 @@ class RobotContainer:
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
         )
-    def disablePIDSubsystems(self) -> None:
-        """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
-        This should be called on robot disable to prevent integral windup."""
-        self.elevator.disable()
+
 
     def getAutonomousCommand(self) -> commands2.Command:
         """Use this to pass the autonomous command to the main {@link Robot} class.
@@ -154,6 +151,4 @@ class RobotContainer:
         :returns: the command to run in autonomous
         """
         return commands2.cmd.print_("No autonomous command configured")
-    def moveElevator(self, meters: int) -> None:
-        self.elevator.setGoal(meters)
-        self.elevator.enable()
+    

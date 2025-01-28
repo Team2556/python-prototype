@@ -4,42 +4,37 @@ import wpimath.controller
 import wpimath.trajectory
 import phoenix6
 
-import constants
+from constants import ElevatorConstants
 
 class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
 
-
 # Create a new ElevatorSubsystem
     def __init__(self) -> None:
+        '''IM AN ELEVATOR'''
         super().__init__(
             wpimath.controller.ProfiledPIDController(
-                constants.ElevatorConstants.kElevatorKp,
+                ElevatorConstants.kElevatorKp,
                 0,
                 0,
                 wpimath.trajectory.TrapezoidProfile.Constraints(
-                    constants.ElevatorConstants.kMaxVelocityMetersPerSecond,
-                    constants.ElevatorConstants.kMaxAccelerationMetersPerSecSquared,
+                    ElevatorConstants.kMaxVelocityMetersPerSecond,
+                    ElevatorConstants.kMaxAccelerationMetersPerSecSquared,
                 ),
             ),
             0,
         )
 
-        self.rightelevmotor = phoenix6.hardware.TalonFX(constants.ElevatorConstants.kRightMotorPort)
-        self.leftelevmotor = phoenix6.hardware.TalonFX(constants.ElevatorConstants.kLeftMotorPort)
-        self.elevencoder = wpilib.Encoder(0, 1,)
+        self.rightelevmotor = phoenix6.hardware.TalonFX(ElevatorConstants.kRightMotorPort)
+        self.leftelevmotor = phoenix6.hardware.TalonFX(ElevatorConstants.kLeftMotorPort)
         self.feedforward = wpimath.controller.ElevatorFeedforward(
-            constants.ElevatorConstants.kSVolts,
-            constants.ElevatorConstants.kGVolts,
-            constants.ElevatorConstants.kVVoltSecondPerMeter,
-            constants.ElevatorConstants.kAVoltSecondSquaredPerMeter,
-        )
-
-        self.elevencoder.setDistancePerPulse(
-            constants.ElevatorConstants.kEncoderDistancePerPulse
+            ElevatorConstants.kSVolts,
+            ElevatorConstants.kGVolts,
+            ElevatorConstants.kVVoltSecondPerMeter,
+            ElevatorConstants.kAVoltSecondSquaredPerMeter,
         )
 
         # Start elevator at rest in neutral position
-        self.setGoal(constants.ElevatorConstants.kElevatorOffsetMeters)
+        self.setGoal(ElevatorConstants.kElevatorOffsetMeters)
 
     def _useOutput(
         self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State
@@ -51,4 +46,13 @@ class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
         self.rightelevmotor.setVoltage(output + feedforward)
         self.leftelevmotor.setVoltage(output + feedforward)
     def _getMeasurement(self) -> float:
-        return self.elevencoder.getDistance() + constants.ElevatorConstants.kElevatorOffsetMeters
+        return self.rightelevmotor.set_position() + ElevatorConstants.kElevatorOffsetMeters
+    
+    def disablePIDSubsystems(self) -> None:
+        """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
+        This should be called on robot disable to prevent integral windup."""
+        self.disable()
+
+    def moveElevator(self, meters = ElevatorConstants.kElevatorOffsetMeters) -> None:
+        self.setGoal(meters)
+        self.enable()

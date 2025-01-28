@@ -30,7 +30,7 @@ class MyRobot(commands2.TimedCommandRobot):
         
         # distance per pulse = (distance per revolution) / (pulses per revolution)
         #  = (Pi * D) / ppr
-        kElevatorEncoderDistPerPulse = 2.0 * math.pi * 0.0508 / 4096.0
+       
 
     autonomousCommand: typing.Optional[commands2.Command] = None
 
@@ -41,12 +41,11 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.elevconstraints = wpimath.trajectory.TrapezoidProfile.Constraints(1.75, 0.75)
         self.elevcontroller = wpimath.controller.PIDController(5.0, 0, 0)
-        self.elevencoder = wpilib.Encoder(0, 1)
         self.leftelevmotor = phoenix6.hardware.TalonFX(0)
         self.rightelevmotor = phoenix6.hardware.TalonFX(1)
         self.joystick = wpilib.XboxController(0)
 
-        self.elevencoder.setDistancePerPulse(2.0 * math.pi * 0.0508 / 4096.0)
+
 
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
@@ -69,7 +68,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
         if self.joystick.rightTrigger():
             # Here, we run PID control like normal, with a constant setpoint of 30in (0.762 meters).
-            pidOutput = self.elevcontroller.calculate(self.elevencoder.getDistance(), 0.762)
+            pidOutput = self.elevcontroller.calculate(self.rightelevmotor.set_position(), 0.762)
             self.leftelevmotor.setVoltage(pidOutput)
             self.rightelevmotor.setVoltage(pidOutput)
         else:

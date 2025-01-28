@@ -83,8 +83,6 @@ class CAN_Address(IntEnum):
 class ElevatorConstants(IntEnum):
         kLeftMotorPort = 0
         kRightMotorPort = 1
-        kEncoderAChannel = 0
-        kEncoderBChannel = 1
         kJoystickPort = 0
 
         kElevatorKp = 5.0
@@ -98,7 +96,6 @@ class ElevatorConstants(IntEnum):
         kMaxVelocityMetersPerSecond = 1.5
         kMaxAccelerationMetersPerSecSquared = 0.5
 
-        kEncoderDistancePerPulse = 2.0 * math.pi * 0.0508 / 4096.0
 
         kSVolts = 0
         kGVolts = 0
