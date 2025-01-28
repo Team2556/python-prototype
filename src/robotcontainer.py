@@ -100,12 +100,19 @@ class RobotContainer:
         
         # Do the default command thing
         self.algae.setDefaultCommand(
-            self.algae.apply_request(
-                lambda: self.algae.disable()
+            commands2.cmd.run(
+                lambda: self.algae.default(), self.algae
             )
         )
 
-        self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
+        # This commant seperates default commands from joystick inputs...
+
+        self._joystick.a().whileTrue(
+            self.drivetrain.apply_request(
+                lambda: self._brake
+            )
+        )
+        
         self._joystick.b().whileTrue(
             self.drivetrain.apply_request(
                 lambda: self._point.with_module_direction(
@@ -114,12 +121,28 @@ class RobotContainer:
             )
         )
         
-        # I'm doing algae input here because I don't know how to move it to the commands folder
-        # Also the input can be changed from x to some other thing
-        # Cycle function should intake the algae or spit it out if algae is already stored
-        self._joystick.x().whileTrue(
-            self.algae.apply_request(
-                lambda: self.algae.cycle()
+        # Also the input can be changed from x and y to some other thing
+        self._joystick.x().onTrue(
+            commands2.cmd.runOnce(
+                lambda: self.algae.intakeButtonPressed(), self.algae
+            )
+        )
+        
+        self._joystick.x().onFalse(
+            commands2.cmd.runOnce(
+                lambda: self.algae.intakeButtonReleased(), self.algae
+            )
+        )
+        
+        self._joystick.y().onTrue(
+            commands2.cmd.runOnce(
+                lambda: self.algae.dischargeButtonPressed(), self.algae
+            )
+        )
+        
+        self._joystick.y().onFalse(
+            commands2.cmd.runOnce(
+                lambda: self.algae.dischargeButtonReleased(), self.algae
             )
         )
 

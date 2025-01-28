@@ -5,8 +5,11 @@ from commands2.subsystem import Subsystem
 from commands2.command import Command
 import commands2.cmd
 
+# TODO: Figure out the limit switch thing
+# TODO: Add necesary stuffs to physics.py (later)
+
 class AlgaeHandler(Subsystem):
-    
+    '''This thing uses two inputs to intake or discharge'''
     def __init__(self):
         # We don't know the motor channel yet
         motorChannel1 = AlgaeConstants.kIntakeCANAddress1
@@ -18,48 +21,58 @@ class AlgaeHandler(Subsystem):
         self.AlgaeMotor2 = wpilib.PWMSparkMax(motorChannel2)
         # set() function makes these turn
         
-        self.holdingAlgae = False
+        # Records direction of the motors (1 is intake, -1 is discharge)
+        self.spinningDirection = 0
         
-        # Setup the timer
-        self.timer = wpilib.Timer()
+        # Records when button is pressing so override system works
+        self.intakeActive = False
+        self.dischargeActive = False
         
-    def disable(self):
-        self.AlgaeMotor1.set(0)
-        self.AlgaeMotor2.set(0)
-        print("DEFAULT COMMAND")
+        # Most of the complicated stuff is from the override system
+        # where if you press one button while another is already pressed, it registeres the new button
         
-    def apply_request(self, function):
-        return commands2.cmd.run(function, self)
+    def default(self) -> None:
+        '''This command runs when no others are running in the same tick'''
+        # Nothing here yet but it might be needed later
+        pass
     
-    def cycle(self):
-        '''Activates when algae button is pressed'''
-        # Figure out some way to detect if holding algae (limit switch or something)
-        # For now it just alternates every time the button is pressed but thats not the best idea
+    def intakeButtonPressed(self) -> None:
+        '''Starts spinning motors in intake direction once intake button is pressed'''
+        self.intakeActive = True
+        self.spinMotors(1)
         
-        # Reset timer to 0 and start
-        self.timer.reset()
-        self.timer.start()
+    def intakeButtonReleased(self) -> None:
+        '''Spins a different motor when intake button is released; either discharge or stop the motors'''
+        self.intakeActive = False
+        self.spinBasedOnButtons()
         
-        if self.holdingAlgae: 
-            self.spinMotors(-1) # Opposite of intake
-        else: 
-            self.spinMotors(1) # Intake
+    def dischargeButtonPressed(self) -> None:
+        '''Starts spinning motors in discharge direction once discharge button is pressed'''
+        self.dischargeActive = True
+        self.spinMotors(-1)
         
-        # Later replace this with some code at the start of the function that
-        # sets self.holdingAlgae based on if the robot is actually holding algae
-        self.holdingAlgae = not self.holdingAlgae
-        
-        print("BUTTON PRESSED")
-                
-    def checkCycle(self):
-        '''If motors have been spinning for a set amount of time (AlgaeConstants.intakeTime), stop the motors'''
-        if self.timer.hasElapsed(AlgaeConstants.intakeTime):
-            # Reset timer to 0 and start
-            self.timer.stop()
-            self.timer.reset()
-            self.spinMotors(0) # Stops motors
+    def dischargeButtonReleased(self) -> None:
+        '''Spins a different motor when discharge button is released; either intake or stop the motors'''
+        self.dischargeActive = False
+        self.spinBasedOnButtons()
             
-    def spinMotors(self, dir):
-        '''Spins the motors (1 is intake, -1 spits the algae out hopefully)'''
+    def spinBasedOnButtons(self) -> None:
+        '''Activated when a button is released because then 0 or 1 algae buttons will be held, 
+            and whatever button is activated can be used to spin the motors in the right direction'''
+        if self.intakeActive:
+            self.spinMotors(1)
+        elif self.dischargeActive:
+            self.spinMotors(-1)
+        else:
+            self.spinMotors(0)
+    
+    def spinMotors(self, dir) -> None:
+        '''Spins the motors (1 is intake, -1 is discharge hopefully)'''
+        # Update spinningDirection variable
+        self.spinningDirection = dir
+        # Spins them in seperate directions to suck in the algae
         self.AlgaeMotor1.set(dir)
         self.AlgaeMotor2.set(-dir)
+        # For testing
+        print(self.spinningDirection)
+        
