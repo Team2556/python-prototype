@@ -12,12 +12,12 @@ from generated.tuner_constants import TunerConstants
 from telemetry import Telemetry
 from robotUtils import controlAugment
 
-from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import AutoBuilder, PathConstraints, PathfindThenFollowPath
 from phoenix6 import swerve
-from wpilib import SmartDashboard
+from wpilib import SmartDashboard, DriverStation
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
-
+import math
 from subsystems import limelight
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
@@ -98,9 +98,11 @@ class RobotContainer:
         #                         .with_rotational_rate(0.3))
 
         # Path follower
-        self._auto_chooser = AutoBuilder.buildAutoChooser("Tests")
+        self._auto_chooser = AutoBuilder.buildAutoChooser("Red2-Algae")
         SmartDashboard.putData("Auto Mode", self._auto_chooser)
         
+        
+        # PathfindThenFollowPath()
         # Configure the button bindings
         self.configureButtonBindings()
 
@@ -127,23 +129,23 @@ class RobotContainer:
                     .with_rotational_rate(
                         -controlAugment.smooth(self._joystick.getRightX()) * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
-                    .with_center_of_rotation(Translation2d(self.robotWidthBumpered*(controlAugment
+                    .with_center_of_rotation(Translation2d(x= self.robotWidthBumpered*(controlAugment
                                                                                     .smooth(controlAugment
                                                                                             .one_side_control_only( self._joystick.getRightY(), 'Pos'))),
                                                             # want y translation to depend on direction of turn
-                                                            self._joystick.getRightX()/abs(self._joystick.getRightX()) *
+                                                            y= math.copysign(1,self._joystick.getRightX())) *
                                                                 self.robotWidthBumpered*(controlAugment
                                                                                             .smooth(controlAugment
-                                                                                                    .one_side_control_only( self._joystick.getRightY(), 'Pos')))))
+                                                                                                    .one_side_control_only( self._joystick.getRightY(), 'Pos'))))
                     # shift the center of rotation to opposite front corner, if the driver pulls down on the right stick in addition to the side. 
                     # This should allow some nice defensive roll-off maneuvers                        
                 )
-            )#.alongWith(commands2.PrintCommand("Running default command. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n")),
+            )
         )
         
         #section vision related commands
         #take in vision data and update the odometery... there has to be a better way in crte code...
-        self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command) #.negate()
+        self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
         #Focus in on the target and move relative to it
         # self._joystick.rightStick().whileTrue(
         #     self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values

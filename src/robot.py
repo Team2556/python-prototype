@@ -9,6 +9,7 @@ import wpilib
 import commands2
 import typing
 from wpilib import SmartDashboard, DriverStation, Field2d
+from pathplannerlib.auto import AutoBuilder
 
 
 from robotcontainer import RobotContainer
@@ -55,7 +56,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container.invertBlueRedDrive = 1
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             self.container.invertBlueRedDrive = -1
-        print(f"Robot is on the {DriverStation.getAlliance()} alliance.\n -\n-\n-\n- {self.container.invertBlueRedDrive =}")
+        # print(f"Robot is on the {DriverStation.getAlliance()} alliance.\n -\n-\n-\n- {self.container.invertBlueRedDrive =}")
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
@@ -63,11 +64,16 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def disabledPeriodic(self) -> None:
         """This function is called periodically when disabled"""
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed: 
+            AutoBuilder._shouldFlipPath = lambda: True
+        else:
+            AutoBuilder._shouldFlipPath = lambda: False
         pass
 
     def autonomousInit(self) -> None:
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.autonomousCommand = self.container.getAutonomousCommand()
+
 
         if self.autonomousCommand:
             self.autonomousCommand.schedule()

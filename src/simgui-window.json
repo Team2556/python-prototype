@@ -11,8 +11,8 @@
       "style": "0",
       "userScale": "2",
       "width": "1920",
-      "xpos": "9",
-      "ypos": "70"
+      "xpos": "7",
+      "ypos": "442"
     }
   },
   "Table": {
@@ -47,7 +47,7 @@
     "###FMS": {
       "Collapsed": "0",
       "Pos": "24,156",
-      "Size": "202,214"
+      "Size": "210,214"
     },
     "###Joysticks": {
       "Collapsed": "0",

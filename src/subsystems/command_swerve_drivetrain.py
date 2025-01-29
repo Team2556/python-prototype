@@ -263,10 +263,11 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             ),
             config,
             # Assume the path needs to be flipped for Red vs Blue, this is normally the case
-            lambda: (DriverStation.getAlliance() or DriverStation.Alliance.kBlue) == DriverStation.Alliance.kRed,
+            #  don't know what the 'or' is for ... lambda: (DriverStation.getAlliance() or DriverStation.Alliance.kBlue) == DriverStation.Alliance.kRed,
+            lambda: DriverStation.getAlliance()  == DriverStation.Alliance.kRed, #has no effect in sim as it is init happens before color selection
             self # Subsystem for requirements
         )
-
+        
     def apply_request(
         self, request: Callable[[], swerve.requests.SwerveRequest]
     ) -> Command:
