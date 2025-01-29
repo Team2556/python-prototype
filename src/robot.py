@@ -15,7 +15,7 @@ import wpimath.controller
 import wpimath.trajectory
 
 from robotcontainer import RobotContainer
-from constants import ElevatorConstants
+
 
 
 
@@ -25,11 +25,6 @@ class MyRobot(commands2.TimedCommandRobot):
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of robotPeriodic which runs the scheduler for you
     """
-    class Elevator(wpilib.Elevator):
-        ElevatorConstants.kElevatorDrumRadius = 0.0508
-        
-        # distance per pulse = (distance per revolution) / (pulses per revolution)
-        #  = (Pi * D) / ppr
        
 
     autonomousCommand: typing.Optional[commands2.Command] = None
@@ -106,7 +101,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
-        pass
+        self.container.elevator.elevatorPeriodic()
 
     def testInit(self) -> None:
         # Cancels all running commands at the start of test mode

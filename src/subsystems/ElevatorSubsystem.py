@@ -3,8 +3,8 @@ import wpilib
 import wpimath.controller
 import wpimath.trajectory
 import phoenix6
-
 from constants import ElevatorConstants
+
 
 class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
 
@@ -26,6 +26,8 @@ class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
 
         self.rightelevmotor = phoenix6.hardware.TalonFX(ElevatorConstants.kRightMotorPort)
         self.leftelevmotor = phoenix6.hardware.TalonFX(ElevatorConstants.kLeftMotorPort)
+        self.topelevmotorlimitswitch = wpilib.DigitalInput(ElevatorConstants.kTopLimitSwitchChannel)
+        self.bottomelevmotorlimitswitch = wpilib.DigitalInput(ElevatorConstants.kBottomLimitSwitchChannel)
         self.feedforward = wpimath.controller.ElevatorFeedforward(
             ElevatorConstants.kSVolts,
             ElevatorConstants.kGVolts,
@@ -47,7 +49,7 @@ class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
         self.leftelevmotor.setVoltage(output + feedforward)
     def _getMeasurement(self) -> float:
         return self.rightelevmotor.set_position() + ElevatorConstants.kElevatorOffsetMeters
-    
+        
     def disablePIDSubsystems(self) -> None:
         """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
         This should be called on robot disable to prevent integral windup."""
@@ -56,3 +58,9 @@ class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
     def moveElevator(self, meters = ElevatorConstants.kElevatorOffsetMeters) -> None:
         self.setGoal(meters)
         self.enable()
+
+    def elevatorPeriodic(self) -> None:
+        if self.topelevmotorlimitswitch.get():
+            self.moveElevator(meters = self.getMeasurement - ElevatorConstants.kElevatorDistanceMovedAfterContactWithLimitSwitch)
+        elif self.bottomelevmotorlimitswitch.get():
+            self.moveElevator(meters = self.getMeasurement + ElevatorConstants.kElevatorDistanceMovedAfterContactWithLimitSwitch)

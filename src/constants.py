@@ -92,6 +92,7 @@ class ElevatorConstants(IntEnum):
 
         kMinElevatorHeight = 0.0508  # 2 inches
         kMaxElevatorHeight = 1.27  # 50 inches
+        kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.02
 
         kMaxVelocityMetersPerSecond = 1.5
         kMaxAccelerationMetersPerSecSquared = 0.5
@@ -103,6 +104,11 @@ class ElevatorConstants(IntEnum):
         kAVoltSecondSquaredPerMeter = 0.75
 
         kElevatorOffsetMeters = 0
+
+        kTopLimitSwitchChannel = 2
+        kBottomLimitSwitchChannel = 3
+
+
 #endregion
 class Override_DriveConstant:
     ...
