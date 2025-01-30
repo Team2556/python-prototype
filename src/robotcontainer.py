@@ -6,6 +6,7 @@
 
 import commands2
 import commands2.button, commands2.cmd
+import numpy as np
 from commands2.sysid import SysIdRoutine
 
 from generated.tuner_constants import TunerConstants
@@ -111,7 +112,30 @@ class RobotContainer:
         self.path_doc_feed_right = PathPlannerPath.fromPathFile("Dock-Feed-Right")
         self.path_doc_feed_left = PathPlannerPath.fromPathFile("Dock-Feed-Left")
 
+        #section TeleAuto coral
+        #define numpy array of coral locations; there are 12 poles with 4 levels available for scoring for a total fof 48 scoring locations
+        self.coral_locations = np.zeros((12, 4)) 
+        # np.array([(x, y) for x, y in zip(range(12), range(4) * 12)])
+        def record_score_coral(pole: int, level: int):
+            assert 0 <= pole < 12
+            assert 0 <= level < 4
+            self.coral_locations[pole, level] = 1
+        def record_descore_coral(pole: int, level: int):
+            assert 0 <= pole < 12
+            assert 0 <= level < 4
+            self.coral_locations[pole, level] = 0
+        def pick_coral_to_score():
+            #pick the first coral location that is not scored
+            for level in range(3,0,-1):
+                for pole in range(12):
+                    if self.coral_locations[pole, level] == 0:
+                        return pole, level
+                        
+            return None
 
+
+
+        #endsection TeleAuto coral
        
         # self.path_dock_processing_command = AutoBuilder.pathfindThenFollowPath(
         #     goal_path= self.closest_path_to_robot,
@@ -250,42 +274,39 @@ class RobotContainer:
         # print(f'inline   {AutoBuilder._getPose()=} {self.closest_path_to_robot=}!!!!!!!!***************************!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         
         # teleAuto to processing
-        rect_feedArea = Rectangle2d(Translation2d(0,0),Translation2d(4.50,7.50))
-        rect_procArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,1.10))
+        #TODO: handel the red side of the field; more rectangles or a function that returns the rotation of the rectangle
+        self.rotate_rectangle_by = Rotation2d( degreesToRadians(0))
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed: 
+            self.rotate_rectangle_by = Translation2d(Rotation2d(degreesToRadians(180)))
+        rect_feedArea = Rectangle2d(Translation2d(0,0),Translation2d(4.50,7.50) )#.transformBy(self.rotate_rectangle_by)
+        rect_procArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,1.10))#.transformBy(self.rotate_rectangle_by)
         print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
-        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_feedArea.contains(AutoBuilder.getCurrentPose().translation()) or 
+        (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_feedArea.contains(AutoBuilder.getCurrentPose().translation()) or 
                                                                                                                                   rect_procArea.contains(AutoBuilder.getCurrentPose().translation()))).onTrue(
                                              AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_proc_RtWall,
-                                                                                pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
-                                                                                .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
-                                                                                           )
+                                                                                pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False))
                                                                                            )
                                                                                 # self.update_closest_path_to_robot(),
-        rect_midArea = Rectangle2d(Translation2d(6.5,2.7),Translation2d(8.7,7.70))
-        rect_topFarArea = Rectangle2d(Translation2d(4.5,5.5),Translation2d(8.7,7.70))
-        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_midArea.contains(AutoBuilder.getCurrentPose().translation()) or
+        rect_midArea = Rectangle2d(Translation2d(6.5,2.7),Translation2d(8.7,7.70))#.transformBy(self.rotate_rectangle_by)
+        rect_topFarArea = Rectangle2d(Translation2d(4.5,5.5),Translation2d(8.7,7.70))#.transformBy(self.rotate_rectangle_by)
+        (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_midArea.contains(AutoBuilder.getCurrentPose().translation()) or
                                                                                   rect_topFarArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_proc_midfield,
                                                                         pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
-                                                                        .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
-                                                                                    )
                                                                                     )
         # teleAuto to feeders
-        rect_rightFeedArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,4.0))
-        (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_rightFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
+        rect_rightFeedArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,4.0))#.transformBy(self.rotate_rectangle_by)
+        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_rightFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_right,
                                                                         pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
-                                                                        .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
-                                                                                    )
                                                                                     )
         
-        rect_leftFeedArea = Rectangle2d(Translation2d(0,4.5),Translation2d(8.70,7.70))
-        (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
+        rect_leftFeedArea = Rectangle2d(Translation2d(0,4.5),Translation2d(8.70,7.70))#.transformBy(self.rotate_rectangle_by)
+        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_left,
                                                                         pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
-                                                                        .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
                                                                                     )
-                                                                                    )
+        
 
 
         # (self._joystick.a() & self._joystick.povDown()).whileTrue( GotoClosestPath(drivetrain=self.drivetrain,
