@@ -81,6 +81,6 @@ class Override_DriveConstant:
     ...
     
 class AlgaeConstants:
-    kIntakeCANAddress1 = 13 # TODO: Correct the intake CAN Addresses pls
+    kIntakeCANAddress1 = 13 # TODO: Correct the CAN Addresses pls
     kIntakeCANAddress2 = 14
-    intakeTime = 2 # The amount of seconds the motors spin when you press the button
+    kAlgaeLimitSwitchChannel = 15 # So it doesn't input when limit switch activated
