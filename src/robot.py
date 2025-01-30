@@ -10,6 +10,7 @@ import commands2
 import typing
 from wpilib import SmartDashboard, DriverStation, Field2d
 from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.logging import PathPlannerLogging
 
 
 from robotcontainer import RobotContainer
@@ -36,6 +37,14 @@ class MyRobot(commands2.TimedCommandRobot):
         self.field = Field2d()
         SmartDashboard.putData("Field", self.field)
         #endregion Glass field viewer
+        # Logging callback for current robot pose
+        PathPlannerLogging.setLogCurrentPoseCallback(lambda pose: self.field.setRobotPose(pose))
+
+        # Logging callback for target robot pose
+        PathPlannerLogging.setLogTargetPoseCallback(lambda pose: self.field.getObject('target pose').setPose(pose))
+
+        # Logging callback for the active path, this is sent as a list of poses
+        PathPlannerLogging.setLogActivePathCallback(lambda poses: self.field.getObject('path').setPoses(poses))
 
  
     def robotPeriodic(self) -> None:

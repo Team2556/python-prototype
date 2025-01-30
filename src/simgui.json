@@ -73,7 +73,20 @@
       }
     },
     "transitory": {
-      "SmartDashboard": {
+      "LiveWindow": {
+        ".status": {
+          "open": true
+        }
+      },
+      "PathPlanner": {
+        "HotReload": {
+          "open": true
+        }
+      },
+      "Pose": {
+        "double[]##v_/Pose/robotPose": {
+          "open": true
+        },
         "open": true
       },
       "photonvision": {

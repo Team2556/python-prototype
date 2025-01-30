@@ -12,15 +12,17 @@ from generated.tuner_constants import TunerConstants
 from telemetry import Telemetry
 from robotUtils import controlAugment
 
-from pathplannerlib.auto import AutoBuilder, PathConstraints, PathfindThenFollowPath
+from pathplannerlib.auto import AutoBuilder, PathfindThenFollowPath, PathPlannerAuto
+from pathplannerlib.path import PathPlannerPath, PathConstraints
 from phoenix6 import swerve
 from wpilib import SmartDashboard, DriverStation
-from wpimath.geometry import Rotation2d, Translation2d, Transform2d
+from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
 import math
 from subsystems import limelight
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
+from commands.gotoClosestPath import GotoClosestPath
 
 from constants import RobotDimensions
 
@@ -74,6 +76,7 @@ class RobotContainer:
         self._logger = Telemetry(self._max_speed)
 
         self._joystick = commands2.button.CommandXboxController(0)
+        self._joystickAutotTel = commands2.button.CommandXboxController(1)
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
@@ -81,7 +84,7 @@ class RobotContainer:
         self.limelight = limelight.LimelightSubsystem()
 
         # Run the VisOdoFuseCommand --- put it where?
-        self.current_pose_swerve = self.drivetrain.get_state_copy().pose #SwerveDriveState.pose #swerve_drive_state.pose
+        self.current_pose_swerve = self.drivetrain.get_state().pose #SwerveDriveState.pose #swerve_drive_state.pose
         trust_vision_data, latest_parsed_result = self.limelight.trust_target(self.current_pose_swerve)
         self.vis_odo_fuse_command =  commands2.ConditionalCommand(VisOdoFuseCommand(self.drivetrain, latest_parsed_result),
                                                                   commands2.PrintCommand("Not Updating Odometer with Vision Data"),
@@ -100,11 +103,32 @@ class RobotContainer:
         # Path follower
         self._auto_chooser = AutoBuilder.buildAutoChooser("Red2-Algae")
         SmartDashboard.putData("Auto Mode", self._auto_chooser)
+
+        self.path_doc_proc_short = PathPlannerPath.fromPathFile("Dock-Processor")
+        self.path_doc_proc_midfield = PathPlannerPath.fromPathFile("Dock-Proc-Mid")
+        self.path_doc_proc_RtWall = PathPlannerPath.fromPathFile("Dock-Proc-RtWall")
+        self.pathlist_dock_processing = [self.path_doc_proc_short, self.path_doc_proc_midfield, self.path_doc_proc_RtWall]
+        self.path_doc_feed_right = PathPlannerPath.fromPathFile("Dock-Feed-Right")
+        self.path_doc_feed_left = PathPlannerPath.fromPathFile("Dock-Feed-Left")
+
+
+       
+        # self.path_dock_processing_command = AutoBuilder.pathfindThenFollowPath(
+        #     goal_path= self.closest_path_to_robot,
+        #     pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False),
+        #     # rotation_delay_distance=0.5, online example bad
+        # )
         
         
         # PathfindThenFollowPath()
         # Configure the button bindings
         self.configureButtonBindings()
+    def update_closest_path_to_robot(self):
+        # self.closest_path_to_robot = 
+        # print(f'inside update closest path to robot, current translation: {self.drivetrain.get_state().pose.translation()} 9999999999999999999999999999999999999999999999999999999999999999999999999999999')
+        self.closest_path_to_robot_lam = lambda paths: min(paths, key=lambda path: path._waypoints[0].anchor.distance(self.drivetrain.get_state().pose.translation()))
+        self.closest_path_to_robot = self.closest_path_to_robot_lam(self.pathlist_dock_processing)
+        return self.closest_path_to_robot_lam(self.pathlist_dock_processing)
 
     def configureButtonBindings(self) -> None:
         """
@@ -155,7 +179,7 @@ class RobotContainer:
 
         #endsection vision related commands
 
-        self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
+        # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
             self.drivetrain.apply_request(
                 lambda: self._point.with_module_direction(
@@ -215,6 +239,63 @@ class RobotContainer:
         self._joystick.leftBumper().onTrue(
             self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
         )
+
+        #section Autonomous During Teleop
+        # self._joystickAutotTel need another controller for this;
+ 
+ 
+        # paths = self.pathlist_dock_processing
+        # self.closest_path_to_robot_lam = lambda paths: min(paths, key=lambda path: path._waypoints[0].anchor.distance(AutoBuilder._getPose().translation()))
+        # self.closest_path_to_robot = self.closest_path_to_robot_lam(self.pathlist_dock_processing)
+        # print(f'inline   {AutoBuilder._getPose()=} {self.closest_path_to_robot=}!!!!!!!!***************************!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        
+        # teleAuto to processing
+        rect_feedArea = Rectangle2d(Translation2d(0,0),Translation2d(4.50,7.50))
+        rect_procArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,1.10))
+        print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
+        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_feedArea.contains(AutoBuilder.getCurrentPose().translation()) or 
+                                                                                                                                  rect_procArea.contains(AutoBuilder.getCurrentPose().translation()))).onTrue(
+                                             AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_proc_RtWall,
+                                                                                pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
+                                                                                .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
+                                                                                           )
+                                                                                           )
+                                                                                # self.update_closest_path_to_robot(),
+        rect_midArea = Rectangle2d(Translation2d(6.5,2.7),Translation2d(8.7,7.70))
+        rect_topFarArea = Rectangle2d(Translation2d(4.5,5.5),Translation2d(8.7,7.70))
+        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_midArea.contains(AutoBuilder.getCurrentPose().translation()) or
+                                                                                  rect_topFarArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
+                                        AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_proc_midfield,
+                                                                        pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
+                                                                        .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
+                                                                                    )
+                                                                                    )
+        # teleAuto to feeders
+        rect_rightFeedArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,4.0))
+        (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_rightFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
+                                        AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_right,
+                                                                        pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
+                                                                        .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
+                                                                                    )
+                                                                                    )
+        
+        rect_leftFeedArea = Rectangle2d(Translation2d(0,4.5),Translation2d(8.70,7.70))
+        (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
+                                        AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_left,
+                                                                        pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
+                                                                        .alongWith(commands2.PrintCommand(f"{AutoBuilder._getPose()=} {self.closest_path_to_robot=}best path {self.update_closest_path_to_robot()}99999999999999999999999999999999999999999999999")
+                                                                                    )
+                                                                                    )
+
+
+        # (self._joystick.a() & self._joystick.povDown()).whileTrue( GotoClosestPath(drivetrain=self.drivetrain,
+        #                                                                            paths=self.pathlist_dock_processing))
+
+        
+                                                                                           
+
+
+        #endsection Autonomous During Teleop
 
 
         self.drivetrain.register_telemetry(
