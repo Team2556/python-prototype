@@ -52,7 +52,10 @@ class RobotContainer:
 
         self._logger = Telemetry(self._max_speed)
 
+        # This one's probably used for moving
         self._joystick = commands2.button.CommandXboxController(0)
+        # This one's probably used for scoring stuff
+        self._joystick2 = commands2.button.CommandXboxController(1)
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
@@ -98,10 +101,12 @@ class RobotContainer:
             )
         )
         
-        # Do the default command thing
+        # Do the default command thing that tells algae controller stuff
+        # Algae controls with controller 2 left joystick
+        # It's negative because that's how xbox controllers work
         self.algae.setDefaultCommand(
             commands2.cmd.run(
-                lambda: self.algae.default(), self.algae
+                lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
             )
         )
 
@@ -118,31 +123,6 @@ class RobotContainer:
                 lambda: self._point.with_module_direction(
                     Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
                 )
-            )
-        )
-        
-        # Also the input can be changed from x and y to some other thing
-        self._joystick.x().onTrue(
-            commands2.cmd.runOnce(
-                lambda: self.algae.intakeButtonPressed(), self.algae
-            )
-        )
-        
-        self._joystick.x().onFalse(
-            commands2.cmd.runOnce(
-                lambda: self.algae.intakeButtonReleased(), self.algae
-            )
-        )
-        
-        self._joystick.y().onTrue(
-            commands2.cmd.runOnce(
-                lambda: self.algae.dischargeButtonPressed(), self.algae
-            )
-        )
-        
-        self._joystick.y().onFalse(
-            commands2.cmd.runOnce(
-                lambda: self.algae.dischargeButtonReleased(), self.algae
             )
         )
 
