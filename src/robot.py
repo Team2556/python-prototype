@@ -5,14 +5,9 @@
 # the WPILib BSD license file in the root directory of this project.
 #
 
-import phoenix6
-import wpilib
 import commands2
 import typing
-import math
 from wpilib import (SmartDashboard, Field2d)
-import wpimath.controller
-import wpimath.trajectory
 
 from robotcontainer import RobotContainer
 
@@ -34,14 +29,6 @@ class MyRobot(commands2.TimedCommandRobot):
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
-        self.elevconstraints = wpimath.trajectory.TrapezoidProfile.Constraints(1.75, 0.75)
-        self.elevcontroller = wpimath.controller.PIDController(5.0, 0, 0)
-        self.leftelevmotor = phoenix6.hardware.TalonFX(0)
-        self.rightelevmotor = phoenix6.hardware.TalonFX(1)
-        self.joystick = wpilib.XboxController(0)
-
-
-
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
         self.container = RobotContainer()
@@ -61,20 +48,9 @@ class MyRobot(commands2.TimedCommandRobot):
         # block in order for anything in the Command-based framework to work.
         commands2.CommandScheduler.getInstance().run()
 
-        if self.joystick.rightTrigger():
-            # Here, we run PID control like normal, with a constant setpoint of 30in (0.762 meters).
-            pidOutput = self.elevcontroller.calculate(self.rightelevmotor.set_position(), 0.762)
-            self.leftelevmotor.setVoltage(pidOutput)
-            self.rightelevmotor.setVoltage(pidOutput)
-        else:
-            # Otherwise we disable the motor
-            self.leftelevmotor.set(0.0)
-            self.rightelevmotor.set(0.0)
-
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
-        self.leftelevmotor.set(0)
-        self.rightelevmotor.set(0)
+        pass
 
     def disabledPeriodic(self) -> None:
         """This function is called periodically when disabled"""

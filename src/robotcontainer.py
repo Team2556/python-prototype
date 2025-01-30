@@ -52,6 +52,7 @@ class RobotContainer:
         self._logger = Telemetry(self._max_speed)
 
         self._joystick = commands2.button.CommandXboxController(0)
+        self._joystick2 = commands2.button.CommandXboxController(1)
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
@@ -79,18 +80,26 @@ class RobotContainer:
                 return -1
             else:
                 return value_update
-        self._joystick.rightTrigger().onTrue(
-            commands2.cmd.runOnce(lambda: self.elevator.moveElevator(1.27), self.elevator)
-        )
-        self._joystick.leftTrigger().onTrue(
-            commands2.cmd.runOnce(
-                lambda: self.elevator.moveElevator(), self.elevator
+            
+        self.elevator.setDefaultCommand(
+            commands2.cmd.run(
+                lambda: self.elevator.getDefaultCommand(), self.elevator
             )
         )
-        self._joystick.rightBumper().onTrue(
-            commands2.cmd.runOnce(lambda: self.elevator.disable())
+        self._joystick2.rightTrigger().onTrue(
+            commands2.cmd.runOnce(lambda: self.elevator.moveElevator(1.27), self.elevator)
         )
-
+        self._joystick2.leftTrigger().onTrue(
+            commands2.cmd.runOnce(
+                lambda: self.elevator.moveElevator(0.762), self.elevator
+            )
+        )
+        self._joystick2.leftBumper().onTrue(
+            commands2.cmd.runOnce(lambda: self.elevator.moveElevator(0.3), self.elevator)
+        )
+        self._joystick2.rightBumper().onTrue(
+            commands2.cmd.runOnce(lambda: self.elevator.moveElevator(0), self.elevator)
+        )
         # Note that X is defined as forward according to WPILib convention,
         # and Y is defined as to the left according to WPILib convention.
         self.drivetrain.setDefaultCommand(
