@@ -281,10 +281,12 @@ class RobotContainer:
         rect_feedArea = Rectangle2d(Translation2d(0,0),Translation2d(4.50,7.50) )#.transformBy(self.rotate_rectangle_by)
         rect_procArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,1.10))#.transformBy(self.rotate_rectangle_by)
         print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
+
+        pathfinding_constraints_global=PathConstraints(3/3, 4/3, degreesToRadians(540/2), degreesToRadians(720/2),12,False)#was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
         (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_feedArea.contains(AutoBuilder.getCurrentPose().translation()) or 
                                                                                                                                   rect_procArea.contains(AutoBuilder.getCurrentPose().translation()))).onTrue(
                                              AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_proc_RtWall,
-                                                                                pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False))
+                                                                                pathfinding_constraints=pathfinding_constraints_global)
                                                                                            )
                                                                                 # self.update_closest_path_to_robot(),
         rect_midArea = Rectangle2d(Translation2d(6.5,2.7),Translation2d(8.7,7.70))#.transformBy(self.rotate_rectangle_by)
@@ -292,23 +294,22 @@ class RobotContainer:
         (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_midArea.contains(AutoBuilder.getCurrentPose().translation()) or
                                                                                   rect_topFarArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_proc_midfield,
-                                                                        pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
+                                                                        pathfinding_constraints=pathfinding_constraints_global )
                                                                                     )
         # teleAuto to feeders
         rect_rightFeedArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,4.0))#.transformBy(self.rotate_rectangle_by)
         (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_rightFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_right,
-                                                                        pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
+                                                                        pathfinding_constraints=pathfinding_constraints_global )
                                                                                     )
         
         rect_leftFeedArea = Rectangle2d(Translation2d(0,4.5),Translation2d(8.70,7.70))#.transformBy(self.rotate_rectangle_by)
         (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_left,
-                                                                        pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False) )
+                                                                        pathfinding_constraints=pathfinding_constraints_global )
                                                                                     )
         
-
-
+        AutoBuilder.configure
         # (self._joystick.a() & self._joystick.povDown()).whileTrue( GotoClosestPath(drivetrain=self.drivetrain,
         #                                                                            paths=self.pathlist_dock_processing))
 
