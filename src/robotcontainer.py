@@ -9,7 +9,9 @@ import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
 
+import constants
 from generated.tuner_constants import TunerConstants
+from subsystems import ElevatorSubsystem
 from telemetry import Telemetry
 from robotUtils import controlAugment
 
@@ -60,7 +62,6 @@ class RobotContainer:
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive 
-
         )
 
 
@@ -77,9 +78,12 @@ class RobotContainer:
         self._logger = Telemetry(self._max_speed)
 
         self._joystick = commands2.button.CommandXboxController(0)
-        self._joystickAutotTel = commands2.button.CommandXboxController(1)
+        self._joystick2 = commands2.button.CommandXboxController(1)
 
         self.drivetrain = TunerConstants.create_drivetrain()
+
+        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
@@ -160,6 +164,7 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
+
         # Note that X is defined as forward according to WPILib convention,
         # and Y is defined as to the left according to WPILib convention.
         # Drivetrain will execute this command periodically
@@ -324,10 +329,11 @@ class RobotContainer:
             lambda state: self._logger.telemeterize(state)
         )
 
+
     def getAutonomousCommand(self) -> commands2.Command:
         """Use this to pass the autonomous command to the main {@link Robot} class.
 
         :returns: the command to run in autonomous
         """
-        # return commands2.cmd.print_("No autonomous command configured")
+        #return commands2.cmd.print_("No autonomous command configured")
         return self._auto_chooser.getSelected()

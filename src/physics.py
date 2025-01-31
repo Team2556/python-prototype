@@ -1,5 +1,5 @@
+import phoenix6
 import wpilib
-from wpilib import SmartDashboard
 import wpilib.simulation
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Transform2d, Pose3d, Rotation3d, Transform3d
@@ -14,13 +14,24 @@ from constants import AprilTags, AprilTagField
 
 from phoenix6.unmanaged import feed_enable
 from phoenix6.hardware import TalonFX
+import typing
+import wpimath.system.plant
+
+
+from constants import ElevatorConstants
+import subsystems
+import subsystems.ElevatorSubsystem
+
+if typing.TYPE_CHECKING:
+    from robot import MyRobot
+
 # import generated.tuner_constants as tc
 # from wpimath.units import inchesToMeters, feetToMeters, metersToFeet
 # from pyfrc.physics.drivetrains import four_motor_swerve_drivetrain
 
 
 class PhysicsEngine:
-    def __init__(self, physics_controller, robot: "RobotContainer"):
+    def __init__(self, physics_controller, robot: "MyRobot"):
         self.physics_controller = physics_controller
         self.robot = robot
         self.container = self.robot.container
@@ -132,6 +143,29 @@ class PhysicsEngine:
             sim_back_right_drive, sim_back_right_steer,
             swerve_kinematics, 0.381, 0.381, 0.381, 0.381
         )'''
+        self.elevator = subsystems.ElevatorSubsystem(
+            self.elevatorGearbox,
+            ElevatorConstants.kElevatorGearing,
+            ElevatorConstants.kCarriageMass,
+            ElevatorConstants.kElevatorDrumRadius,
+            ElevatorConstants.kMinElevatorHeight,
+            ElevatorConstants.kMaxElevatorHeight,
+            True,
+            0,
+            [0.01, 0.0],
+        )
+        self.elevencoder = wpilib.Encoder(robot.elevencoder) #not sure if i need to add another encoder, will find out later
+        self.leftelevmotor = TalonFX(robot.leftelevmotor.get())
+        self.rightelevmotor = TalonFX(robot.rightelevmotor.get())
+        # Create a Mechanism2d display of an elevator
+        self.mech2d = wpilib.Mechanism2d(20, 50)
+        self.elevatorRoot = self.mech2d.getRoot("Elevator Root", 10, 0)
+        self.elevatorMech2d = self.elevatorRoot.appendLigament(
+            "Elevator", self.elevator.getPositionInches(), 90
+        )
+
+        # Put Mechanism to SmartDashboard
+        wpilib.SmartDashboard.putData("Elevator", self.mech2d)
 
             
         
@@ -161,11 +195,32 @@ class PhysicsEngine:
         #may need unit conversion, may not..? metersToFeet or feetToMeters
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
+        self.elevator.setInput(
+            0, self.leftelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
+        )
+        self.elevator.setInput(
+            1, self.rightelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
+        )
+
+        # Next, we update it
+        self.elevator.update(tm_diff)
+
+        # Finally, we set our simulated encoder's readings and simulated battery
+        # voltage
+        self.elevencoder.getDistance(self.elevator.getPosition())
+        # SimBattery estimates loaded battery voltage
+        # wpilib.simulation.RoboRioSim.setVInVoltage(
+        #     wpilib.simulation.BatterySim
+        # )
+
+        # Update the Elevator length based on the simulated elevator height
+        self.elevatorMech2d.setLength(self.elevator.getPositionInches())
+
         do_nothing = True
         if do_nothing:
             pass
         else:
-            self.physics_controller.move_robot(Transform2d(self.prev_pose, self.drivetrain.get_state().pose))
+            self.physics_controller.move_elevator(Transform2d(self.prev_pose, self.drivetrain.get_state().pose))
             self.prev_pose = self.drivetrain.get_state().pose
 
             

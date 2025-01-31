@@ -4,7 +4,6 @@
 # Open Source Software; you can modify and/or share it under the terms of
 # the WPILib BSD license file in the root directory of this project.
 #
-
 import wpilib
 import commands2
 import typing
@@ -20,6 +19,7 @@ class MyRobot(commands2.TimedCommandRobot):
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of robotPeriodic which runs the scheduler for you
     """
+       
 
     autonomousCommand: typing.Optional[commands2.Command] = None
 
@@ -28,7 +28,6 @@ class MyRobot(commands2.TimedCommandRobot):
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
-
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
         self.container = RobotContainer()
@@ -103,7 +102,7 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
         
-        pass
+        self.container.elevator.elevatorPeriodic()
 
     def testInit(self) -> None:
         # Cancels all running commands at the start of test mode
