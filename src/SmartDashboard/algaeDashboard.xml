@@ -1,0 +1,47 @@
+<xml version="1.0">
+<dashboard>
+	<widget field="Motor Multiplier" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="9" y="41"/>
+	</widget>
+	<widget field="Limit Switch" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="7" y="149"/>
+		<width>67</width>
+	</widget>
+	<widget field="Toggle Limit Switch" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.CheckBox">
+		<location x="9" y="64"/>
+	</widget>
+	<widget field="Motor2" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
+		<location x="180" y="170"/>
+		<property name="Maximum" value="1.0"/>
+		<property name="Minimum" value="-1.0"/>
+	</widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="-6" y="208"/>
+		<width>650</width>
+		<height>40</height>
+	</static-widget>
+	<widget field="Deadband" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="9" y="15"/>
+	</widget>
+	<widget field="Motor1" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
+		<location x="7" y="169"/>
+		<height>28</height>
+		<property name="Foreground" value="0.255.153.255"/>
+		<property name="Background" value="204.255.204.255"/>
+		<property name="Maximum" value="1.0"/>
+		<property name="Minimum" value="-1.0"/>
+	</widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="-6" y="208"/>
+		<width>650</width>
+		<height>40</height>
+	</static-widget>
+</dashboard>
+<live-window>
+</live-window>
+	<hidden field="Field"/>
+	<hidden field="Module 2"/>
+	<hidden field="Module 3"/>
+	<hidden field="Module 0"/>
+	<hidden field="Module 1"/>
+</xml>
