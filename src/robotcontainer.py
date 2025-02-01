@@ -19,6 +19,7 @@ from wpimath.geometry import Rotation2d, Translation2d, Transform2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
 
 from subsystems import limelight
+from subsystems import coral
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
 
@@ -73,9 +74,12 @@ class RobotContainer:
 
         self._logger = Telemetry(self._max_speed)
 
-        self._joystick = commands2.button.CommandXboxController(0)
+        self._joystick = commands2.button.CommandXboxController(0) # I detest this name!!! Make it called self.controller
+        self._joystick2 = commands2.button.CommandXboxController(1) # For driving
 
         self.drivetrain = TunerConstants.create_drivetrain()
+
+        self.coral = coral.Coral()
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
@@ -148,10 +152,16 @@ class RobotContainer:
         # self._joystick.rightStick().whileTrue(
         #     self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values
         # )
+
+        self._joystick2.y().onTrue(commands2.cmd.run(lambda: self.coral.Extract.extractOn(self.coral), self.coral.Extract))
+        self._joystick2.y().onFalse(commands2.cmd.run(lambda: self.coral.Extract.extractOff(self.coral), self.coral.Extract))
+
         self._joystick.x().onTrue(SnapToLineCommand(self.drivetrain))
 
-
         #endsection vision related commands
+
+        self._joystick2.x().onTrue(commands2.cmd.run(lambda: self.coral.Intake.intakeOn(self.coral), self.coral.Intake))
+        self._joystick2.x().onFalse(commands2.cmd.run(lambda: self.coral.Intake.intakeOff(self.coral), self.coral.Intake))
 
         self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
@@ -168,7 +178,7 @@ class RobotContainer:
         #         lambda: self._forward_straight.with_velocity_x(0.5).with_velocity_y(0)
         #     )
         # )
-        #trim out the gyro drift; if press POV 0 and move right stick update the drivetrain rotation, but conditional that the right stick input is more than .1
+        # trim out the gyro drift; if press POV 0 and move right stick update the drivetrain rotation, but conditional that the right stick input is more than .1
         self._joystick.pov(0).whileTrue(
             commands2.ConditionalCommand(
                 self.drivetrain.apply_request(
@@ -208,6 +218,8 @@ class RobotContainer:
         (self._joystick.start() & self._joystick.x()).whileTrue(
             self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
         )
+
+
 
         # reset the field-centric heading on left bumper press
         self._joystick.leftBumper().onTrue(

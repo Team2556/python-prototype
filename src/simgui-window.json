@@ -36,12 +36,12 @@
     },
     "###/SmartDashboard/Auto Mode": {
       "Collapsed": "0",
-      "Pos": "5,320",
+      "Pos": "-6,428",
       "Size": "307,60"
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "353,20",
+      "Pos": "344,38",
       "Size": "1046,633"
     },
     "###FMS": {
@@ -51,7 +51,7 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "665,58",
+      "Pos": "852,136",
       "Size": "976,278"
     },
     "###Keyboard 0 Settings": {
@@ -61,18 +61,23 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "375,229",
+      "Pos": "171,320",
       "Size": "937,661"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "493,188",
+      "Pos": "519,151",
       "Size": "937,181"
     },
     "###Other Devices": {
       "Collapsed": "0",
-      "Pos": "1281,25",
+      "Pos": "1581,13",
       "Size": "312,868"
+    },
+    "###PWM Outputs": {
+      "Collapsed": "0",
+      "Pos": "910,20",
+      "Size": "158,90"
     },
     "###System Joysticks": {
       "Collapsed": "0",

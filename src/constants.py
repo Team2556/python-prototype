@@ -122,3 +122,7 @@ class Override_DriveConstant:
 
 class RobotDimensions:
     WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)
+
+class CoralConstants():
+    kCoralIntakeMotorID = 5 # Change these later when we get the actual IDs for these motors.
+    kCoralExtractMotorID = 6
