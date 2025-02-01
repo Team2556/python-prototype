@@ -37,6 +37,9 @@ class PhysicsEngine:
         self.container = self.robot.container
         self.drivetrain = self.container.drivetrain
         self.prev_pose = self.drivetrain.get_state().pose
+        self.elevatorGearbox = wpimath.system.plant.DCMotor.krakenX60(2)
+
+        self.sim_oneMotor = phoenix6.sim.TalonFXSimState(self.container.one_motor.motor)
 
         self.field = self.robot.field #wpilib.Field2d()#already put a field on smartdashboard from robot or container..
         # SmartDashboard.putData("Field-Vision", self.field)
@@ -68,82 +71,10 @@ class PhysicsEngine:
         #     for motor in module:
         #         temp = motor.sim_state
 
-        '''# Front Left
-        _front_left_drive_motor_id = 10
-        _front_left_steer_motor_id = 11
-        _front_left_encoder_id = 12
-        _front_left_encoder_offset: units.rotation = 0.45361328125
-        _front_left_steer_motor_inverted = False
-        _front_left_encoder_inverted = False
 
-        _front_left_x_pos: units.meter = inchesToMeters(11.75)
-        _front_left_y_pos: units.meter = inchesToMeters(11.75)
-
-        # Front Right
-        _front_right_drive_motor_id = 7
-        _front_right_steer_motor_id = 8
-        _front_right_encoder_id = 9
-        _front_right_encoder_offset: units.rotation = 0.43505859375
-        _front_right_steer_motor_inverted = False
-        _front_right_encoder_inverted = False
-
-        _front_right_x_pos: units.meter = inchesToMeters(11.75)
-        _front_right_y_pos: units.meter = inchesToMeters(-11.75)
-
-        # Back Left
-        _back_left_drive_motor_id = 4
-        _back_left_steer_motor_id = 5
-        _back_left_encoder_id = 6
-        _back_left_encoder_offset: units.rotation = 0.187255859375
-        _back_left_steer_motor_inverted = False
-        _back_left_encoder_inverted = False
-
-        _back_left_x_pos: units.meter = inchesToMeters(-11.75)
-        _back_left_y_pos: units.meter = inchesToMeters(11.75)
-
-        # Back Right
-        _back_right_drive_motor_id = 1
-        _back_right_steer_motor_id = 2
-        _back_right_encoder_id = 3
-        _back_right_encoder_offset: units.rotation = 0.35498046875
-        _back_right_steer_motor_inverted = False
-        _back_right_encoder_inverted = False
-
-        _back_right_x_pos: units.meter = inchesToMeters(-11.75)
-        _back_right_y_pos: units.meter = inchesToMeters(-11.75)
-
-        #simulated motors and encoders
-        self.sim_front_left_drive = TalonFX(_front_left_drive_motor_id).sim_state
-        self.sim_front_left_drive.set_supply_voltage(12.0)
-        self.sim_front_left_steer = TalonFX(_front_left_steer_motor_id).sim_state
-        self.sim_front_left_steer.set_supply_voltage(12.0)
-        # sim_front_left_encoder = CANCoder(hardware._front_left_encoder_id).sim_state
-
-        self.sim_front_right_drive = TalonFX(_front_right_drive_motor_id).sim_state
-        self.sim_front_right_steer = TalonFX(_front_right_steer_motor_id).sim_state
-        # sim_front_right_encoder = CANCoder(_front_right_encoder_id).sim_state
-
-        self.sim_back_left_drive = TalonFX(_back_left_drive_motor_id).sim_state
-        self.sim_back_left_steer = TalonFX(_back_left_steer_motor_id).sim_state
-        # sim_back_left_encoder = CANCoder(_back_left_encoder_id).sim_state
-
-        self.sim_back_right_drive = TalonFX(_back_right_drive_motor_id).sim_state
-        self.sim_back_right_steer = TalonFX(_back_right_steer_motor_id).sim_state
-        # sim_back_right_encoder = CANCoder(_back_right_encoder_id).sim_state
-
-        swerve_kinematics = SwerveDrive4Kinematics(Translation2d(_front_left_x_pos, _front_left_y_pos),
-                                                   Translation2d(_front_right_x_pos, _front_right_y_pos),
-                                                   Translation2d(_back_left_x_pos, _back_left_y_pos),
-                                                   Translation2d(_back_right_x_pos, _back_right_y_pos))
-        
-        self.swerve_drivetrain_speeds = four_motor_swerve_drivetrain(
-            self.sim_front_left_drive, sim_front_left_steer,
-            sim_front_right_drive, sim_front_right_steer,
-            sim_back_left_drive, sim_back_left_steer,
-            sim_back_right_drive, sim_back_right_steer,
-            swerve_kinematics, 0.381, 0.381, 0.381, 0.381
-        )'''
-        self.elevator = subsystems.ElevatorSubsystem(
+        '''
+        self.elevator = self.container.elevator
+        subsystems.ElevatorSubsystem(
             self.elevatorGearbox,
             ElevatorConstants.kElevatorGearing,
             ElevatorConstants.kCarriageMass,
@@ -154,18 +85,21 @@ class PhysicsEngine:
             0,
             [0.01, 0.0],
         )
-        self.elevencoder = wpilib.Encoder(robot.elevencoder) #not sure if i need to add another encoder, will find out later
-        self.leftelevmotor = TalonFX(robot.leftelevmotor.get())
-        self.rightelevmotor = TalonFX(robot.rightelevmotor.get())
+        # self.leftelevmotor = self.container.leftelevmotor  TalonFX(robot.leftelevmotor.get())
+        # self.rightelevmotor = TalonFX(robot.rightelevmotor.get())
+        self.sim_leftelevmotor = phoenix6.sim.TalonFXSimState(self.elevator.elevmotor_left)
+        self.sim_rightelevmotor = phoenix6.sim.TalonFXSimState(self.elevator.elevmotor_right)
+        # self.sim_leftelevencoder = phoenix6.sim.EncoderSimState(self.container.leftelevencoder)
+        # self.sim_rightelevencoder = phoenix6.sim.EncoderSimState(self.container.rightelevencoder)
+        # wpilib.Encoder(robot.elevencoder) #not sure if i need to add another encoder, will find out later
         # Create a Mechanism2d display of an elevator
         self.mech2d = wpilib.Mechanism2d(20, 50)
         self.elevatorRoot = self.mech2d.getRoot("Elevator Root", 10, 0)
         self.elevatorMech2d = self.elevatorRoot.appendLigament(
             "Elevator", self.elevator.getPositionInches(), 90
         )
-
         # Put Mechanism to SmartDashboard
-        wpilib.SmartDashboard.putData("Elevator", self.mech2d)
+        wpilib.SmartDashboard.putData("Elevator", self.mech2d)'''
 
             
         
@@ -195,11 +129,11 @@ class PhysicsEngine:
         #may need unit conversion, may not..? metersToFeet or feetToMeters
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
-        self.elevator.setInput(
-            0, self.leftelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
+        '''self.elevator.setInput(
+            0, self.sim_leftelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
         )
         self.elevator.setInput(
-            1, self.rightelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
+            1, self.sim_rightelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
         )
 
         # Next, we update it
@@ -221,7 +155,7 @@ class PhysicsEngine:
             pass
         else:
             self.physics_controller.move_elevator(Transform2d(self.prev_pose, self.drivetrain.get_state().pose))
-            self.prev_pose = self.drivetrain.get_state().pose
+            self.prev_pose = self.drivetrain.get_state().pose'''
 
             
 

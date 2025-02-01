@@ -1,22 +1,27 @@
 {
   "HALProvider": {
     "Other Devices": {
-      "Talon FX (v6)[10]": {
+      "Talon FX (v6)[14]": {
         "header": {
           "open": true
         }
       },
-      "Talon FX (v6)[10]/Fwd Limit": {
+      "Talon FX (v6)[14]/Fwd Limit": {
         "header": {
           "open": true
         }
       },
-      "Talon FX (v6)[10]/Rotor Sensor": {
+      "Talon FX (v6)[14]/Rev Limit": {
         "header": {
           "open": true
         }
       },
-      "Talon FX (v6)[11]": {
+      "Talon FX (v6)[14]/Rotor Sensor": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[2]/Rotor Sensor": {
         "header": {
           "open": true
         }

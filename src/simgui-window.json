@@ -6,13 +6,13 @@
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "592",
-      "maximized": "0",
+      "height": "991",
+      "maximized": "1",
       "style": "0",
       "userScale": "2",
-      "width": "1918",
-      "xpos": "1",
-      "ypos": "199"
+      "width": "1920",
+      "xpos": "0",
+      "ypos": "29"
     }
   },
   "Table": {
@@ -47,11 +47,11 @@
     "###FMS": {
       "Collapsed": "0",
       "Pos": "24,156",
-      "Size": "210,214"
+      "Size": "202,214"
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "665,58",
+      "Pos": "102,624",
       "Size": "976,278"
     },
     "###Keyboard 0 Settings": {
@@ -61,12 +61,12 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "375,38",
+      "Pos": "740,222",
       "Size": "937,852"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "493,188",
+      "Pos": "768,213",
       "Size": "937,181"
     },
     "###Other Devices": {

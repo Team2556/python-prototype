@@ -4,6 +4,7 @@ from enum import (IntEnum, auto)
 import math
 from phoenix6.units import *
 from wpimath.units import degrees, radians, degreesToRadians, radiansToDegrees, inchesToMeters, inches
+from wpimath.trajectory import TrapezoidProfile
 VISION_DES_ANGLE_deg = 25
 VISION_TURN_kP = 0
 VISION_STRAFE_kP = 26
@@ -116,13 +117,21 @@ class CAN_Address(IntEnum):
     TEN = auto()
     ELEVEN = auto()
     TWELVE = auto()
+    THIRTEEN = auto()
+    FOURTEEN = auto()
+    FIFTEEN = auto()
+    SIXTEEN = auto()
+    SEVENTEEN = auto()
+    EIGHTEEN = auto()
+    NINETEEN = auto()
+    TWENTY = auto()
 #endregion
 
 #region Elevator Constants
 
-class ElevatorConstants(IntEnum):
-        kLeftMotorPort = 0
-        kRightMotorPort = 1
+class ElevatorConstants():
+        kLeftMotorPort = CAN_Address.FOURTEEN
+        kRightMotorPort = CAN_Address.FIFTEEN
         kJoystickPort = 0
 
         kElevatorKp = 5.0
@@ -136,7 +145,6 @@ class ElevatorConstants(IntEnum):
 
         kMaxVelocityMetersPerSecond = 1.5
         kMaxAccelerationMetersPerSecSquared = 0.5
-
 
         kSVolts = 0
         kGVolts = 0

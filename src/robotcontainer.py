@@ -9,15 +9,18 @@ import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
 
+from subsystems import oneMotor
 import constants
 from generated.tuner_constants import TunerConstants
-from subsystems import ElevatorSubsystem
+from subsystems import (ElevatorSubsystem,
+                        limelight)
 from telemetry import Telemetry
 from robotUtils import controlAugment
 
 from pathplannerlib.auto import AutoBuilder, PathfindThenFollowPath, PathPlannerAuto
 from pathplannerlib.path import PathPlannerPath, PathConstraints
 from phoenix6 import swerve
+from phoenix6.hardware import TalonFX
 from wpilib import SmartDashboard, DriverStation
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
@@ -26,6 +29,7 @@ from subsystems import limelight
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
 from commands.gotoClosestPath import GotoClosestPath
+from commands.drive_one_motor import DriveOneMotorCommand
 
 from constants import RobotDimensions
 
@@ -82,7 +86,10 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+        # self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+
+        self.one_motor = oneMotor.OneMotor(
+            motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
 
 
         # Vision
@@ -151,6 +158,7 @@ class RobotContainer:
         # PathfindThenFollowPath()
         # Configure the button bindings
         self.configureButtonBindings()
+
     def update_closest_path_to_robot(self):
         # self.closest_path_to_robot = 
         # print(f'inside update closest path to robot, current translation: {self.drivetrain.get_state().pose.translation()} 9999999999999999999999999999999999999999999999999999999999999999999999999999999')
@@ -195,7 +203,8 @@ class RobotContainer:
                 )
             )
         )
-        
+        self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
+
         #section vision related commands
         #take in vision data and update the odometery... there has to be a better way in crte code...
         self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
@@ -328,6 +337,7 @@ class RobotContainer:
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
         )
+
 
 
     def getAutonomousCommand(self) -> commands2.Command:

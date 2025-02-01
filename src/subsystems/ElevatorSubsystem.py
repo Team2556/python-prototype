@@ -23,11 +23,12 @@ class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
             ),
             0,
         )
-        self.elevcontroller = wpimath.controller.ProfiledPIDController(5.0, 0, 0)
-        self.elevmotors = phoenix6.hardware.TalonFX(ElevatorConstants.kRightMotorPort, ElevatorConstants.kLeftMotorPort)
+        self.elevcontroller = super().getController# .controler# wpimath.controller.ProfiledPIDController(5.0, 0, 0)
+        self.elevmotor_right = phoenix6.hardware.TalonFX(ElevatorConstants.kRightMotorPort, "rio")
+        self.elevmotor_left = phoenix6.hardware.TalonFX( ElevatorConstants.kLeftMotorPort, "rio")
         self.topelevmotorlimitswitch = wpilib.DigitalInput(ElevatorConstants.kTopLimitSwitchChannel)
         self.bottomelevmotorlimitswitch = wpilib.DigitalInput(ElevatorConstants.kBottomLimitSwitchChannel)
-        self.joystick = commands2.button.CommandXboxController(1)
+        self.joystick2 = commands2.button.CommandXboxController(ElevatorConstants.kJoystickPort)
         self.feedforward = wpimath.controller.ElevatorFeedforward(
             ElevatorConstants.kSVolts,
             ElevatorConstants.kGVolts,
@@ -60,17 +61,17 @@ class ElevatorSubsystem(commands2.ProfiledPIDSubsystem):
 
     def elevatorPeriodic(self) -> None:
 
-        if self.joystick.rightTrigger():
+        if self.joystick2.rightTrigger():
             # Here, we run PID control like normal, with a constant setpoint of 30in (0.762 meters).
             pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 1.27)
             self.elevmotors.setVoltage(pidOutput)
-        elif self.joystick.leftTrigger():
+        elif self.joystick2.leftTrigger():
             pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 0.762)
             self.elevmotors.setVoltage(pidOutput)
-        elif self.joystick.leftBumper():
+        elif self.joystick2.leftBumper():
             pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 0.3)
             self.elevmotors.setVoltage(pidOutput)
-        elif self.joystick.rightBumper():
+        elif self.joystick2.rightBumper():
             pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 0)
             self.elevmotors.setVoltage(pidOutput)
         else:
