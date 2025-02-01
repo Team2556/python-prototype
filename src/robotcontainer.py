@@ -135,7 +135,7 @@ class RobotContainer:
                                                                                     .smooth(controlAugment
                                                                                             .one_side_control_only( self._joystick.getRightY(), 'Pos'))),
                                                             # want y translation to depend on direction of turn
-                                                            self._joystick.getRightX()/abs(self._joystick.getRightX()) *
+                                                            (self._joystick.getRightX()/abs(self._joystick.getRightX())) if self._joystick.getRightX() != 0 else 0 * # Sebastian updated this so no divide by 0
                                                                 self.robotWidthBumpered*(controlAugment
                                                                                             .smooth(controlAugment
                                                                                                     .one_side_control_only( self._joystick.getRightY(), 'Pos')))))
@@ -153,15 +153,15 @@ class RobotContainer:
         #     self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values
         # )
 
-        self._joystick2.y().onTrue(commands2.cmd.run(lambda: self.coral.extractOn(self.coral), self.coral))
-        self._joystick2.y().onFalse(commands2.cmd.run(lambda: self.coral.extractOff(self.coral), self.coral))
-
         self._joystick.x().onTrue(SnapToLineCommand(self.drivetrain))
 
         #endsection vision related commands
 
-        self._joystick2.x().onTrue(commands2.cmd.run(lambda: self.coral.intakeOn(self.coral), self.coral))
-        self._joystick2.x().onFalse(commands2.cmd.run(lambda: self.coral.intakeOff(self.coral), self.coral))
+        self._joystick2.x().onTrue(commands2.cmd.run(lambda: self.coral.intakeOn(), self.coral))
+        self._joystick2.x().onFalse(commands2.cmd.run(lambda: self.coral.intakeOff(), self.coral))
+
+        self._joystick2.y().onTrue(commands2.cmd.run(lambda: self.coral.extractOn(), self.coral))
+        self._joystick2.y().onFalse(commands2.cmd.run(lambda: self.coral.extractOff(), self.coral))
 
         self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(

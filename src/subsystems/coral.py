@@ -17,7 +17,7 @@ NEO 550 - Extract
 from commands2.subsystem import Subsystem
 from constants import CoralConstants # Holds the public motorIDs. In a different script so it can easily be changed later instead of changing motors in every script
 
-from wpilib import Spark
+from wpilib import Spark, SmartDashboard
 
 class Coral(Subsystem):
     
@@ -31,20 +31,20 @@ class Coral(Subsystem):
     def intakeOn(self):
       ''' Turns on intake motor '''
       self.intakeMotor.set(1)
-      # print("Intake motor set value: ", self.intakeMotor.get())
+      print("Intake motor set value: ", self.intakeMotor.get())
 
 
     def intakeOff(self):
       ''' Turns off intake motor '''
       self.intakeMotor.set(0)
-      # print("Intake motor set value: ", self.intakeMotor.get())
+      print("Intake motor set value: ", self.intakeMotor.get())
         
     def extractOn(self):
       ''' Turns on the extract motor '''
       self.extractMotor.set(1)
-      # print("Extract motor set value: ",  self.extractMotor.get())
+      print("Extract motor set value: ",  self.extractMotor.get())
 
     def extractOff(self):
         ''' Turns off the extract motor '''
         self.extractMotor.set(0)
-        # print("Extract motor set value: ",  self.extractMotor.get())
+        print("Extract motor set value: ",  self.extractMotor.get())
