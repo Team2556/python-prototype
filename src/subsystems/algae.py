@@ -1,4 +1,5 @@
 import wpilib
+from wpilib import SmartDashboard
 from constants import AlgaeConstants
 
 from commands2.subsystem import Subsystem
@@ -30,30 +31,60 @@ class AlgaeHandler(Subsystem):
         self.intakeActive = False
         self.dischargeActive = False
         
-        # Most of the complicated stuff is from the override system
-        # where if you press one button while another is already pressed, it registeres the new button
+        # Settings to tune in SmartDashboard
+        self.deadband = 0.1
+        self.motorMultiplier = 1
+        
+        # SmartDasboard setting
+        self.updateSmartDashboard()
     
     def cycle(self, controllerLeftYInput) -> None:
         '''Gets called periodically; updates the algar motors based on the controller'''
         
         # Change the input stuffs
-        dir = self.curveOffInput(controllerLeftYInput)
+        dir = self.curveOffInput(controllerLeftYInput, self.deadband)
         
-        # Account for limit switches (if limit switch active then you can't intake)
-        if self.limitSwitch.get() and dir > 0:
-            dir = 0
+        # TEMPORARY COMMENTED OUT FOR TESTING
+        # # Account for limit switches (if limit switch active then you can't intake)
+        # if self.limitSwitch.get() and dir > 0:
+        #     dir = 0
         
         self.spinMotors(dir)
+        
+        # SmartDasboard updating
+        self.setupSmartDashboard()
     
-    def curveOffInput(self, num, deadband=0.05):
+    def curveOffInput(self, num, deadband=0.1): # Change deadband if necesary
         '''Does stuff like the cubing and the deadband'''
         # Do the deadband
         if num < deadband and num > -deadband:
             return 0
         # Do the cubing
-        return num ** 3
+        num = num ** 3
+        # Do the motor multiplier (max at 1)
+        if self.motorMultiplier > 1:
+            self.motorMultiplier = 1
+        num *= self.motorMultiplier
+        return num
     
     def spinMotors(self, dir) -> None:
         '''Spins the motors (1 is intake, -1 is discharge hopefully)'''
         self.algaeMotor1.set(dir)
         self.algaeMotor2.set(-dir)
+        
+    def updateSmartDashboard(self) -> None:
+        '''Updates the Smart Dashboard with all the cool things'''
+        
+        # Update values TO the Smart Dashboard
+        SmartDashboard.putNumber("Motor1", self.algaeMotor1.get())
+        SmartDashboard.putNumber("Motor2", self.algaeMotor2.get())
+        
+        # Update values FROM the Smart Dashboard
+        self.deadband = SmartDashboard.getNumber("Deadband", self.deadband)
+        self.motorMultiplier = SmartDashboard.getNumber("Motor Multiplier", self.motorMultiplier)
+        
+    def setupSmartDashboard(self) -> None:
+        SmartDashboard.putNumber("Motor1", self.algaeMotor1.get())
+        SmartDashboard.putNumber("Motor2", self.algaeMotor2.get())
+        SmartDashboard.putNumber("Deadband", self.deadband)
+        SmartDashboard.putNumber("Motor Multiplier", self.motorMultiplier)
