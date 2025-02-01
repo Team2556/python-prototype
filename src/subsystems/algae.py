@@ -1,13 +1,10 @@
+# Thing that controls the algae
+
 import wpilib
 from wpilib import SmartDashboard
 from constants import AlgaeConstants
 
 from commands2.subsystem import Subsystem
-from commands2.command import Command
-import commands2.cmd
-
-# TODO: Figure out the limit switch thing
-# TODO: Add necesary stuffs to physics.py (later)
 
 class AlgaeHandler(Subsystem):
     '''This thing uses two inputs to intake or discharge'''
@@ -31,12 +28,15 @@ class AlgaeHandler(Subsystem):
         self.intakeActive = False
         self.dischargeActive = False
         
-        # Settings to tune in SmartDashboard
+        # Settings to tune
         self.deadband = 0.1
         self.motorMultiplier = 1
+        self.toggleLimitSwitch = True
         
         # SmartDasboard setting
-        self.updateSmartDashboard()
+        self.toggleSmartDashboard = True
+        if self.toggleSmartDashboard:
+            self.setupSmartDashboard()
     
     def cycle(self, controllerLeftYInput) -> None:
         '''Gets called periodically; updates the algar motors based on the controller'''
@@ -44,15 +44,19 @@ class AlgaeHandler(Subsystem):
         # Change the input stuffs
         dir = self.curveOffInput(controllerLeftYInput, self.deadband)
         
-        # TEMPORARY COMMENTED OUT FOR TESTING
-        # # Account for limit switches (if limit switch active then you can't intake)
-        # if self.limitSwitch.get() and dir > 0:
-        #     dir = 0
+        # Account for limit switches (if limit switch active then you can't intake)
+        if self.limitSwitch.get() and dir > 0 and self.toggleLimitSwitch:
+            dir = 0
         
         self.spinMotors(dir)
         
+        # Change SmartDashboard motor multiplier because it can't be more than one
+        if self.toggleSmartDashboard and self.motorMultiplier > 1:
+                SmartDashboard.putNumber("Motor Multiplier", 1)
+        
         # SmartDasboard updating
-        self.setupSmartDashboard()
+        if self.toggleSmartDashboard:
+            self.updateSmartDashboard()
     
     def curveOffInput(self, num, deadband=0.1): # Change deadband if necesary
         '''Does stuff like the cubing and the deadband'''
@@ -72,19 +76,25 @@ class AlgaeHandler(Subsystem):
         self.algaeMotor1.set(dir)
         self.algaeMotor2.set(-dir)
         
+    def setupSmartDashboard(self) -> None:
+        '''Sets up the Smart Dashboard for Algae with all the cool things'''
+        SmartDashboard.putNumber("Motor1", self.algaeMotor1.get())
+        SmartDashboard.putNumber("Motor2", self.algaeMotor2.get())
+        SmartDashboard.putBoolean("Limit Switch", self.limitSwitch.get())
+        
+        SmartDashboard.putNumber("Deadband", self.deadband)
+        SmartDashboard.putNumber("Motor Multiplier", self.motorMultiplier)
+        SmartDashboard.putBoolean("Toggle Limit Switch", self.toggleLimitSwitch)
+        
     def updateSmartDashboard(self) -> None:
-        '''Updates the Smart Dashboard with all the cool things'''
+        '''Updates the Smart Dashboard for Algae with all the cool things'''
         
         # Update values TO the Smart Dashboard
         SmartDashboard.putNumber("Motor1", self.algaeMotor1.get())
         SmartDashboard.putNumber("Motor2", self.algaeMotor2.get())
+        SmartDashboard.putBoolean("Limit Switch", self.limitSwitch.get())
         
         # Update values FROM the Smart Dashboard
         self.deadband = SmartDashboard.getNumber("Deadband", self.deadband)
         self.motorMultiplier = SmartDashboard.getNumber("Motor Multiplier", self.motorMultiplier)
-        
-    def setupSmartDashboard(self) -> None:
-        SmartDashboard.putNumber("Motor1", self.algaeMotor1.get())
-        SmartDashboard.putNumber("Motor2", self.algaeMotor2.get())
-        SmartDashboard.putNumber("Deadband", self.deadband)
-        SmartDashboard.putNumber("Motor Multiplier", self.motorMultiplier)
+        self.toggleLimitSwitch = SmartDashboard.getBoolean("Toggle Limit Switch", self.toggleLimitSwitch)
