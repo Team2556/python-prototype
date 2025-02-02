@@ -12,6 +12,7 @@ from commands2.sysid import SysIdRoutine
 from subsystems import oneMotor
 import constants
 from generated.tuner_constants import TunerConstants
+from constants import RobotDimensions
 from subsystems import (ElevatorSubsystem,
                         limelight)
 from telemetry import Telemetry
@@ -25,13 +26,12 @@ from wpilib import SmartDashboard, DriverStation
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
 import math
-from subsystems import limelight
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
 from commands.gotoClosestPath import GotoClosestPath
 from commands.drive_one_motor import DriveOneMotorCommand
+from commands.liftElevator import DriveElevatorCommand
 
-from constants import RobotDimensions
 
 
 
@@ -88,9 +88,9 @@ class RobotContainer:
 
         # self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 
-        self.one_motor = oneMotor.OneMotor(
-            motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
-
+        # self.one_motor = oneMotor.OneMotor(
+        #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
+        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
@@ -203,8 +203,8 @@ class RobotContainer:
                 )
             )
         )
-        self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
-
+        # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
+        self.elevator.setDefaultCommand(DriveElevatorCommand(self.elevator, self._joystick2))
         #section vision related commands
         #take in vision data and update the odometery... there has to be a better way in crte code...
         self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
@@ -289,9 +289,9 @@ class RobotContainer:
         
         # teleAuto to processing
         #TODO: handel the red side of the field; more rectangles or a function that returns the rotation of the rectangle
-        self.rotate_rectangle_by = Rotation2d( degreesToRadians(0))
-        if DriverStation.getAlliance() == DriverStation.Alliance.kRed: 
-            self.rotate_rectangle_by = Translation2d(Rotation2d(degreesToRadians(180)))
+        # self.rotate_rectangle_by = Rotation2d( degreesToRadians(0))
+        # if DriverStation.getAlliance() == DriverStation.Alliance.kRed: 
+        #     self.rotate_rectangle_by = Translation2d(Rotation2d(degreesToRadians(180)))
         rect_feedArea = Rectangle2d(Translation2d(0,0),Translation2d(4.50,7.50) )#.transformBy(self.rotate_rectangle_by)
         rect_procArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,1.10))#.transformBy(self.rotate_rectangle_by)
         print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')

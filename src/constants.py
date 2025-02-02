@@ -134,8 +134,10 @@ class ElevatorConstants():
         kRightMotorPort = CAN_Address.FIFTEEN
         kJoystickPort = 0
 
-        kElevatorKp = 5.0
-        kElevatorGearing = 10.0
+        kElevatorKp = .05
+        kElevatorKi = 0.0
+        kElevatorKd = .0
+        kElevatorGearing = 6#10.0
         kElevatorDrumRadius = 0.0508  # 2 inches in meters
         kCarriageMass = 4
 
@@ -147,7 +149,7 @@ class ElevatorConstants():
         kMaxAccelerationMetersPerSecSquared = 0.5
 
         kSVolts = 0
-        kGVolts = 0
+        kGVolts = 0.0
         kVVoltSecondPerMeter = 1.5
         kAVoltSecondSquaredPerMeter = 0.75
 

@@ -1,3 +1,4 @@
+import commands2
 import wpilib
 from wpilib import Timer, XboxController
 from wpimath.controller import PIDController
@@ -5,7 +6,6 @@ from phoenix6 import hardware, controls
 from phoenix6.controls import Follower
 from phoenix6.signals import NeutralModeValue
 
-import commands2
 
 class OneMotor(commands2.PIDSubsystem):
     def __init__(self, motor: list[hardware.TalonFX]):
