@@ -5,6 +5,9 @@ import math
 from phoenix6.units import *
 from wpimath.units import degrees, radians, degreesToRadians, radiansToDegrees, inchesToMeters, inches
 from wpimath.trajectory import TrapezoidProfile
+from wpilib import SmartDashboard
+
+
 VISION_DES_ANGLE_deg = 25
 VISION_TURN_kP = 0
 VISION_STRAFE_kP = 26
@@ -134,12 +137,12 @@ class ElevatorConstants():
         kRightMotorPort = CAN_Address.FIFTEEN
         kJoystickPort = 0
 
-        kElevatorKp = .05
+        kElevatorKp = 10.0
         kElevatorKi = 0.0
         kElevatorKd = .0
         kElevatorGearing = 6#10.0
         kElevatorDrumRadius = 0.0508  # 2 inches in meters
-        kCarriageMass = 4
+        kCarriageMass = 4 # 4 kg
 
         kMinElevatorHeight = 0.0508  # 2 inches
         kMaxElevatorHeight = 1.27  # 50 inches
@@ -150,8 +153,9 @@ class ElevatorConstants():
 
         kSVolts = 0
         kGVolts = 0.0
-        kVVoltSecondPerMeter = 1.5
-        kAVoltSecondSquaredPerMeter = 0.75
+
+        kVVoltSecondPerMeter = 0#1.5
+        kAVoltSecondSquaredPerMeter = 0#0.75
 
         kElevatorOffsetMeters = 0
 

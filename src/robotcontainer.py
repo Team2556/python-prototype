@@ -9,12 +9,13 @@ import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
 
-from subsystems import oneMotor
 import constants
 from generated.tuner_constants import TunerConstants
-from constants import RobotDimensions
+from constants import RobotDimensions, ElevatorConstants
 from subsystems import (ElevatorSubsystem,
-                        limelight)
+                        limelight,
+                        # oneMotor,
+                        )
 from telemetry import Telemetry
 from robotUtils import controlAugment
 
@@ -29,7 +30,7 @@ import math
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
 from commands.gotoClosestPath import GotoClosestPath
-from commands.drive_one_motor import DriveOneMotorCommand
+# from commands.drive_one_motor import DriveOneMotorCommand
 from commands.liftElevator import DriveElevatorCommand
 
 
@@ -46,6 +47,11 @@ class RobotContainer:
     def __init__(self) -> None:
         self.robotWidthBumpered = inchesToMeters(RobotDimensions.WIDTH_w_bumpers)
         SmartDashboard.putNumber("Max Speed", TunerConstants.speed_at_12_volts)
+        SmartDashboard.putNumber("Elevator\Kp",ElevatorConstants.kElevatorKp)
+        SmartDashboard.putNumber("Elevator\Ki",ElevatorConstants.kElevatorKi)
+        SmartDashboard.putNumber("Elevator\Kd",ElevatorConstants.kElevatorKd)
+        SmartDashboard.putNumber("Elevator\Kg",ElevatorConstants.kGVolts)
+        # SmartDashboard.putNumber("Elevator\Kf",0.0)
 
         self._max_speed = SmartDashboard.getNumber("Max Speed", TunerConstants.speed_at_12_volts)
         '''self._max_speed = (

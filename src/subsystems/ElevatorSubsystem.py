@@ -15,7 +15,7 @@ from math import pi
 class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
     def __init__(self) -> None:
         '''IM AN ELEVATOR'''
-        
+
         super().__init__(
             # controller=ProfiledPIDController(
             #     Kp=ElevatorConstants.kElevatorKp,
@@ -32,7 +32,6 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         # Start at position 0, use slot 0
         wpilib.SmartDashboard.putNumber("Elevator/Setpoint", 0.0)
         self.setpoint = wpilib.SmartDashboard.getNumber("Elevator/Setpoint", 0.0)
-        self.position_voltage = controls.PositionVoltage(0).with_slot(0)
 
         self.elevmotor_right = phoenix6.hardware.TalonFX(ElevatorConstants.kRightMotorPort, "rio")
         self.elevmotor_left = phoenix6.hardware.TalonFX( ElevatorConstants.kLeftMotorPort, "rio")
@@ -52,11 +51,14 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         cfg.slot0.integralZone = 0
         cfg.slot0.forwardSoftLimitThreshold = 0
 
-        cfg.slot0.with_gravity_type(signals.GravityTypeValue.ELEVATOR_STATIC).with_static_feedforward_sign(signals.StaticFeedforwardSignValue.USE_VELOCITY_SIGN)
+        cfg.slot0.gravity_type = signals.GravityTypeValue.ELEVATOR_STATIC
+        cfg.slot0.static_feedforward_sign = signals.StaticFeedforwardSignValue.USE_VELOCITY_SIGN
         cfg.slot0.k_g = ElevatorConstants.kGVolts
+        
+
         cfg.slot0.k_a = ElevatorConstants.kAVoltSecondSquaredPerMeter
         cfg.slot0.k_v = ElevatorConstants.kVVoltSecondPerMeter
-        cfg.slot0.maxIntegralAccumulator = 0
+        # cfg.slot0.maxIntegralAccumulator = 0
         
 
         # cfg.voltage.peak_output_forward = 8
@@ -77,10 +79,12 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
                                        )
         cfg.with_hardware_limit_switch(elevmotorLimitswitch_cfg)
         
-        # using the CANcoder on motor elevmotorFeedback_cfg = (configs.FeedbackConfigs()
-        #                          .with_sensor_to_mechanism_ratio(ElevatorConstants.kElevatorGearing)#/(2*pi*ElevatorConstants.kElevatorDrumRadius))
-        #                          )
-        # cfg.with_feedback(elevmotorFeedback_cfg)
+        elevmotorFeedback_cfg = (configs.FeedbackConfigs().with_feedback_sensor_source(signals.FeedbackSensorSourceValue.ROTOR_SENSOR)
+                                 .with_sensor_to_mechanism_ratio(ElevatorConstants.kElevatorGearing)#/(2*pi*ElevatorConstants.kElevatorDrumRadius))
+                                 )
+        cfg.with_feedback(elevmotorFeedback_cfg)
+
+        self.cfg_slot0 = cfg.slot0
         
         #. wpilib.DigitalInput(ElevatorConstants.kTopLimitSwitchChannel)
         # bottomelevmotorlimitswitch_cfg = wpilib.DigitalInput(ElevatorConstants.kBottomLimitSwitchChannel)
@@ -97,6 +101,10 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
 
+        print(f"Configured TalonFX {ElevatorConstants.kLeftMotorPort} with status: {status.name}\n {cfg.slot0}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+
+        #creat handel for the control
+        self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         # Make sure we start at 0
         self.elevmotor_left.set_position(self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
         # self.elevmotor_left.
@@ -115,28 +123,47 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         # # Start elevator at rest in neutral position
         # self.setGoal(ElevatorConstants.kElevatorOffsetMeters)
+
+    def updateSlot0(self,  k_p: float = None, k_i:float =None, k_d:float=None, k_g: float=None   ) -> None:
+        if not k_p: self.cfg_slot0.k_p = k_p
+        if not k_i: self.cfg_slot0.k_i = k_i
+        if not k_d: self.cfg_slot0.k_d = k_d
+        if not k_g: self.cfg_slot0.k_g = k_g
+        status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
+        for _ in range(0, 5):
+            status = self.elevmotor_left.configurator.apply(self.cfg_slot0 )
+            if status.is_ok():
+                break
+        if not status.is_ok():
+            print(f"Could not apply updated gravity compensation, error code: {status.name}")
+        else:
+            print(f"Updated slot0 {self.cfg_slot0} with status: {status.name}")
+
     def distanceToRotations(self, distance: float) -> float:
         return distance * ElevatorConstants.kElevatorGearing/(2*pi*ElevatorConstants.kElevatorDrumRadius)
     def rotationsToDistance(self, rotations: float) -> float:
         return rotations * 2*pi*ElevatorConstants.kElevatorDrumRadius/ElevatorConstants.kElevatorGearing
     
-    def update_setpoint(self, setpoint: float, incremental = True) -> None:
+    def update_setpoint(self, setpoint: float, incremental = True, constrain: bool = True) -> None:
         '''Setpoint is in meters'''
         if incremental:
             self.setpoint += setpoint
         else:
             self.setpoint = setpoint
         #within bounds check and reset to bounds:
-        if self.setpoint > ElevatorConstants.kMaxElevatorHeight:
-            self.setpoint = ElevatorConstants.kMaxElevatorHeight
-        elif self.setpoint < ElevatorConstants.kMinElevatorHeight:
-            self.setpoint = ElevatorConstants.kMinElevatorHeight
+        if constrain:
+            if self.setpoint > ElevatorConstants.kMaxElevatorHeight:
+                self.setpoint = ElevatorConstants.kMaxElevatorHeight
+            elif self.setpoint < ElevatorConstants.kMinElevatorHeight:
+                self.setpoint = ElevatorConstants.kMinElevatorHeight
         wpilib.SmartDashboard.putNumber("Elevator/Setpoint", self.setpoint)
 
     def moveElevator(self, meters=None) -> None:
         if not meters:
             meters = self.setpoint
         self.elevmotor_left.set_control(self.position_voltage.with_position(self.distanceToRotations(meters)))
+        self.elevmotor_left.set_control(self.position_voltage.   with_position(self.distanceToRotations(meters)))
+        
     
     # def _useOutput(
     #     self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State

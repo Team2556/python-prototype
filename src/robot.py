@@ -60,6 +60,8 @@ class MyRobot(commands2.TimedCommandRobot):
         commands2.CommandScheduler.getInstance().run()
         
         self.container._max_speed = SmartDashboard.getNumber("Max Speed",0.0)
+        self.container.elevator.updateSlot0(k_p=SmartDashboard.getNumber("Elevator\Kp",0.0),k_i=SmartDashboard.getNumber("Elevator\Ki",0.0),k_d=SmartDashboard.getNumber("Elevator\Kd",0.0),#k_f=SmartDashboard.getNumber("Elevator\Kf",0.0),k_izone=SmartDashboard.getNumber("Elevator\Izone",0.0),k_peak_output=SmartDashboard.getNumber("Elevator\Peak Output",0.0),k_allowable_error=SmartDashboard.getNumber("Elevator\Allowable Error",0.0),k_cruise_velocity=SmartDashboard.getNumber("Elevator\Cruise Velocity",0.0),k_acceleration=SmartDashboard.getNumber("Elevator\Acceleration",0.0),k_g=SmartDashboard.getNumber("Elevator\Gravity Compensation",0.0))
+            k_g=SmartDashboard.getNumber("Elevator\Kg",0.0))
                 # The origin is always blue. When our alliance is red, X and Y need to be inverted
         self.container.invertBlueRedDrive = 1
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
