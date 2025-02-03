@@ -7,7 +7,7 @@ from constants import AlgaeConstants
 from commands2.subsystem import Subsystem
 
 class AlgaeHandler(Subsystem):
-    '''This thing uses two inputs to intake or discharge'''
+    '''This thing does algae intake and discharge'''
     def __init__(self):
         # We don't know the channels yet
         motorChannel1 = AlgaeConstants.kIntakeCANAddress1
