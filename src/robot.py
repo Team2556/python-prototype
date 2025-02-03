@@ -55,7 +55,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container.invertBlueRedDrive = 1
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             self.container.invertBlueRedDrive = -1
-        print(f"Robot is on the {DriverStation.getAlliance()} alliance.\n -\n-\n-\n- {self.container.invertBlueRedDrive =}")
+        # print(f"Robot is on the {DriverStation.getAlliance()} alliance.\n -\n-\n-\n- {self.container.invertBlueRedDrive =}")
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""

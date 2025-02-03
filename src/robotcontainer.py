@@ -18,12 +18,11 @@ from wpilib import SmartDashboard
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
 
-from subsystems import limelight
+from subsystems import limelight, coraldischarge
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
 
 from constants import RobotDimensions
-
 
 
 class RobotContainer:
@@ -42,7 +41,7 @@ class RobotContainer:
         '''self._max_speed = (
             TunerConstants.speed_at_12_volts
         )  # speed_at_12_volts desired top speed'''
-        print(f"Max speed: {self._max_speed}")
+        # print(f"Max speed: {self._max_speed}")
         self._max_angular_rate = rotationsToRadians(
             0.75
         )  # 3/4 of a rotation per second max angular velocity
@@ -74,9 +73,12 @@ class RobotContainer:
         self._logger = Telemetry(self._max_speed)
 
         self._joystick = commands2.button.CommandXboxController(0)
+        self._joystick2 = commands2.button.CommandXboxController(1) # For scoring stuff
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
+        self.coralDischarge = coraldischarge.CoralDischarge()
+        
         # Vision
         self.limelight = limelight.LimelightSubsystem()
 
@@ -131,7 +133,7 @@ class RobotContainer:
                                                                                     .smooth(controlAugment
                                                                                             .one_side_control_only( self._joystick.getRightY(), 'Pos'))),
                                                             # want y translation to depend on direction of turn
-                                                            self._joystick.getRightX()/abs(self._joystick.getRightX()) *
+                                                            (self._joystick.getRightX()/abs(self._joystick.getRightX())) if self._joystick.getRightX() != 0 else 0 * # Sebastian added so no divide by 0
                                                                 self.robotWidthBumpered*(controlAugment
                                                                                             .smooth(controlAugment
                                                                                                     .one_side_control_only( self._joystick.getRightY(), 'Pos')))))
@@ -152,6 +154,28 @@ class RobotContainer:
 
 
         #endsection vision related commands
+        
+        # Controls can be changed from triggers easily if needed
+        self._joystick2.leftTrigger().onTrue(
+            commands2.cmd.runOnce(
+                lambda: self.coralDischarge.spinLeft(True)
+            )
+        )
+        self._joystick2.leftTrigger().onFalse(
+            commands2.cmd.runOnce(
+                lambda: self.coralDischarge.spinLeft(False)
+            )
+        )
+        self._joystick2.rightTrigger().onTrue(
+            commands2.cmd.runOnce(
+                lambda: self.coralDischarge.spinRight(True)
+            )
+        )
+        self._joystick2.rightTrigger().onFalse(
+            commands2.cmd.runOnce(
+                lambda: self.coralDischarge.spinRight(False)
+            )
+        )
 
         self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(

@@ -122,3 +122,7 @@ class Override_DriveConstant:
 
 class RobotDimensions:
     WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)
+    
+class CoralConstants():
+    # TODO: Change this to the correct ID
+    kDischargeMotorID = 13 # Assuming there's one motor hopefully
