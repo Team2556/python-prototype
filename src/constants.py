@@ -125,4 +125,4 @@ class RobotDimensions:
     
 class CoralConstants():
     # TODO: Change this to the correct ID
-    kDischargeMotorID = 13 # Assuming there's one motor hopefully
+    kCoralMotorID = 13 # Assuming there's one motor hopefully

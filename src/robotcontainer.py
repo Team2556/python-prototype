@@ -18,7 +18,7 @@ from wpilib import SmartDashboard
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
 
-from subsystems import limelight, coraldischarge
+from subsystems import limelight, trackdischarge
 from commands.odometry_fuse import VisOdoFuseCommand
 from commands.odometry_snap2Line import SnapToLineCommand
 
@@ -77,7 +77,7 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        self.coralDischarge = coraldischarge.CoralDischarge()
+        self.coralDischarge = trackdischarge.TrackDischarge()
         
         # Vision
         self.limelight = limelight.LimelightSubsystem()
