@@ -16,17 +16,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
     def __init__(self) -> None:
         '''IM AN ELEVATOR'''
 
-        super().__init__(
-            # controller=ProfiledPIDController(
-            #     Kp=ElevatorConstants.kElevatorKp,
-            #     Ki=ElevatorConstants.kElevatorKi,
-            #     Kd=ElevatorConstants.kElevatorKd,
-            #     constraints=wpimath.trajectory.TrapezoidProfile.Constraints(
-            #         ElevatorConstants.kMaxVelocityMetersPerSecond,
-            #         ElevatorConstants.kMaxAccelerationMetersPerSecSquared),
-            #     period=0.02,),
-            # initial_position=0
-            )
+        super().__init__( )
         # self.elevcontroller = self.getController# .controler# wpimath.controller.ProfiledPIDController(5.0, 0, 0)
 
         # Start at position 0, use slot 0
@@ -125,25 +115,31 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         # self.setGoal(ElevatorConstants.kElevatorOffsetMeters)
 
     def updateSlot0(self,  k_p: float = None, k_i:float =None, k_d:float=None, k_g: float=None   ) -> None:
-        print(f'Passed Elev SubSys the value for Kp {k_p=}')
-        if k_p: 
-            self.cfg_slot0.k_p = k_p
-            # print(f'Executing Kp Update to {k_p} in Elev SubSys')
-        else:
-            print(f'Not Even Executing Kp Update to {k_p} in Elev SubSys')
+        updated = False
 
-        if  k_i: self.cfg_slot0.k_i = k_i
-        if  k_d: self.cfg_slot0.k_d = k_d
-        if  k_g: self.cfg_slot0.k_g = k_g
-        status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
-        for _ in range(0, 5):
-            status = self.elevmotor_left.configurator.apply(self.cfg_slot0 )
-            if status.is_ok():
-                break
-        if not status.is_ok():
-            print(f"Could not apply updated gravity compensation, error code: {status.name}")
-        else:
-            print(f"Updated slot0 {self.cfg_slot0} with status: {status.name} /n  Get rid of this update for competition")
+        if self.cfg_slot0.k_p != k_p: 
+            self.cfg_slot0.k_p = k_p
+            updated = True
+        if  self.cfg_slot0.k_i != k_i: 
+            self.cfg_slot0.k_i = k_i
+            updated = True
+        if  self.cfg_slot0.k_d != k_d: 
+            self.cfg_slot0.k_d = k_d
+            updated = True
+        if  self.cfg_slot0.k_g != k_g: 
+            self.cfg_slot0.k_g = k_g
+            updated = True
+        #TODO: add others, if needed
+        if updated:
+            status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
+            for _ in range(0, 5):
+                status = self.elevmotor_left.configurator.apply(self.cfg_slot0 )
+                if status.is_ok():
+                    break
+            if not status.is_ok():
+                print(f"Could not apply updated gravity compensation, error code: {status.name}")
+            else:
+                print(f"Updated slot0 {self.cfg_slot0} with status: {status.name} /n  Get rid of this update for competition")
 
     def distanceToRotations(self, distance: float) -> float:
         return distance * ElevatorConstants.kElevatorGearing/(2*pi*ElevatorConstants.kElevatorDrumRadius)
