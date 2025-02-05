@@ -63,8 +63,8 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         # cfg.voltage.peak_output_forward = 8
         cfg.stator_current_limit_enable = True
-        cfg.torque_current.peak_forward_torque_current = 80 #120
-        cfg.torque_current.peak_reverse_torque_current = -80 #-120
+        cfg.torque_current.peak_forward_torque_current = ElevatorConstants.kpeak_forward_torque_current
+        cfg.torque_current.peak_reverse_torque_current = ElevatorConstants.kpeak_reverse_torque_current
         elevmotorLimitswitch_cfg = (configs.HardwareLimitSwitchConfigs()
                                        .with_forward_limit_enable(True)
                                        .with_forward_limit_autoset_position_enable(True)
@@ -85,7 +85,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         cfg.with_feedback(elevmotorFeedback_cfg)
 
         self.cfg_slot0 = cfg.slot0
-        
+
         #. wpilib.DigitalInput(ElevatorConstants.kTopLimitSwitchChannel)
         # bottomelevmotorlimitswitch_cfg = wpilib.DigitalInput(ElevatorConstants.kBottomLimitSwitchChannel)
         # (cfg.slot0
@@ -125,10 +125,16 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         # self.setGoal(ElevatorConstants.kElevatorOffsetMeters)
 
     def updateSlot0(self,  k_p: float = None, k_i:float =None, k_d:float=None, k_g: float=None   ) -> None:
-        if not k_p: self.cfg_slot0.k_p = k_p
-        if not k_i: self.cfg_slot0.k_i = k_i
-        if not k_d: self.cfg_slot0.k_d = k_d
-        if not k_g: self.cfg_slot0.k_g = k_g
+        print(f'Passed Elev SubSys the value for Kp {k_p=}')
+        if k_p: 
+            self.cfg_slot0.k_p = k_p
+            # print(f'Executing Kp Update to {k_p} in Elev SubSys')
+        else:
+            print(f'Not Even Executing Kp Update to {k_p} in Elev SubSys')
+
+        if  k_i: self.cfg_slot0.k_i = k_i
+        if  k_d: self.cfg_slot0.k_d = k_d
+        if  k_g: self.cfg_slot0.k_g = k_g
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
         for _ in range(0, 5):
             status = self.elevmotor_left.configurator.apply(self.cfg_slot0 )
@@ -137,7 +143,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         if not status.is_ok():
             print(f"Could not apply updated gravity compensation, error code: {status.name}")
         else:
-            print(f"Updated slot0 {self.cfg_slot0} with status: {status.name}")
+            print(f"Updated slot0 {self.cfg_slot0} with status: {status.name} /n  Get rid of this update for competition")
 
     def distanceToRotations(self, distance: float) -> float:
         return distance * ElevatorConstants.kElevatorGearing/(2*pi*ElevatorConstants.kElevatorDrumRadius)
@@ -164,6 +170,11 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         self.elevmotor_left.set_control(self.position_voltage.with_position(self.distanceToRotations(meters)))
         self.elevmotor_left.set_control(self.position_voltage.   with_position(self.distanceToRotations(meters)))
         
+    def periodic(self):
+        wpilib.SmartDashboard.putNumber("Elevator/Position_calced", self.rotationsToDistance(self.elevmotor_left.get_position().value))
+        wpilib.SmartDashboard.putNumber("Elevator/SetpointError_calced", self.setpoint - self.rotationsToDistance(self.elevmotor_left.get_position().value))
+        
+        return super().periodic()
     
     # def _useOutput(
     #     self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State

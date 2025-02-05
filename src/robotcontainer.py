@@ -47,11 +47,11 @@ class RobotContainer:
     def __init__(self) -> None:
         self.robotWidthBumpered = inchesToMeters(RobotDimensions.WIDTH_w_bumpers)
         SmartDashboard.putNumber("Max Speed", TunerConstants.speed_at_12_volts)
-        SmartDashboard.putNumber("Elevator\Kp",ElevatorConstants.kElevatorKp)
-        SmartDashboard.putNumber("Elevator\Ki",ElevatorConstants.kElevatorKi)
-        SmartDashboard.putNumber("Elevator\Kd",ElevatorConstants.kElevatorKd)
-        SmartDashboard.putNumber("Elevator\Kg",ElevatorConstants.kGVolts)
-        # SmartDashboard.putNumber("Elevator\Kf",0.0)
+        SmartDashboard.putNumber("Elevator/Kp",ElevatorConstants.kElevatorKp)
+        SmartDashboard.putNumber("Elevator/Ki",ElevatorConstants.kElevatorKi)
+        SmartDashboard.putNumber("Elevator/Kd",ElevatorConstants.kElevatorKd)
+        SmartDashboard.putNumber("Elevator/Kg",ElevatorConstants.kGVolts)
+        # SmartDashboard.putNumber("Elevator/Kf",0.0)
 
         self._max_speed = SmartDashboard.getNumber("Max Speed", TunerConstants.speed_at_12_volts)
         '''self._max_speed = (

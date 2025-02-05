@@ -16,7 +16,7 @@ class DriveElevatorCommand(Command):
         self.joystick = joystick
         # self.setpoint = self.sub_elevator.setpoint
         self.addRequirements(sub_elevator)
-        self.increment_m_per_sec_held = 2.54*1.47*.02
+        self.increment_m_per_sec_held = .02
         self.previous_time = None
 
 
