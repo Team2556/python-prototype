@@ -1,8 +1,10 @@
 import commands2
 import wpilib
+from wpilib import SmartDashboard
 import wpimath.controller
 from wpimath.controller import PIDController, ProfiledPIDController
 import wpimath.trajectory
+from wpimath.units import meters, inches, seconds, metersToInches, inchesToMeters
 import phoenix6
 from phoenix6 import hardware, controls, configs, StatusCode, signals
 from phoenix6.controls import Follower
@@ -17,7 +19,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         '''IM AN ELEVATOR'''
 
         super().__init__( )
-        # self.elevcontroller = self.getController# .controler# wpimath.controller.ProfiledPIDController(5.0, 0, 0)
+        self.i = 0
 
         # Start at position 0, use slot 0
         wpilib.SmartDashboard.putNumber("Elevator/Setpoint", 0.0)
@@ -28,7 +30,6 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         self.elevmotor_right.set_control(request=Follower(self.elevmotor_left.device_id, oppose_master_direction=True))
         self.elevmotor_right.setNeutralMode(NeutralModeValue.BRAKE)
         self.elevmotor_left.setNeutralMode(NeutralModeValue.BRAKE)
-        # self.control = controls.DutyCycleOut(0)
         self.elevCANcoder_left = phoenix6.hardware.CANcoder(ElevatorConstants.kLeftMotorPort)
         self.elevCANcoder_right = phoenix6.hardware.CANcoder(ElevatorConstants.kRightMotorPort)
 
@@ -68,19 +69,22 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
                                        .with_reverse_limit_type(signals.ReverseLimitTypeValue.NORMALLY_OPEN)
                                        )
         cfg.with_hardware_limit_switch(elevmotorLimitswitch_cfg)
+
+        elevmotorSoftLimits_cfg = (configs.SoftwareLimitSwitchConfigs()
+                                   .with_forward_soft_limit_enable(True)
+                                   .with_forward_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kMaxElevatorHeight-inchesToMeters(5)))
+                                   .with_reverse_soft_limit_enable(True)
+                                   .with_reverse_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
+                                   )
+        cfg.with_software_limit_switch(elevmotorSoftLimits_cfg)
         
         elevmotorFeedback_cfg = (configs.FeedbackConfigs().with_feedback_sensor_source(signals.FeedbackSensorSourceValue.ROTOR_SENSOR)
-                                 .with_sensor_to_mechanism_ratio(ElevatorConstants.kElevatorGearing)#/(2*pi*ElevatorConstants.kElevatorDrumRadius))
+                                 #The functions distance to rotations had this already TODO: which way to go  .with_sensor_to_mechanism_ratio(ElevatorConstants.kElevatorGearing)#/(2*pi*ElevatorConstants.kElevatorDrumRadius))
                                  )
         cfg.with_feedback(elevmotorFeedback_cfg)
 
         self.cfg_slot0 = cfg.slot0
 
-        #. wpilib.DigitalInput(ElevatorConstants.kTopLimitSwitchChannel)
-        # bottomelevmotorlimitswitch_cfg = wpilib.DigitalInput(ElevatorConstants.kBottomLimitSwitchChannel)
-        # (cfg.slot0
-        #  .with_stator_current_limit_enable(True)
-        #  .with_stator_current_limit(20))
         
         # Retry config apply up to 5 times, report if failure
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
@@ -93,26 +97,13 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         print(f"Configured TalonFX {ElevatorConstants.kLeftMotorPort} with status: {status.name}\n {cfg.slot0}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
-        #creat handel for the control
+        #create handel for the control
         self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         # Make sure we start at 0
-        self.elevmotor_left.set_position(self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
-        # self.elevmotor_left.
+        self.elevmotor_left.set_position(0)#self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
         #move up some
-        # self.elevmotor_left.set_control(request=self.position_voltage.with_position(.25))
+        # self.elevmotor_left.set_control(request=self.position_voltage.with_position(self.distanceToRotations(.25))
 
-
-        
-        # # self.joystick2 = commands2.button.CommandXboxController(ElevatorConstants.kJoystickPort)
-        # self.feedforward = wpimath.controller.ElevatorFeedforward(
-        #     ElevatorConstants.kSVolts,
-        #     ElevatorConstants.kGVolts,
-        #     ElevatorConstants.kVVoltSecondPerMeter,
-        #     ElevatorConstants.kAVoltSecondSquaredPerMeter,
-        # )
-
-        # # Start elevator at rest in neutral position
-        # self.setGoal(ElevatorConstants.kElevatorOffsetMeters)
 
     def updateSlot0(self,  k_p: float = None, k_i:float =None, k_d:float=None, k_g: float=None   ) -> None:
         updated = False
@@ -131,6 +122,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
             updated = True
         #TODO: add others, if needed
         if updated:
+            #repete up to 5 times
             status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
             for _ in range(0, 5):
                 status = self.elevmotor_left.configurator.apply(self.cfg_slot0 )
@@ -147,7 +139,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         return rotations * 2*pi*ElevatorConstants.kElevatorDrumRadius/ElevatorConstants.kElevatorGearing
     
     def update_setpoint(self, setpoint: float, incremental = True, constrain: bool = True) -> None:
-        '''Setpoint is in meters'''
+        '''Setpoint is in meters of elevator elevation from lowest physical limit'''
         if incremental:
             self.setpoint += setpoint
         else:
@@ -160,58 +152,19 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
                 self.setpoint = ElevatorConstants.kMinElevatorHeight
         wpilib.SmartDashboard.putNumber("Elevator/Setpoint", self.setpoint)
 
-    def moveElevator(self, meters=None) -> None:
-        if not meters:
-            meters = self.setpoint
-        self.elevmotor_left.set_control(self.position_voltage.with_position(self.distanceToRotations(meters)))
-        self.elevmotor_left.set_control(self.position_voltage.   with_position(self.distanceToRotations(meters)))
+    def moveElevator(self, movement=None) -> None:
+        '''Setpoint is in meters of elevator elevation from lowest physical limit'''
+        if not movement:
+            movement = self.setpoint
+        self.elevmotor_left.set_control(self.position_voltage.with_position(self.distanceToRotations(movement)))
+        self.elevmotor_left.set_control(self.position_voltage.   with_position(self.distanceToRotations(movement)))
         
     def periodic(self):
         wpilib.SmartDashboard.putNumber("Elevator/Position_calced", self.rotationsToDistance(self.elevmotor_left.get_position().value))
         wpilib.SmartDashboard.putNumber("Elevator/SetpointError_calced", self.setpoint - self.rotationsToDistance(self.elevmotor_left.get_position().value))
-        
+        self.i +=1
+        SmartDashboard.putNumber("Counter on elevator periodic", self.i)
+        self.updateSlot0(k_p= SmartDashboard.getNumber("Elevator/Kp",0.0),k_i=SmartDashboard.getNumber("Elevator/Ki",0.0),k_d=SmartDashboard.getNumber("Elevator/Kd",0.0),#k_f=SmartDashboard.getNumber("Elevator\Kf",0.0),k_izone=SmartDashboard.getNumber("Elevator\Izone",0.0),k_peak_output=SmartDashboard.getNumber("Elevator\Peak Output",0.0),k_allowable_error=SmartDashboard.getNumber("Elevator\Allowable Error",0.0),k_cruise_velocity=SmartDashboard.getNumber("Elevator\Cruise Velocity",0.0),k_acceleration=SmartDashboard.getNumber("Elevator\Acceleration",0.0),k_g=SmartDashboard.getNumber("Elevator\Gravity Compensation",0.0))
+            k_g=SmartDashboard.getNumber("Elevator/Kg",0.0))
         return super().periodic()
     
-    # def _useOutput(
-    #     self, output: float, setpoint: wpimath.trajectory.TrapezoidProfile.State
-    # ) -> None:
-    #     # Calculate the feedforward from the setpoint
-    #     feedforward = self.feedforward.calculate(setpoint.position, setpoint.velocity)
-
-    #     # Add the feedforward to the PID output to get the motor output
-    #     self.elevmotors.setVoltage(output + feedforward)
-    # def _getMeasurement(self) -> float:
-    #     return self.elevmotors.set_position() + ElevatorConstants.kElevatorOffsetMeters
-        
-    # def disablePIDSubsystems(self) -> None:
-    #     """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
-    #     This should be called on robot disable to prevent integral windup."""
-    #     self.disable()
-
-
-
-    # def elevatorPeriodic(self) -> None:
-
-    #     if self.joystick2.rightTrigger():
-    #         # Here, we run PID control like normal, with a constant setpoint of 30in (0.762 meters).
-    #         pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 1.27)
-    #         self.elevmotors.setVoltage(pidOutput)
-    #     elif self.joystick2.leftTrigger():
-    #         pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 0.762)
-    #         self.elevmotors.setVoltage(pidOutput)
-    #     elif self.joystick2.leftBumper():
-    #         pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 0.3)
-    #         self.elevmotors.setVoltage(pidOutput)
-    #     elif self.joystick2.rightBumper():
-    #         pidOutput = self.elevcontroller.calculate(self.elevmotors.set_position(), 0)
-    #         self.elevmotors.setVoltage(pidOutput)
-    #     else:
-    #         # Otherwise we disable the motor
-    #         self.elevmotors.set(0.0)
-
-
-    #     if self.topelevmotorlimitswitch.get():
-    #         self.moveElevator(meters = self.getMeasurement - ElevatorConstants.kElevatorDistanceMovedAfterContactWithLimitSwitch)
-    #     elif self.bottomelevmotorlimitswitch.get():
-    #         self.moveElevator(meters = self.getMeasurement + ElevatorConstants.kElevatorDistanceMovedAfterContactWithLimitSwitch)
-            

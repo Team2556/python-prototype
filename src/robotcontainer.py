@@ -12,7 +12,7 @@ from commands2.sysid import SysIdRoutine
 import constants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
-from subsystems import (ElevatorSubsystem,
+from subsystems import (elevatorSubsystem,
                         limelight,
                         # oneMotor,
                         )
@@ -27,11 +27,10 @@ from wpilib import SmartDashboard, DriverStation
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
 import math
-from commands.odometry_fuse import VisOdoFuseCommand
-from commands.odometry_snap2Line import SnapToLineCommand
-from commands.gotoClosestPath import GotoClosestPath
+from commands.odometrySnap2Line import SnapToLineCommand
+# from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
-from commands.liftElevator import DriveElevatorCommand
+from commands.liftElevator import LiftElevatorCommand
 
 
 
@@ -54,9 +53,7 @@ class RobotContainer:
         # SmartDashboard.putNumber("Elevator/Kf",0.0)
 
         self._max_speed = SmartDashboard.getNumber("Max Speed", TunerConstants.speed_at_12_volts)
-        '''self._max_speed = (
-            TunerConstants.speed_at_12_volts
-        )  # speed_at_12_volts desired top speed'''
+        '''speed_at_12_volts desired top speed'''
         print(f"Max speed: {self._max_speed}")
         self._max_angular_rate = rotationsToRadians(
             0.75
@@ -68,7 +65,7 @@ class RobotContainer:
             .with_deadband(self._max_speed * 0.05)
             .with_rotational_deadband(
                 self._max_angular_rate * 0.05
-            )  # Add a 5% deadband
+            )  # Add a 5% deadband on output
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive 
@@ -92,31 +89,14 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        # self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
-        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+        self.elevator = elevatorSubsystem.ElevatorSubsystem()
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
-
-        # Run the VisOdoFuseCommand --- put it where?
-        self.current_pose_swerve = self.drivetrain.get_state().pose #SwerveDriveState.pose #swerve_drive_state.pose
-        trust_vision_data, latest_parsed_result = self.limelight.trust_target(self.current_pose_swerve)
-        self.vis_odo_fuse_command =  commands2.ConditionalCommand(VisOdoFuseCommand(self.drivetrain, latest_parsed_result),
-                                                                  commands2.PrintCommand("Not Updating Odometer with Vision Data"),
-                                                                  lambda: trust_vision_data)
-        # self.vis_odo_fuse_command.schedule()
-        
-        # drive to a specific orientation relative to a target
-        # TODO: replace with command import : swerve.requests.DriveAtTargetCommand
-        # TODO: create error terms for vision data and target location
-        # TODO: implement a PID controller to drive to the target
-        # self._driveTargetRelative = (swerve.requests.RobotCentric()
-        #                         .with_velocity_x(.1)
-        #                         .with_velocity_y(0.2)
-        #                         .with_rotational_rate(0.3))
+      
 
         # Path follower
         self._auto_chooser = AutoBuilder.buildAutoChooser("Red2-Algae")
@@ -128,6 +108,7 @@ class RobotContainer:
         self.pathlist_dock_processing = [self.path_doc_proc_short, self.path_doc_proc_midfield, self.path_doc_proc_RtWall]
         self.path_doc_feed_right = PathPlannerPath.fromPathFile("Dock-Feed-Right")
         self.path_doc_feed_left = PathPlannerPath.fromPathFile("Dock-Feed-Left")
+        self.pathlist_dock_feed = [self.path_doc_feed_right, self.path_doc_feed_left]
 
         #section TeleAuto coral
         #define numpy array of coral locations; there are 12 poles with 4 levels available for scoring for a total fof 48 scoring locations
@@ -159,18 +140,22 @@ class RobotContainer:
         #     pathfinding_constraints=PathConstraints(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False),
         #     # rotation_delay_distance=0.5, online example bad
         # )
-        
-        
+
         # PathfindThenFollowPath()
+        self.closest_proc_path_to_robot_lam = lambda pose: min(self.pathlist_dock_processing, key=lambda path: path._waypoints[0].anchor.distance(pose))
+        # self.closest_proc_path_to_robot = self.closest_proc_path_to_robot_lam(self.drivetrain.get_state().pose.translation())
+        self.closest_feed_path_to_robot_lam = lambda pose: min(self.pathlist_dock_feed, key=lambda path: path._waypoints[0].anchor.distance(pose))
+        # self.closest_feed_path_to_robot = self.closest_feed_path_to_robot_lam(self.drivetrain.get_state().pose.translation())
+
+        self.set_closest_paths(self.drivetrain.get_state().pose)
+
         # Configure the button bindings
         self.configureButtonBindings()
 
-    def update_closest_path_to_robot(self):
-        # self.closest_path_to_robot = 
-        # print(f'inside update closest path to robot, current translation: {self.drivetrain.get_state().pose.translation()} 9999999999999999999999999999999999999999999999999999999999999999999999999999999')
-        self.closest_path_to_robot_lam = lambda paths: min(paths, key=lambda path: path._waypoints[0].anchor.distance(self.drivetrain.get_state().pose.translation()))
-        self.closest_path_to_robot = self.closest_path_to_robot_lam(self.pathlist_dock_processing)
-        return self.closest_path_to_robot_lam(self.pathlist_dock_processing)
+
+    def set_closest_paths(self, pose: Pose2d) -> None:
+        self.closest_proc_path_to_robot = self.closest_proc_path_to_robot_lam(pose.translation())
+        self.closest_feed_path_to_robot = self.closest_feed_path_to_robot_lam(pose.translation())
 
     def configureButtonBindings(self) -> None:
         """
@@ -210,10 +195,10 @@ class RobotContainer:
             )
         )
         # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
-        self.elevator.setDefaultCommand(DriveElevatorCommand(self.elevator, self._joystick2))
+        self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
         #section vision related commands
         #take in vision data and update the odometery... there has to be a better way in crte code...
-        self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
+        # self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
         #Focus in on the target and move relative to it
         # self._joystick.rightStick().whileTrue(
         #     self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values
@@ -285,14 +270,9 @@ class RobotContainer:
         )
 
         #section Autonomous During Teleop
-        # self._joystickAutotTel need another controller for this;
+         
  
- 
-        # paths = self.pathlist_dock_processing
-        # self.closest_path_to_robot_lam = lambda paths: min(paths, key=lambda path: path._waypoints[0].anchor.distance(AutoBuilder._getPose().translation()))
-        # self.closest_path_to_robot = self.closest_path_to_robot_lam(self.pathlist_dock_processing)
-        # print(f'inline   {AutoBuilder._getPose()=} {self.closest_path_to_robot=}!!!!!!!!***************************!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        
+        # This method used rectangles as triggers
         # teleAuto to processing
         #TODO: handel the red side of the field; more rectangles or a function that returns the rotation of the rectangle
         # self.rotate_rectangle_by = Rotation2d( degreesToRadians(0))
@@ -308,7 +288,6 @@ class RobotContainer:
                                              AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_proc_RtWall,
                                                                                 pathfinding_constraints=pathfinding_constraints_global)
                                                                                            )
-                                                                                # self.update_closest_path_to_robot(),
         rect_midArea = Rectangle2d(Translation2d(6.5,2.7),Translation2d(8.7,7.70))#.transformBy(self.rotate_rectangle_by)
         rect_topFarArea = Rectangle2d(Translation2d(4.5,5.5),Translation2d(8.7,7.70))#.transformBy(self.rotate_rectangle_by)
         (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_midArea.contains(AutoBuilder.getCurrentPose().translation()) or
@@ -329,12 +308,18 @@ class RobotContainer:
                                                                         pathfinding_constraints=pathfinding_constraints_global )
                                                                                     )
         
-        AutoBuilder.configure
+        '''#this method uses the robot periodic updated closest path to robot
+        pathfinding_constraints_global = PathConstraints(3/3, 4/3, degreesToRadians(540/2), degreesToRadians(720/2),12,False)#was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
+        # teleAuto to processing
+        (self._joystick.b() & self._joystick.povDown()).whileTrue(AutoBuilder.pathfindThenFollowPath( goal_path= self.closest_proc_path_to_robot,
+                                                                                                     pathfinding_constraints=pathfinding_constraints_global))
+        # teleAuto to feeders
+        (self._joystick.a() & self._joystick.povDown()).whileTrue(AutoBuilder.pathfindThenFollowPath( goal_path= self.closest_feed_path_to_robot,
+                                                                                                     pathfinding_constraints=pathfinding_constraints_global))
+        '''
+        # configured in Command_swerve_drivetrain AutoBuilder.configure
         # (self._joystick.a() & self._joystick.povDown()).whileTrue( GotoClosestPath(drivetrain=self.drivetrain,
         #                                                                            paths=self.pathlist_dock_processing))
-
-        
-                                                                                           
 
 
         #endsection Autonomous During Teleop

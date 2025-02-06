@@ -8,6 +8,7 @@ from typing import Callable, overload
 from wpilib import DriverStation, Notifier, RobotController
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Rotation2d
+# from archive import odometry_fuse
 
 
 class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
@@ -244,6 +245,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
     
     def _configure_auto_builder(self):
         config = RobotConfig.fromGUISettings()
+        
         AutoBuilder.configure(
             lambda: self.get_state().pose,   # Supplier of current robot pose
             self.reset_pose,                 # Consumer for seeding pose against auto
@@ -320,6 +322,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                     else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
                 )
                 self._has_applied_operator_perspective = True
+        
 
     def _start_sim_thread(self):
         def _sim_periodic():

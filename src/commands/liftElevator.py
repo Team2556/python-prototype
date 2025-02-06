@@ -1,5 +1,5 @@
 from commands2 import Command
-from wpilib import XboxController
+from wpilib import XboxController, SmartDashboard
 from wpimath.controller import PIDController
 from wpimath.units import meters, inches, seconds, metersToInches, inchesToMeters
 from phoenix6 import hardware
@@ -9,14 +9,15 @@ import numpy as np
 import time
 from robotUtils import controlAugment
 
-class DriveElevatorCommand(Command):
+class LiftElevatorCommand(Command):
     def __init__(self,sub_elevator, joystick: XboxController):
         super().__init__()
         self.sub_elevator = sub_elevator
         self.joystick = joystick
         # self.setpoint = self.sub_elevator.setpoint
         self.addRequirements(sub_elevator)
-        self.increment_m_per_sec_held = .02
+        SmartDashboard.putNumber("Elevator/Move Increment", ElevatorConstants.kincrement_m_per_sec_held)
+        self.increment_m_per_sec_held = ElevatorConstants.kincrement_m_per_sec_held
         self.previous_time = None
 
 
@@ -24,10 +25,11 @@ class DriveElevatorCommand(Command):
         if not self.previous_time:
             self.previous_time = time.time()
         time_delta = np.min([time.time()-self.previous_time, .02])
+        self.increment_m_per_sec_held =  SmartDashboard.getNumber("Elevator/Move Increment", ElevatorConstants.kincrement_m_per_sec_held)
 
-        right_trigger_value = self.joystick.getRightTriggerAxis()
-        left_trigger_value = self.joystick.getLeftTriggerAxis()
-        # self.setpoint = self.sub_elevator.elevmotor_left.get_closed_loop_reference().value /(ElevatorConstants.kElevatorGearing/(2*pi*ElevatorConstants.kElevatorDrumRadius))
+        right_trigger_value = controlAugment.smooth(self.joystick.getRightTriggerAxis(), exponential_for_curving=3, blend=0.5)
+        left_trigger_value = controlAugment.smooth(self.joystick.getLeftTriggerAxis(), exponential_for_curving=3, blend=0.5)
+
         if self.joystick.rightTrigger(threshold=.15):
             self.sub_elevator.update_setpoint( self.increment_m_per_sec_held * right_trigger_value * time_delta)
             self.sub_elevator.moveElevator()

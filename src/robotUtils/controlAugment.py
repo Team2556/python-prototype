@@ -6,7 +6,7 @@ def smooth(joystick_value: float, exponential_for_curving: int = 3, blend: float
     if (exponential_for_curving-1) % 2 == 0:
         exponential_for_curving = exponential_for_curving
     else:
-        exponential_for_curving = int(exponential_for_curving-1)
+        exponential_for_curving = int(exponential_for_curving)
 
     blend_value = joystick_value * blend
     smoothed_blend_value = blend_value ** exponential_for_curving

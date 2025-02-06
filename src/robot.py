@@ -10,6 +10,7 @@ import typing
 from wpilib import SmartDashboard, DriverStation, Field2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.logging import PathPlannerLogging
+from phoenix6.utils import fpga_to_current_time
 
 
 from robotcontainer import RobotContainer
@@ -60,15 +61,28 @@ class MyRobot(commands2.TimedCommandRobot):
         commands2.CommandScheduler.getInstance().run()
         
         self.container._max_speed = SmartDashboard.getNumber("Max Speed",0.0)
-        k_p_update=SmartDashboard.getNumber("Elevator/Kp",0.0)
-        print(f'update Elevator/Kp to {k_p_update=}')
-        self.container.elevator.updateSlot0(k_p= k_p_update,k_i=SmartDashboard.getNumber("Elevator/Ki",0.0),k_d=SmartDashboard.getNumber("Elevator/Kd",0.0),#k_f=SmartDashboard.getNumber("Elevator\Kf",0.0),k_izone=SmartDashboard.getNumber("Elevator\Izone",0.0),k_peak_output=SmartDashboard.getNumber("Elevator\Peak Output",0.0),k_allowable_error=SmartDashboard.getNumber("Elevator\Allowable Error",0.0),k_cruise_velocity=SmartDashboard.getNumber("Elevator\Cruise Velocity",0.0),k_acceleration=SmartDashboard.getNumber("Elevator\Acceleration",0.0),k_g=SmartDashboard.getNumber("Elevator\Gravity Compensation",0.0))
-            k_g=SmartDashboard.getNumber("Elevator/Kg",0.0))
-                # The origin is always blue. When our alliance is red, X and Y need to be inverted
+        
         self.container.invertBlueRedDrive = 1
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             self.container.invertBlueRedDrive = -1
-        # print(f"Robot is on the {DriverStation.getAlliance()} alliance.\n -\n-\n-\n- {self.container.invertBlueRedDrive =}")
+
+        #section vision related commands
+        #update swerve odometry with vision data
+        #attmept to add in vision update
+        # self.container.drivetrain
+        # self.container.limelight
+        '''add_vision_measurement(vision_robot_pose: Pose2d, timestamp: phoenix6.units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)'''
+        current_pose_swerve = self.container.drivetrain.get_state_copy().pose #SwerveDriveState.pose #swerve_drive_state.pose
+        # if trust vision data update the drivetrain odometer
+        trust_vision_data, latest_parsed_result = self.container.limelight.trust_target(current_pose_swerve)
+        if trust_vision_data:
+            print(f'-\n Running the robot periodic -- current_pose_swerve: {current_pose_swerve} -----\n With uncertainty {latest_parsed_result.vision_measurement_std_devs}\n----\n------Pose update {current_pose_swerve - self.container.drivetrain.get_state_copy().pose=}-----------------------\n-------\n--\n')
+            self.drivetrain.add_vision_measurement(latest_parsed_result.robot_pose, fpga_to_current_time(latest_parsed_result.timestamp), latest_parsed_result.vision_measurement_std_devs)
+        else:
+            pass#print(f'-\n Running the robot periodic NOT TRUSTING VISION -- -----\n----\n------------XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-----------------\n-------\n--\n')
+     
+        #endsection vision related commands
+        
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
@@ -105,6 +119,13 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
+        #section update closest paths
+        current_pose_swerve = self.container.drivetrain.get_state_copy().pose
+        self.container.set_closest_paths(current_pose_swerve)
+        print(f'closest_proc_path_to_robot: {self.container.closest_proc_path_to_robot}')
+        # self.container.closest_proc_path_to_robot = self.container.closest_proc_path_to_robot_lam(current_pose_swerve.translation())
+        # closest_feed_path_to_robot = self.container.closest_feed_path_to_robot_lam(current_pose_swerve.translation())
+
         
         # self.container.elevator.elevatorPeriodic()
 

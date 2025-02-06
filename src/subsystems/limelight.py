@@ -103,32 +103,35 @@ class LimelightSubsystem(Subsystem):
         return self.ll.enable_websocket()
     
     #section specialty utilities
-    def trust_target(self, robot_pose: Pose2d):
+    def trust_target(self, robot_pose: Pose2d, residual_threshold=1):
         #calculate distance to the detected target
         #will the results hav only one target's results? assume one for now
         # Done: check unit consistency: botpose is in meters, robot_pose is in meters
         trust_vision_data = True
         if self.discovered_limelights:
             latest_parsed_result = limelightresults.parse_results(self.ll.get_latest_results())
-            validity = latest_parsed_result.validity #what units are validity in ?
-            trust_vision_data *= (validity==1) 
-            delta_x  = latest_parsed_result.botpose[0] - robot_pose.X
-            delta_y = latest_parsed_result.botpose[1] - robot_pose.Y
-            residual = np.sqrt(delta_x**2 + delta_y**2)
-            trust_vision_data *= (residual < 1) 
-            if latest_parsed_result.stddevs:
-                detect_stdDev = latest_parsed_result.stddevs
-                detect_stdDev_x = detect_stdDev[0]
-                detect_stdDev_y = detect_stdDev[1]
-                max_stdDev = max(detect_stdDev_x, detect_stdDev_y)
-                trust_vision_data *= (residual < 2 * max_stdDev) 
-                #if the residual is within 2 standard deviations, 
-                # and the residual is less than 1 meter, 
+            if latest_parsed_result:
+                validity = latest_parsed_result.validity #what units are validity in ?
+                trust_vision_data *= (validity==1) 
+                delta_x  = latest_parsed_result.botpose[0] - robot_pose.X
+                delta_y = latest_parsed_result.botpose[1] - robot_pose.Y
+                residual = np.sqrt(delta_x**2 + delta_y**2)
+                trust_vision_data *= (residual < residual_threshold) 
+                if latest_parsed_result.stddevs:
+                    detect_stdDev = latest_parsed_result.stddevs
+                    detect_stdDev_x = detect_stdDev[0]
+                    detect_stdDev_y = detect_stdDev[1]
+                    max_stdDev = max(detect_stdDev_x, detect_stdDev_y)
+                    trust_vision_data *= (residual < 2 * max_stdDev) 
+                    #if the residual is within 2 standard deviations, 
+                    # and the residual is less than 1 meter, 
                 # trust the target
+                trust_telemetry = [validity, residual, detect_stdDev_x, detect_stdDev_y]
+                print(f"trust_telemetry: {trust_telemetry}     IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+                
         else:
             trust_vision_data = False
             latest_parsed_result= None
-            '''add_vision_measurement(vision_robot_pose: Pose2d, timestamp: phoenix6.units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)'''
 
 
         return (trust_vision_data , latest_parsed_result)

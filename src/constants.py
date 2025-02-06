@@ -138,15 +138,16 @@ class ElevatorConstants():
         kJoystickPort = 0
         kpeak_forward_torque_current = 8 #120
         kpeak_reverse_torque_current = -8 #-120
+        kincrement_m_per_sec_held = .05
 
         kElevatorKp = 2.0
         kElevatorKi = 0.0
         kElevatorKd = .0
         kElevatorGearing = 6#10.0
-        kElevatorDrumRadius = 0.0508  # 2 inches in meters
+        kElevatorDrumRadius = .035/2   # half of 35mm in meters
         kCarriageMass = 4 # 4 kg
 
-        kMinElevatorHeight = 0.0508  # 2 inches
+        kMinElevatorHeight = 0.0 #0.0508  # 2 inches
         kMaxElevatorHeight = 1.27  # 50 inches
         kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.02
 
