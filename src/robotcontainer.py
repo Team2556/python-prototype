@@ -12,7 +12,7 @@ from commands2.sysid import SysIdRoutine
 import constants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
-from subsystems import (elevatorSubsystem,
+from subsystems import (ElevatorSubsystem,
                         limelight,
                         # oneMotor,
                         )
@@ -92,7 +92,7 @@ class RobotContainer:
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
-        self.elevator = elevatorSubsystem.ElevatorSubsystem()
+        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()

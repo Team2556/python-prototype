@@ -10,7 +10,7 @@ import time
 from robotUtils import controlAugment
 
 class LiftElevatorCommand(Command):
-    def __init__(self,sub_elevator, joystick: XboxController):
+    def __init__(self, sub_elevator, joystick: XboxController):
         super().__init__()
         self.sub_elevator = sub_elevator
         self.joystick = joystick
