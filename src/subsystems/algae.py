@@ -21,16 +21,11 @@ class AlgaeHandler(Subsystem):
         self.limitSwitch = wpilib.DigitalInput(limitSwitchChannel)
         # set() function makes these turn
         
-        # Records direction of the motors (1 is intake, -1 is discharge)
-        self.spinningDirection = 0
-        
-        # Records when button is pressing so override system works
-        self.intakeActive = False
-        self.dischargeActive = False
-        
         # Settings to tune
         self.deadband = 0.1
-        self.motorMultiplier = 1
+        self.motorSpeedMultiplier = 1 # Needs to be between -1 and 1
+        
+        # Testing variable that ignores limit switches if False (will always be True during games)
         self.toggleLimitSwitch = True
         
         # SmartDasboard setting
@@ -38,11 +33,12 @@ class AlgaeHandler(Subsystem):
         if self.toggleSmartDashboard:
             self.setupSmartDashboard()
     
-    def cycle(self, controllerLeftYInput) -> None:
-        '''Gets called periodically; updates the algar motors based on the controller'''
+    def cycle(self, controllerRightYInput) -> None:
+        '''Gets called periodically; updates the algae motors based on the controller'''
         
         # Change the input stuffs
-        dir = self.curveOffInput(controllerLeftYInput, self.deadband)
+        dir = self.curveOffInput(controllerRightYInput, self.deadband)
+        # TODO: Change this to use the one main curveOffInput thing later
         
         # Account for limit switches (if limit switch active then you can't intake)
         if self.limitSwitch.get() and dir > 0 and self.toggleLimitSwitch:
@@ -51,8 +47,10 @@ class AlgaeHandler(Subsystem):
         self.spinMotors(dir)
         
         # Change SmartDashboard motor multiplier because it can't be more than one
-        if self.toggleSmartDashboard and self.motorMultiplier > 1:
+        if self.toggleSmartDashboard and self.motorSpeedMultiplier > 1:
                 SmartDashboard.putNumber("Motor Multiplier", 1)
+        if self.toggleSmartDashboard and self.motorSpeedMultiplier < -1:
+                SmartDashboard.putNumber("Motor Multiplier", -1)
         
         # SmartDasboard updating
         if self.toggleSmartDashboard:
@@ -63,12 +61,16 @@ class AlgaeHandler(Subsystem):
         # Do the deadband
         if num < deadband and num > -deadband:
             return 0
+        
         # Do the cubing
         num = num ** 3
+        
         # Do the motor multiplier (max at 1)
-        if self.motorMultiplier > 1:
-            self.motorMultiplier = 1
-        num *= self.motorMultiplier
+        if self.motorSpeedMultiplier > 1: self.motorSpeedMultiplier = 1
+        if self.motorSpeedMultiplier < -1: self.motorSpeedMultiplier = -1
+        
+        num *= self.motorSpeedMultiplier
+        
         return num
     
     def spinMotors(self, dir) -> None:
@@ -83,7 +85,7 @@ class AlgaeHandler(Subsystem):
         SmartDashboard.putBoolean("Limit Switch", self.limitSwitch.get())
         
         SmartDashboard.putNumber("Deadband", self.deadband)
-        SmartDashboard.putNumber("Motor Multiplier", self.motorMultiplier)
+        SmartDashboard.putNumber("Motor Multiplier", self.motorSpeedMultiplier)
         SmartDashboard.putBoolean("Toggle Limit Switch", self.toggleLimitSwitch)
         
     def updateSmartDashboard(self) -> None:
@@ -96,5 +98,5 @@ class AlgaeHandler(Subsystem):
         
         # Update values FROM the Smart Dashboard
         self.deadband = SmartDashboard.getNumber("Deadband", self.deadband)
-        self.motorMultiplier = SmartDashboard.getNumber("Motor Multiplier", self.motorMultiplier)
+        self.motorSpeedMultiplier = SmartDashboard.getNumber("Motor Multiplier", self.motorSpeedMultiplier)
         self.toggleLimitSwitch = SmartDashboard.getBoolean("Toggle Limit Switch", self.toggleLimitSwitch)
