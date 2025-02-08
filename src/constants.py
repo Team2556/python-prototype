@@ -172,6 +172,11 @@ class ElevatorConstants():
 #endregion
 class Override_DriveConstant:
     ...
+    
+class AlgaeConstants:
+    kIntakeCANAddress1 = 13 # TODO: Correct the CAN Addresses pls
+    kIntakeCANAddress2 = 14
+    kAlgaeLimitSwitchChannel = 15 # So it doesn't input when limit switch activated
 
 class RobotDimensions:
     WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)

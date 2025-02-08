@@ -35,6 +35,7 @@ from commands.liftElevator import LiftElevatorCommand
 
 
 
+from subsystems import algae
 
 class RobotContainer:
     """
@@ -82,10 +83,14 @@ class RobotContainer:
             )
         )
 
+        
+        self.algae = algae.AlgaeHandler()
 
         self._logger = Telemetry(self._max_speed)
 
+        # This one's probably used for moving
         self._joystick = commands2.button.CommandXboxController(0)
+        # This one's probably used for scoring stuff
         self._joystick2 = commands2.button.CommandXboxController(1)
 
         self.drivetrain = TunerConstants.create_drivetrain()
@@ -223,6 +228,15 @@ class RobotContainer:
                     Rotation2d(-self._joystick.getLeftY() * self.invertBlueRedDrive , 
                                -self._joystick.getLeftX() * self.invertBlueRedDrive )
                 )
+            )
+        )
+        
+        # Do the default command thing that tells algae controller stuff
+        # Algae controls with controller 2 left joystick
+        # It's negative because that's how xbox controllers work
+        self.algae.setDefaultCommand(
+            commands2.cmd.run(
+                lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
             )
         )
 
