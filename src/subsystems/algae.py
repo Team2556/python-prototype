@@ -6,6 +6,8 @@ from constants import AlgaeConstants
 
 from commands2.subsystem import Subsystem
 
+import phoenix6
+
 class AlgaeHandler(Subsystem):
     '''This thing does algae intake and discharge'''
     def __init__(self):
@@ -16,11 +18,25 @@ class AlgaeHandler(Subsystem):
         
         # 1 = The one spinning clockwise when intaking
         # 2 = The one spinning counterclockwise when intaking
-        self.algaeMotor1 = wpilib.PWMSparkMax(motorChannel1)
-        self.algaeMotor2 = wpilib.PWMSparkMax(motorChannel2)
-        self.limitSwitch = wpilib.DigitalInput(limitSwitchChannel)
-        # set() function makes these turn
+        self.algaeMotor1 = phoenix6.hardware.TalonFX(motorChannel1, "rio")
+        self.algaeMotor2 = phoenix6.hardware.TalonFX(motorChannel2, "rio")
         
+        # Make it so if motor is set at 0 then it resists any turning if force is applied to it
+        # So algae doesn't fall out
+        self.algaeMotor1.setNeutralMode(phoenix6.signals.NeutralModeValue.BRAKE)
+        self.algaeMotor2.setNeutralMode(phoenix6.signals.NeutralModeValue.BRAKE)
+        
+        # Make it so motor 2 spins opposite of motor 1
+        self.algaeMotor2.set_control(
+            request = phoenix6.controls.Follower(self.algaeMotor1.device_id, oppose_master_direction=True)
+        )
+        
+        # Creates a "CTRE Control Request Object"
+        self.velocityOut = phoenix6.controls.VoltageOut(output=0)
+        
+        # Declare limit switch
+        self.limitSwitch = wpilib.DigitalInput(limitSwitchChannel)
+                
         # Settings to tune
         self.deadband = 0.1
         self.motorSpeedMultiplier = 1 # Needs to be between -1 and 1
@@ -37,14 +53,14 @@ class AlgaeHandler(Subsystem):
         '''Gets called periodically; updates the algae motors based on the controller'''
         
         # Change the input stuffs
-        dir = self.curveOffInput(controllerRightYInput, self.deadband)
+        speed = self.curveOffInput(controllerRightYInput, self.deadband)
         # TODO: Change this to use the one main curveOffInput thing later
         
         # Account for limit switches (if limit switch active then you can't intake)
-        if self.limitSwitch.get() and dir > 0 and self.toggleLimitSwitch:
-            dir = 0
+        if self.limitSwitch.get() and speed > 0 and self.toggleLimitSwitch:
+            speed = 0
         
-        self.spinMotors(dir)
+        self.spinMotors(speed)
         
         # Change SmartDashboard motor multiplier because it can't be more than one
         if self.toggleSmartDashboard and self.motorSpeedMultiplier > 1:
@@ -56,27 +72,26 @@ class AlgaeHandler(Subsystem):
         if self.toggleSmartDashboard:
             self.updateSmartDashboard()
     
-    def curveOffInput(self, num, deadband=0.1): # Change deadband if necesary
+    def curveOffInput(self, speed, deadband=0.1):
         '''Does stuff like the cubing and the deadband'''
         # Do the deadband
-        if num < deadband and num > -deadband:
+        if speed < deadband and speed > -deadband:
             return 0
         
         # Do the cubing
-        num = num ** 3
+        speed = speed ** 3
         
-        # Do the motor multiplier (max at 1)
+        # Do the motor multiplier (from 1 to -1)
         if self.motorSpeedMultiplier > 1: self.motorSpeedMultiplier = 1
         if self.motorSpeedMultiplier < -1: self.motorSpeedMultiplier = -1
         
-        num *= self.motorSpeedMultiplier
+        speed *= self.motorSpeedMultiplier
         
-        return num
+        return speed
     
-    def spinMotors(self, dir) -> None:
-        '''Spins the motors (1 is intake, -1 is discharge hopefully)'''
-        self.algaeMotor1.set(dir)
-        self.algaeMotor2.set(-dir)
+    def spinMotors(self, speed) -> None:
+        '''Spins the motors (speed=1 is intake, speed=-1 is discharge hopefully)'''
+        self.algaeMotor1.set_control(self.velocityOut.with_output(speed))
         
     def setupSmartDashboard(self) -> None:
         '''Sets up the Smart Dashboard for Algae with all the cool things'''
