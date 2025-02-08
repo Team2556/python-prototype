@@ -132,13 +132,14 @@ class LimelightSubsystem(Subsystem):
                 trust_telemetry = [validity, residual, detect_stdDev_x, detect_stdDev_y]
                 print(f"trust_telemetry:{trust_vision_data} -> {trust_telemetry}     IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
                 
+                if override_and_trust: trust_vision_data = True
+                viz_pose = Pose2d(Translation2d(vision_bot_pose_to_use[0], vision_bot_pose_to_use[1]),
+                                    Rotation2d(degreesToRadians(vision_bot_pose_to_use[5])))
         else:
             trust_vision_data = False
+            viz_pose = None
             latest_parsed_result= None
 
-        if override_and_trust: trust_vision_data = True
-        viz_pose = Pose2d(Translation2d(vision_bot_pose_to_use[0], vision_bot_pose_to_use[1]),
-                            Rotation2d(degreesToRadians(vision_bot_pose_to_use[5])))
 
         ''' public static Pose2d toPose2D(double[] inData){
         if(inData.length < 6)
