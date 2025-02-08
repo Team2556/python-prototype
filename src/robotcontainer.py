@@ -99,8 +99,10 @@ class RobotContainer:
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         #section elevator
-        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
-        self._reset_zero_point_here = self.elevator.reset_zero_point_here()
+        self.ENABLE_ELEVATOR = False
+        if self.ENABLE_ELEVATOR: 
+            self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+            self._reset_zero_point_here = self.elevator.reset_zero_point_here()
         #endsection elevator
 
         # Vision
@@ -207,8 +209,10 @@ class RobotContainer:
             )
         )
         # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
-        self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
-        (self._joystick2.start() & self._joystick2.a()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
+        if self.ENABLE_ELEVATOR: 
+            self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
+            (self._joystick2.start() & self._joystick2.a()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
+        
         #section vision related commands
         #take in vision data and update the odometery... there has to be a better way in crte code...
         # self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
