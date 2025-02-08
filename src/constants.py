@@ -1,8 +1,13 @@
 import numpy
 import robotpy_apriltag as apriltag
 from enum import (IntEnum, auto)
+import math
 from phoenix6.units import *
 from wpimath.units import degrees, radians, degreesToRadians, radiansToDegrees, inchesToMeters, inches
+from wpimath.trajectory import TrapezoidProfile
+from wpilib import SmartDashboard
+
+
 VISION_DES_ANGLE_deg = 25
 VISION_TURN_kP = 0
 VISION_STRAFE_kP = 26
@@ -115,6 +120,54 @@ class CAN_Address(IntEnum):
     TEN = auto()
     ELEVEN = auto()
     TWELVE = auto()
+    THIRTEEN = auto()
+    FOURTEEN = auto()
+    FIFTEEN = auto()
+    SIXTEEN = auto()
+    SEVENTEEN = auto()
+    EIGHTEEN = auto()
+    NINETEEN = auto()
+    TWENTY = auto()
+#endregion
+
+#region Elevator Constants
+
+class ElevatorConstants():
+        kLeftMotorPort = CAN_Address.FOURTEEN
+        kRightMotorPort = CAN_Address.FIFTEEN
+        kJoystickPort = 0
+        kpeak_forward_torque_current = 8 #120
+        kpeak_reverse_torque_current = -8 #-120
+        kincrement_m_per_sec_held = .25
+
+        kElevatorKp = 2.0
+        kElevatorKi = 0.0
+        kElevatorKd = .0
+        kElevatorGearing = 6 #10.0
+        kElevatorDrumRadius = .035/2   # half of 35mm in meters
+        kCarriageMass = 4 # 4 kg
+
+        kMinElevatorHeight = 0.05 #0.0508  # 2 inches
+        kMaxElevatorHeight = .59  # 50 inches
+        kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.02
+        kCoralLv1 = 0.1 #height in meters
+        kCoralLv2 = 0.32#556
+        kCoralLv3 = 0.5588
+
+        kMaxVelocityMetersPerSecond = 1.5
+        kMaxAccelerationMetersPerSecSquared = 0.5
+
+        kSVolts = 0
+        kGVolts = 0.0
+
+        kVVoltSecondPerMeter = 0#1.5
+        kAVoltSecondSquaredPerMeter = 0#0.75
+
+        kElevatorOffsetMeters = 0 #TODO: add description of how we are using this
+
+        kTopLimitSwitchChannel = 2
+        kBottomLimitSwitchChannel = 3
+
 
 #endregion
 class Override_DriveConstant:

@@ -14,7 +14,8 @@ import limelightresults
 import json
 import time
 from commands2 import Subsystem
-from wpimath.geometry import Pose2d, Transform2d
+from wpimath.geometry import Pose2d, Transform2d, Translation2d, Rotation2d
+from wpimath.units import degreesToRadians
 import numpy as np
 
 class LimelightSubsystem(Subsystem):
@@ -43,17 +44,8 @@ class LimelightSubsystem(Subsystem):
 
             self.ll.enable_websocket()
             print(self.ll.get_pipeline_atindex(0))
-        '''self.ll.update_pipeline(json.dumps({
-            'area_max': 98.7,
-            'area_min': 1.98778
-        }), flush=1)
-        self.ll.pipeline_switch(1)
-        self.ll.update_python_inputs([4.2,0.1,9.87])
-        self.ll.get_latest_results()
-        self.ll.disable_websocket()'''
-    #disable websocket
-    def disable_websocket(self):
-        return self.ll.disable_websocket()
+            
+        #disable websocket
 
     #update python inputs
     def update_python_inputs(self, inputs):
@@ -103,35 +95,63 @@ class LimelightSubsystem(Subsystem):
         return self.ll.enable_websocket()
     
     #section specialty utilities
-    def trust_target(self, robot_pose: Pose2d):
+    def trust_target(self, robot_pose: Pose2d, residual_threshold=1, override_and_trust=False):
         #calculate distance to the detected target
         #will the results hav only one target's results? assume one for now
         # Done: check unit consistency: botpose is in meters, robot_pose is in meters
         trust_vision_data = True
         if self.discovered_limelights:
             latest_parsed_result = limelightresults.parse_results(self.ll.get_latest_results())
-            validity = latest_parsed_result.validity #what units are validity in ?
-            trust_vision_data *= (validity==1) 
-            delta_x  = latest_parsed_result.botpose[0] - robot_pose.X
-            delta_y = latest_parsed_result.botpose[1] - robot_pose.Y
-            residual = np.sqrt(delta_x**2 + delta_y**2)
-            trust_vision_data *= (residual < 1) 
-            if latest_parsed_result.stddevs:
-                detect_stdDev = latest_parsed_result.stddevs
-                detect_stdDev_x = detect_stdDev[0]
-                detect_stdDev_y = detect_stdDev[1]
-                max_stdDev = max(detect_stdDev_x, detect_stdDev_y)
-                trust_vision_data *= (residual < 2 * max_stdDev) 
-                #if the residual is within 2 standard deviations, 
-                # and the residual is less than 1 meter, 
+            self.ll 
+            detector_confidences = [detector.confidence for detector in latest_parsed_result.detectorResults]
+            print("detector confidences:", detector_confidences)
+            if latest_parsed_result:
+                validity = latest_parsed_result.validity #what units are validity in ?
+                trust_vision_data *= (validity==1) 
+                vision_bot_pose_to_use = latest_parsed_result.botpose_wpiblue #botpose
+
+                delta_x  = vision_bot_pose_to_use[0] - robot_pose.x
+                delta_y = vision_bot_pose_to_use[1] - robot_pose.y
+                residual = np.sqrt(delta_x**2 + delta_y**2)
+                latency = latest_parsed_result.targeting_latency
+ 
+                trust_vision_data *= (residual < residual_threshold) 
+                '''General results do not have stddev
+                if latest_parsed_result.stddevs:
+                    detect_stdDev = latest_parsed_result.stddevs
+                    detect_stdDev_x = detect_stdDev[0]
+                    detect_stdDev_y = detect_stdDev[1]
+                    max_stdDev = max(detect_stdDev_x, detect_stdDev_y)
+                    trust_vision_data *= (residual < 2 * max_stdDev) 
+                    #if the residual is within 2 standard deviations, 
+                    # and the residual is less than 1 meter, 
+                    '''
                 # trust the target
+                detect_stdDev_x = None
+                detect_stdDev_y = None
+                trust_telemetry = [validity, residual, detect_stdDev_x, detect_stdDev_y]
+                print(f"trust_telemetry:{trust_vision_data} -> {trust_telemetry}     IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+                
         else:
             trust_vision_data = False
             latest_parsed_result= None
-            '''add_vision_measurement(vision_robot_pose: Pose2d, timestamp: phoenix6.units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)'''
 
+        if override_and_trust: trust_vision_data = True
+        viz_pose = Pose2d(Translation2d(vision_bot_pose_to_use[0], vision_bot_pose_to_use[1]),
+                            Rotation2d(degreesToRadians(vision_bot_pose_to_use[5])))
 
-        return (trust_vision_data , latest_parsed_result)
+        ''' public static Pose2d toPose2D(double[] inData){
+        if(inData.length < 6)
+        {
+            //System.err.println("Bad LL 2D Pose Data!");
+            return new Pose2d();
+        }
+        Translation2d tran2d = new Translation2d(inData[0], inData[1]);
+        Rotation2d r2d = new Rotation2d(Units.degreesToRadians(inData[5]));
+        return new Pose2d(tran2d, r2d);
+    }'''
+
+        return (trust_vision_data , viz_pose, latest_parsed_result)
 
 
     #endsection specialty utilities
@@ -139,29 +159,25 @@ class LimelightSubsystem(Subsystem):
     def periodic(self):
         if self.discovered_limelights:
             try:
-                while True:
-                    result = self.ll.get_latest_results()
-                    _parsed_result = limelightresults.parse_results(result)
-                    if _parsed_result is not None:
-                        print("valid targets: ", _parsed_result.validity, ", pipelineIndex: ", _parsed_result.pipeline_id,", Targeting Latency: ", _parsed_result.targeting_latency)
-                        self.parsed_result = _parsed_result
-                        
-
-
-                        #for tag in parsed_result.fiducialResults:
-                        #    print(tag.robot_pose_target_space, tag.fiducial_id)
-                    time.sleep(1)  # Set this to 0 for max fps
+                # while True:
+                result = self.ll.get_latest_results()
+                _parsed_result = limelightresults.parse_results(result)
+                if _parsed_result is not None:
+                    print("valid targets: ", _parsed_result.validity, ", pipelineIndex: ", _parsed_result.pipeline_id,", Targeting Latency: ", _parsed_result.targeting_latency)
+                    self.parsed_result = _parsed_result
+                    
+                    #for tag in parsed_result.fiducialResults:
+                    #    print(tag.robot_pose_target_space, tag.fiducial_id)
+                # time.sleep(1)  # Set this to 0 for max fps
             except KeyboardInterrupt:
                 print("Program interrupted by user, shutting down.")
-            finally:
-                self.ll.disable_websocket()
+
             # pass
 
     # def init(self):
     #     pass
 
     def end(self):
-        
         if self.discovered_limelights: self.ll.disable_websocket()
     
 '''discovered_limelights = limelight.discover_limelights(debug=True)

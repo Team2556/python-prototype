@@ -4,16 +4,18 @@
   "holonomicMode": true,
   "pathFolders": [
     "Blue Paths",
-    "Red Paths"
+    "Red Paths-don'tNeed"
   ],
-  "autoFolders": [],
-  "defaultMaxVel": 3.0,
-  "defaultMaxAccel": 3.0,
+  "autoFolders": [
+    "New Folder"
+  ],
+  "defaultMaxVel": 1.0,
+  "defaultMaxAccel": 2.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 27.89593,
-  "robotMOI": 16.1976043789,
+  "robotMass": 43.0,
+  "robotMOI": 5.0,
   "robotTrackwidth": 0.546,
   "driveWheelRadius": 0.0508,
   "driveGearing": 6.75,
@@ -31,5 +33,9 @@
   "brModuleY": -0.301244,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": []
+  "robotFeatures": [
+    "{\"name\":\"coralClaw\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.15,\"y\":0.0},\"size\":{\"width\":0.7,\"length\":0.2},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}",
+    "{\"name\":\"LftScore\",\"type\":\"line\",\"data\":{\"start\":{\"x\":0.15,\"y\":0.35},\"end\":{\"x\":0.15,\"y\":0.65},\"strokeWidth\":0.02}}",
+    "{\"name\":\"Line\",\"type\":\"line\",\"data\":{\"start\":{\"x\":0.15,\"y\":-0.35},\"end\":{\"x\":0.15,\"y\":-0.65},\"strokeWidth\":0.02}}"
+  ]
 }
