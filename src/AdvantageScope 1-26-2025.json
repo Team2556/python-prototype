@@ -1,0 +1,280 @@
+{
+  "hubs": [
+    {
+      "x": -8,
+      "y": -8,
+      "width": 1552,
+      "height": 832,
+      "state": {
+        "sidebar": {
+          "width": 373,
+          "expanded": [
+            "/SmartDashboard/Module 0/RootDirection/Direction",
+            "/DriveState/ModuleStates/0",
+            "/DriveState/ModuleStates/3",
+            "/SmartDashboard/Module 0/RootSpeed/Speed",
+            "/SmartDashboard/Auto Mode/options",
+            "/SmartDashboard/TagsBaby",
+            "/DriveState/Pose/rotation",
+            "/DriveState/Pose/translation",
+            "/TagsBaby",
+            "/DriveState/Speeds",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/Robot",
+            "/photonvision/photonvision/targetPose",
+            "/photonvision/photonvision/targetPose/rotation",
+            "/photonvision/photonvision/targetPose/rotation/q",
+            "/Pose/robotPose",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/visibleTargetPoses",
+            "/SmartDashboard",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system",
+            "/SmartDashboard/Field",
+            "/SmartDashboard/Module 0/RootSpeed",
+            "/Pose",
+            "/photonvision/photonvision",
+            "/photonvision/photonvision/targetPose/translation",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field"
+          ]
+        },
+        "tabs": {
+          "selected": 1,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "8jotn5be5b6tetp7t2mhrhsvt6ic3he1",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/DriveState/Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Presto"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/DriveState/ModuleTargets",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8c00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "visionLegacy",
+                    "logKey": "NT:/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/visibleTargetPoses",
+                    "logType": "NumberArray",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal",
+                      "format": "Translation2d"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/photonvision/photonvision/targetPose",
+                    "logType": "Transform3d",
+                    "visible": false,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "origin": "auto"
+              },
+              "controllerUUID": "atkw82xbnjk76h58q8670idshmt6ulzz",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  5.567275742331815,
+                  9.567828799440775,
+                  -2.5632271039080194
+                ],
+                "cameraTarget": [
+                  5.357996196219007,
+                  -3.975584442928318,
+                  -1.8896106675302913
+                ]
+              },
+              "controlsHeight": 229
+            },
+            {
+              "type": 8,
+              "title": "Joysticks",
+              "controller": [
+                "Xbox Controller (White)",
+                "None",
+                "None",
+                "None",
+                "None",
+                "None"
+              ],
+              "controllerUUID": "rktq90cck5dfs116if2eigis8o1w8bnd",
+              "renderer": null,
+              "controlsHeight": 85
+            },
+            {
+              "type": 9,
+              "title": "Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "NT:/DriveState/Speeds",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleTargets",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  }
+                ],
+                "maxSpeed": 5,
+                "sizeX": 0.65,
+                "sizeY": 0.65,
+                "orientation": 1
+              },
+              "controllerUUID": "p22uk81sg0k3uyiby523wmbwlolinvza",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/DriveState/Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "arrowLegacy",
+                    "logKey": "NT:/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/visibleTargetPoses",
+                    "logType": "NumberArray",
+                    "visible": true,
+                    "options": {
+                      "position": "back",
+                      "format": "Pose2d",
+                      "units": "radians"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "bumpers": "auto",
+                "origin": "auto",
+                "orientation": 0,
+                "size": 27
+              },
+              "controllerUUID": "vl3pq1caxg7jgu2gjtxfq4b189qjqx7k",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/Robot/0",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/Robot/1",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "d4emcj3xmn1dx13axwapygx03zcv7c4z",
+              "renderer": null,
+              "controlsHeight": 200
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.1"
+}

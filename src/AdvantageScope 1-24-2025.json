@@ -1,0 +1,272 @@
+{
+  "hubs": [
+    {
+      "x": -8,
+      "y": -8,
+      "width": 1552,
+      "height": 832,
+      "state": {
+        "sidebar": {
+          "width": 373,
+          "expanded": [
+            "/SmartDashboard/Module 0/RootDirection/Direction",
+            "/DriveState/ModuleStates/0",
+            "/DriveState/ModuleStates/3",
+            "/SmartDashboard/Module 0/RootSpeed/Speed",
+            "/SmartDashboard/Auto Mode/options",
+            "/SmartDashboard/TagsBaby",
+            "/DriveState/Pose/rotation",
+            "/DriveState/Pose/translation",
+            "/TagsBaby",
+            "/DriveState/Speeds",
+            "/Pose",
+            "/photonvision",
+            "/SmartDashboard",
+            "/SmartDashboard/Field",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/Robot",
+            "/photonvision/photonvision/targetPose",
+            "/photonvision/photonvision/targetPose/rotation",
+            "/photonvision/photonvision/targetPose/rotation/q",
+            "/Pose/robotPose",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field",
+            "/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/visibleTargetPoses"
+          ]
+        },
+        "tabs": {
+          "selected": 1,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "8jotn5be5b6tetp7t2mhrhsvt6ic3he1",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/DriveState/Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "2025 KitBot"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/DriveState/ModuleTargets",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8c00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "visionLegacy",
+                    "logKey": "NT:/SmartDashboard/VisionSystemSim-SimPhoton_system/Sim Field/visibleTargetPoses",
+                    "logType": "NumberArray",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal",
+                      "format": "Translation2d"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/photonvision/photonvision/targetPose",
+                    "logType": "Transform3d",
+                    "visible": false,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "origin": "auto"
+              },
+              "controllerUUID": "atkw82xbnjk76h58q8670idshmt6ulzz",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  12.212197687014864,
+                  11.277572796214736,
+                  4.979353536842179
+                ],
+                "cameraTarget": [
+                  1.743439003609235,
+                  -1.943769395462077,
+                  -1.9582510055330027
+                ]
+              },
+              "controlsHeight": 229
+            },
+            {
+              "type": 9,
+              "title": "Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "NT:/DriveState/Speeds",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleStates",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/DriveState/ModuleTargets",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  }
+                ],
+                "maxSpeed": 5,
+                "sizeX": 0.65,
+                "sizeY": 0.65,
+                "orientation": 1
+              },
+              "controllerUUID": "p22uk81sg0k3uyiby523wmbwlolinvza",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/DriveState/Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/PathPlanner/activePath",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "bumpers": "auto",
+                "origin": "auto",
+                "orientation": 0,
+                "size": 27
+              },
+              "controllerUUID": "vl3pq1caxg7jgu2gjtxfq4b189qjqx7k",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 4,
+              "title": "Table",
+              "controller": [
+                "NT:/TagsBaby/1"
+              ],
+              "controllerUUID": "mv3h9zxdbm9uh9amzb1lw53fnmq3h79c",
+              "renderer": null,
+              "controlsHeight": 0
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robotLegacy",
+                    "logKey": "NT:/SmartDashboard/Field/Robot",
+                    "logType": "NumberArray",
+                    "visible": true,
+                    "options": {
+                      "format": "Pose2d",
+                      "units": "radians"
+                    }
+                  },
+                  {
+                    "type": "robotLegacy",
+                    "logKey": "NT:/SmartDashboard/Field/Robot",
+                    "logType": "NumberArray",
+                    "visible": true,
+                    "options": {
+                      "format": "Pose2d",
+                      "units": "radians"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/TagsBaby/1",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "bumpers": "auto",
+                "origin": "blue",
+                "orientation": 0,
+                "size": 30
+              },
+              "controllerUUID": "76rbw1osy0qyrp6aqgdo1xibpfzzxk8s",
+              "renderer": null,
+              "controlsHeight": 200
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.1"
+}

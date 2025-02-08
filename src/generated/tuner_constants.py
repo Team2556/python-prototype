@@ -1,6 +1,7 @@
 from phoenix6 import CANBus, configs, hardware, signals, swerve, units
 from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from wpimath.units import inchesToMeters
+from networktables import NetworkTables
 
 
 class TunerConstants:
@@ -53,7 +54,8 @@ class TunerConstants:
 
     # The stator current at which the wheels start to slip;
     # This needs to be tuned to your individual robot #TODO: #12 _slip_current needs to be tuned
-    _slip_current: units.ampere = 120.0
+    splip_curremt_degrade = 7
+    _slip_current: units.ampere = 120.0 / splip_curremt_degrade
 
     # Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     # Some configs will be overwritten; check the `with_*_initial_configs()` API documentation.
@@ -134,7 +136,7 @@ class TunerConstants:
     _front_left_drive_motor_id = 10
     _front_left_steer_motor_id = 11
     _front_left_encoder_id = 12
-    _front_left_encoder_offset: units.rotation = 0.45361328125
+    _front_left_encoder_offset: units.rotation = 0.453125
     _front_left_steer_motor_inverted = False
     _front_left_encoder_inverted = False
 
@@ -145,7 +147,7 @@ class TunerConstants:
     _front_right_drive_motor_id = 7
     _front_right_steer_motor_id = 8
     _front_right_encoder_id = 9
-    _front_right_encoder_offset: units.rotation = 0.43505859375
+    _front_right_encoder_offset: units.rotation = 0.439453125
     _front_right_steer_motor_inverted = False
     _front_right_encoder_inverted = False
 
@@ -156,7 +158,7 @@ class TunerConstants:
     _back_left_drive_motor_id = 4
     _back_left_steer_motor_id = 5
     _back_left_encoder_id = 6
-    _back_left_encoder_offset: units.rotation = 0.187255859375
+    _back_left_encoder_offset: units.rotation = 0.192626953125
     _back_left_steer_motor_inverted = False
     _back_left_encoder_inverted = False
 
@@ -167,7 +169,7 @@ class TunerConstants:
     _back_right_drive_motor_id = 1
     _back_right_steer_motor_id = 2
     _back_right_encoder_id = 3
-    _back_right_encoder_offset: units.rotation = 0.35498046875
+    _back_right_encoder_offset: units.rotation = 0.36279296875
     _back_right_steer_motor_inverted = False
     _back_right_encoder_inverted = False
 
