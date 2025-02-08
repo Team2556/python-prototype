@@ -7,6 +7,7 @@
 import wpilib
 import commands2
 import typing
+from wpimath.geometry import Pose2d, Transform2d, Rotation2d, Translation2d
 from wpilib import SmartDashboard, DriverStation, Field2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.logging import PathPlannerLogging
@@ -69,15 +70,20 @@ class MyRobot(commands2.TimedCommandRobot):
         #section vision related commands
         #update swerve odometry with vision data
         #attmept to add in vision update
-        # self.container.drivetrain
-        # self.container.limelight
+
         '''add_vision_measurement(vision_robot_pose: Pose2d, timestamp: phoenix6.units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)'''
         current_pose_swerve = self.container.drivetrain.get_state_copy().pose #SwerveDriveState.pose #swerve_drive_state.pose
         # if trust vision data update the drivetrain odometer
-        trust_vision_data, latest_parsed_result = self.container.limelight.trust_target(current_pose_swerve)
+        
+        
+        trust_vision_data, viz_pose, latest_parsed_result = self.container.limelight.trust_target(current_pose_swerve, override_and_trust=True)
         if trust_vision_data:
-            print(f'-\n Running the robot periodic -- current_pose_swerve: {current_pose_swerve} -----\n With uncertainty {latest_parsed_result.vision_measurement_std_devs}\n----\n------Pose update {current_pose_swerve - self.container.drivetrain.get_state_copy().pose=}-----------------------\n-------\n--\n')
-            self.drivetrain.add_vision_measurement(latest_parsed_result.robot_pose, fpga_to_current_time(latest_parsed_result.timestamp), latest_parsed_result.vision_measurement_std_devs)
+            if latest_parsed_result:
+                vision_measurement_std_devs = (1.1, 1.1, 1.1) # {latest_parsed_result.vision_measurement_std_devs} #TODO: look into using MegaTag to get stddevs
+                print(f'-\n Running the robot periodic -- current_pose_swerve: {current_pose_swerve} -----\n The vision stuff{latest_parsed_result.botpose_wpiblue=} With uncertainty ...need to use megatag\n----\n------Pose update {current_pose_swerve - self.container.drivetrain.get_state_copy().pose=}-----------------------\n-------\n--\n')
+                
+                self.container.drivetrain.add_vision_measurement(viz_pose, fpga_to_current_time(latest_parsed_result.timestamp), vision_measurement_std_devs)
+                
         else:
             pass#print(f'-\n Running the robot periodic NOT TRUSTING VISION -- -----\n----\n------------XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-----------------\n-------\n--\n')
      
@@ -121,12 +127,9 @@ class MyRobot(commands2.TimedCommandRobot):
         """This function is called periodically during operator control"""
         #section update closest paths
         current_pose_swerve = self.container.drivetrain.get_state_copy().pose
-        self.container.set_closest_paths(current_pose_swerve)
-        print(f'closest_proc_path_to_robot: {self.container.closest_proc_path_to_robot}')
-        # self.container.closest_proc_path_to_robot = self.container.closest_proc_path_to_robot_lam(current_pose_swerve.translation())
-        # closest_feed_path_to_robot = self.container.closest_feed_path_to_robot_lam(current_pose_swerve.translation())
-
-        
+        #self.container.set_closest_paths(current_pose_swerve)
+        #print(f'closest_proc_path_to_robot: {self.container.closest_proc_path_to_robot}')
+                
         # self.container.elevator.elevatorPeriodic()
 
     def testInit(self) -> None:

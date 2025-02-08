@@ -98,8 +98,9 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         print(f"Configured TalonFX {ElevatorConstants.kLeftMotorPort} with status: {status.name}\n {cfg.slot0}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
         #create handel for the control
-        self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         # Make sure we start at 0
+        self.position_voltage = controls.PositionVoltage(0).with_slot(0)
+        #TODO: add to teleop init a homing command, once we have the limit switches
         self.elevmotor_left.set_position(0)#self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
         #move up some
         # self.elevmotor_left.set_control(request=self.position_voltage.with_position(self.distanceToRotations(.25))
@@ -151,13 +152,20 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
             elif self.setpoint < ElevatorConstants.kMinElevatorHeight:
                 self.setpoint = ElevatorConstants.kMinElevatorHeight
         wpilib.SmartDashboard.putNumber("Elevator/Setpoint", self.setpoint)
+    
+    def reset_zero_point_here(self, let_droop: bool = True) -> None:
+        #put the motor in neutral - no breaking
+        if let_droop: self.elevmotor_left.setNeutralMode(NeutralModeValue.COAST)
+        self.elevmotor_left.set_position(0)
+
+    
 
     def moveElevator(self, movement=None) -> None:
         '''Setpoint is in meters of elevator elevation from lowest physical limit'''
         if not movement:
             movement = self.setpoint
         self.elevmotor_left.set_control(self.position_voltage.with_position(self.distanceToRotations(movement)))
-        self.elevmotor_left.set_control(self.position_voltage.   with_position(self.distanceToRotations(movement)))
+        # self.elevmotor_left.set_control(self.position_voltage.   with_position(self.distanceToRotations(movement)))
         
     def periodic(self):
         wpilib.SmartDashboard.putNumber("Elevator/Position_calced", self.rotationsToDistance(self.elevmotor_left.get_position().value))

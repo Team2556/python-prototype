@@ -39,13 +39,13 @@ class LiftElevatorCommand(Command):
         
 
         elif self.joystick.a():
-            ( self.sub_elevator.update_setpoint(inchesToMeters(7), incremental=False))
+            ( self.sub_elevator.update_setpoint((ElevatorConstants.kCoralLv1), incremental=False))
             self.sub_elevator.moveElevator()
         elif self.joystick.b():
-            ( self.sub_elevator.update_setpoint(inchesToMeters(14), incremental=False))
+            ( self.sub_elevator.update_setpoint((ElevatorConstants.kCoralLv2), incremental=False))
             self.sub_elevator.moveElevator()
         elif self.joystick.y():
-            ( self.sub_elevator.update_setpoint(inchesToMeters(21), incremental=False, constrain=False))
+            ( self.sub_elevator.update_setpoint((ElevatorConstants.kCoralLv3), incremental=False, constrain=False))
             self.sub_elevator.moveElevator()
         self.previous_time = time.time()
         

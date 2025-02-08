@@ -26,6 +26,7 @@ from phoenix6.hardware import TalonFX
 from wpilib import SmartDashboard, DriverStation
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
+import wpinet
 import math
 from commands.odometrySnap2Line import SnapToLineCommand
 # from commands.gotoClosestPath import GotoClosestPath
@@ -92,10 +93,16 @@ class RobotContainer:
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
+        #section elevator
         self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+        self._reset_zero_point_here = self.elevator.reset_zero_point_here()
+        #endsection elevator
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
+        for port  in np.arange( start= 5800, stop= 5809):
+            # PortForwarder.add(port, "limelight.local", port)
+            wpinet.PortForwarder.getInstance().add(port, "limelight.local", port)
       
 
         # Path follower
@@ -171,11 +178,11 @@ class RobotContainer:
                 self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -controlAugment.smooth(self._joystick.getLeftY()) * self._max_speed
+                        -controlAugment.smooth(self._joystick.getLeftY(), exponential_for_curving=5) * self._max_speed
                         * self.invertBlueRedDrive 
                     )  # Drive forward with negative Y (forward)
                     .with_velocity_y(
-                        -controlAugment.smooth(self._joystick.getLeftX()) * self._max_speed
+                        -controlAugment.smooth(self._joystick.getLeftX(), exponential_for_curving=5) * self._max_speed
                         * self.invertBlueRedDrive 
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
@@ -196,6 +203,7 @@ class RobotContainer:
         )
         # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
         self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
+        (self._joystick2.start() & self._joystick2.a()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
         #section vision related commands
         #take in vision data and update the odometery... there has to be a better way in crte code...
         # self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
