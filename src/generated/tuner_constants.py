@@ -16,11 +16,11 @@ class TunerConstants:
     # output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     _steer_gains = (
         configs.Slot0Configs()
-        .with_k_p(100)
+        .with_k_p(10) #was generated as (100)
         .with_k_i(0)
-        .with_k_d(0.5)
-        .with_k_s(0.1)
-        .with_k_v(1.59)
+        .with_k_d(0.5)#was generated as (0.5)
+        .with_k_s(0.1)#was generated as (0.1)
+        .with_k_v(1.59)#was generated as (1.59)
         .with_k_a(0)
         .with_static_feedforward_sign(signals.StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
     )
@@ -64,7 +64,7 @@ class TunerConstants:
         configs.CurrentLimitsConfigs()
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
-        .with_stator_current_limit(60).with_stator_current_limit_enable(True)
+        .with_stator_current_limit(30).with_stator_current_limit_enable(True)
     )
     _encoder_initial_configs = configs.CANcoderConfiguration()
     # Configs for the Pigeon 2; leave this None to skip applying Pigeon 2 configs

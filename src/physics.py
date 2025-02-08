@@ -78,12 +78,13 @@ class PhysicsEngine:
 
 
         # self.sim_oneMotor = phoenix6.sim.TalonFXSimState(self.container.one_motor.motor)
-        self.sim_elevator_motor_left = self.container.elevator.elevmotor_left.sim_state#phoenix6.sim.TalonFXSimState(self.container.elevator.elevmotor_left)
-        self.sim_elevator_motor_right = self.container.elevator.elevmotor_right.sim_state#phoenix6.sim.TalonFXSimState(self.container.elevator.elevmotor_right)
-        self.sim_elevator_encoder_left = self.container.elevator.elevCANcoder_left.sim_state #phoenix6.sim.CANcoderSimState(self.container.elevator.elevCANcoder_left)
-        self.sim_elevator_encoder_right = self.container.elevator.elevCANcoder_right.sim_state #phoenix6.sim.CANcoderSimState(self.container.elevator.elevCANcoder_right)
-        self.sim_elevator_motor_left.orientation = phoenix6_sim.ChassisReference.CounterClockwise_Positive
-        self.sim_elevator_motor_right.orientation = phoenix6_sim.ChassisReference.CounterClockwise_Positive
+        if self.container.ENABLE_ELEVATOR:
+            self.sim_elevator_motor_left = self.container.elevator.elevmotor_left.sim_state#phoenix6.sim.TalonFXSimState(self.container.elevator.elevmotor_left)
+            self.sim_elevator_motor_right = self.container.elevator.elevmotor_right.sim_state#phoenix6.sim.TalonFXSimState(self.container.elevator.elevmotor_right)
+            self.sim_elevator_encoder_left = self.container.elevator.elevCANcoder_left.sim_state #phoenix6.sim.CANcoderSimState(self.container.elevator.elevCANcoder_left)
+            self.sim_elevator_encoder_right = self.container.elevator.elevCANcoder_right.sim_state #phoenix6.sim.CANcoderSimState(self.container.elevator.elevCANcoder_right)
+            self.sim_elevator_motor_left.orientation = phoenix6_sim.ChassisReference.CounterClockwise_Positive
+            self.sim_elevator_motor_right.orientation = phoenix6_sim.ChassisReference.CounterClockwise_Positive
         
         self.field = self.robot.field #wpilib.Field2d()#already put a field on smartdashboard from robot or container..
         # SmartDashboard.putData("Field-Vision", self.field)
@@ -127,13 +128,14 @@ class PhysicsEngine:
         # wpilib.Encoder(robot.elevencoder) #not sure if i need to add another encoder, will find out later
         '''
         # Create a Mechanism2d display of an elevator
-        self.mech2d = wpilib.Mechanism2d(20, 50)
-        self.elevatorRoot = self.mech2d.getRoot("Elevator Root", 10, 0)
-        self.elevatorMech2d = self.elevatorRoot.appendLigament(
-            "Elevator", self.elevator_physics_model.getPositionInches(), 90
-        )
-        # Put Mechanism to SmartDashboard
-        wpilib.SmartDashboard.putData("Elevator", self.mech2d)
+        if self.container.ENABLE_ELEVATOR:
+            self.mech2d = wpilib.Mechanism2d(20, 50)
+            self.elevatorRoot = self.mech2d.getRoot("Elevator Root", 10, 0)
+            self.elevatorMech2d = self.elevatorRoot.appendLigament(
+                "Elevator", self.elevator_physics_model.getPositionInches(), 90
+            )
+            # Put Mechanism to SmartDashboard
+            wpilib.SmartDashboard.putData("Elevator", self.mech2d)
 
             
         
@@ -147,15 +149,15 @@ class PhysicsEngine:
         self.field.setRobotPose(robot_pose) 
         # self.photon_camera_sim.  .setRobotPose(robot_pose)
         self.sim_vision.update(robotPose=robot_pose)
-
-        self.sim_elevator_motor_left.set_supply_voltage(RobotController.getBatteryVoltage())
-        self.sim_elevator_motor_right.set_supply_voltage(RobotController.getBatteryVoltage())
-        self.sim_elevator_model.setInputVoltage(self.sim_elevator_motor_left.motor_voltage)
-        self.sim_elevator_model.update(tm_diff)
-        self.sim_elevator_motor_left.set_raw_rotor_position(radiansToRotations(self.sim_elevator_model.getAngularPosition()))
-        self.sim_elevator_motor_left.set_rotor_velocity(radiansToRotations(self.sim_elevator_model.getAngularVelocity()))
-        self.sim_elevator_motor_right.set_raw_rotor_position(radiansToRotations(self.sim_elevator_model.getAngularPosition()))
-        self.sim_elevator_motor_right.set_rotor_velocity(radiansToRotations(self.sim_elevator_model.getAngularVelocity()))
+        if self.container.ENABLE_ELEVATOR:
+            self.sim_elevator_motor_left.set_supply_voltage(RobotController.getBatteryVoltage())
+            self.sim_elevator_motor_right.set_supply_voltage(RobotController.getBatteryVoltage())
+            self.sim_elevator_model.setInputVoltage(self.sim_elevator_motor_left.motor_voltage)
+            self.sim_elevator_model.update(tm_diff)
+            self.sim_elevator_motor_left.set_raw_rotor_position(radiansToRotations(self.sim_elevator_model.getAngularPosition()))
+            self.sim_elevator_motor_left.set_rotor_velocity(radiansToRotations(self.sim_elevator_model.getAngularVelocity()))
+            self.sim_elevator_motor_right.set_raw_rotor_position(radiansToRotations(self.sim_elevator_model.getAngularPosition()))
+            self.sim_elevator_motor_right.set_rotor_velocity(radiansToRotations(self.sim_elevator_model.getAngularVelocity()))
 
         #refer to https://api.ctr-electronics.com/phoenix6/release/python/autoapi/phoenix6/sim/talon_fx_sim_state/index.html
 
@@ -171,30 +173,31 @@ class PhysicsEngine:
         #may need unit conversion, may not..? metersToFeet or feetToMeters
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
         # self.physics_controller.drive(-(self.drivetrain.get_state().speeds), 0.020)
-        self.elevator_physics_model.setInput(
-            0, 
-            self.sim_elevator_motor_left.motor_voltage
-            # self.sim_leftelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
-        )
-        self.elevator_physics_model.setInput(
-            1, 
-            self.sim_elevator_motor_right.motor_voltage
-            # self.sim_rightelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
-        )
+        if self.container.ENABLE_ELEVATOR:
+            self.elevator_physics_model.setInput(
+                0, 
+                self.sim_elevator_motor_left.motor_voltage
+                # self.sim_leftelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
+            )
+            self.elevator_physics_model.setInput(
+                1, 
+                self.sim_elevator_motor_right.motor_voltage
+                # self.sim_rightelevmotor.setVoltage() * phoenix6.hardware.TalonFX.setVoltage()
+            )
 
-        # Next, we update it
-        self.elevator_physics_model.update(tm_diff)
-        # Update the Elevator length based on the simulated elevator height
-        self.elevatorMech2d.setLength(self.elevator_physics_model.getPositionInches())
-        '''
+            # Next, we update it
+            self.elevator_physics_model.update(tm_diff)
+            # Update the Elevator length based on the simulated elevator height
+            self.elevatorMech2d.setLength(self.elevator_physics_model.getPositionInches())
+            '''
 
-        # Finally, we set our simulated encoder's readings and simulated battery
-        # voltage
-        self.elevencoder.getDistance(self.elevator.getPosition())
-        # SimBattery estimates loaded battery voltage
-        # wpilib.simulation.RoboRioSim.setVInVoltage(
-        #     wpilib.simulation.BatterySim
-        # )
+            # Finally, we set our simulated encoder's readings and simulated battery
+            # voltage
+            self.elevencoder.getDistance(self.elevator.getPosition())
+            # SimBattery estimates loaded battery voltage
+            # wpilib.simulation.RoboRioSim.setVInVoltage(
+            #     wpilib.simulation.BatterySim
+            # )
 
 
         do_nothing = True
