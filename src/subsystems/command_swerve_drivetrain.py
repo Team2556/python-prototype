@@ -245,7 +245,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
     
     def _configure_auto_builder(self):
         config = RobotConfig.fromGUISettings()
-        
+        if AutoBuilder.isConfigured():
+            print("AutoBuilder is already configured, Double Configuring XXXXXXXXXXX!!!!!!!!!!!!!!!!!!!!!!!XXXXXXXXXXXXXXX")
+    
         AutoBuilder.configure(
             lambda: self.get_state().pose,   # Supplier of current robot pose
             self.reset_pose,                 # Consumer for seeding pose against auto
@@ -336,3 +338,15 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self._last_sim_time = utils.get_current_time_seconds()
         self._sim_notifier = Notifier(_sim_periodic)
         self._sim_notifier.startPeriodic(self._SIM_LOOP_PERIOD)
+    
+    def use_vision(self, viz_pose, fpga_time_of_measurement):
+        # self.tare_everything()
+        # self.reset_pose(After_viz_update_odo_pose)
+        self.set_vision_measurement_std_devs((.031, .031, 40*6/180))
+        self.add_vision_measurement(viz_pose, fpga_time_of_measurement) #, vision_measurement_std_devs)
+        
+        # After_viz_update_odo_pose = self.container.drivetrain.get_state().pose
+        # self.container.drivetrain.reset_pose(After_viz_update_odo_pose)
+
+        # self.odometry_thread.set_thread_priority(99)
+        # self.container.drivetrain.OdometryThread.stop(self.container.drivetrain.odometry_thread)

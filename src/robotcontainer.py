@@ -82,6 +82,7 @@ class RobotContainer:
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
         )
+        
 
         
         self.algae = algae.AlgaeHandler()
@@ -113,7 +114,7 @@ class RobotContainer:
       
 
         # Path follower
-        self._auto_chooser = AutoBuilder.buildAutoChooser("Red2-Algae")
+        self._auto_chooser = AutoBuilder.buildAutoChooser("SetOdo_DriverWallRtFeeder")
         SmartDashboard.putData("Auto Mode", self._auto_chooser)
 
         self.path_doc_proc_short = PathPlannerPath.fromPathFile("Dock-Processor")
@@ -208,6 +209,9 @@ class RobotContainer:
                 )
             )
         )
+
+        
+
         # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
         if self.ENABLE_ELEVATOR: 
             self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
@@ -306,7 +310,7 @@ class RobotContainer:
         #     self.rotate_rectangle_by = Translation2d(Rotation2d(degreesToRadians(180)))
         rect_feedArea = Rectangle2d(Translation2d(0,0),Translation2d(4.50,7.50) )#.transformBy(self.rotate_rectangle_by)
         rect_procArea = Rectangle2d(Translation2d(0,0),Translation2d(8.70,1.10))#.transformBy(self.rotate_rectangle_by)
-        print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
+        # print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
 
         pathfinding_constraints_global=PathConstraints(3/3, 4/3, degreesToRadians(540/2), degreesToRadians(720/2),12,False)#was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
         (self._joystick.b() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_feedArea.contains(AutoBuilder.getCurrentPose().translation()) or 

@@ -17,11 +17,12 @@ from commands2 import Subsystem
 from wpimath.geometry import Pose2d, Transform2d, Translation2d, Rotation2d
 from wpimath.units import degreesToRadians
 import numpy as np
+from phoenix6.utils import get_current_time_seconds
 
 class LimelightSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
-        self.discovered_limelights = limelight.discover_limelights(debug=True)
+        self.discovered_limelights = limelight.discover_limelights()#debug=True)
         print("discovered limelights:", self.discovered_limelights)
 
         if self.discovered_limelights:
@@ -95,7 +96,7 @@ class LimelightSubsystem(Subsystem):
         return self.ll.enable_websocket()
     
     #section specialty utilities
-    def trust_target(self, robot_pose: Pose2d, residual_threshold=1, override_and_trust=False):
+    def trust_target(self, robot_pose: Pose2d, residual_threshold=1000000000, override_and_trust=False): #TODO: fix threshold
         #calculate distance to the detected target
         #will the results hav only one target's results? assume one for now
         # Done: check unit consistency: botpose is in meters, robot_pose is in meters
@@ -114,6 +115,7 @@ class LimelightSubsystem(Subsystem):
                 delta_y = vision_bot_pose_to_use[1] - robot_pose.y
                 residual = np.sqrt(delta_x**2 + delta_y**2)
                 latency = latest_parsed_result.targeting_latency
+                time_of_measurement = get_current_time_seconds() - .001 * latency #only acounting for json unpacking 
  
                 trust_vision_data *= (residual < residual_threshold) 
                 '''General results do not have stddev
@@ -139,6 +141,7 @@ class LimelightSubsystem(Subsystem):
             trust_vision_data = False
             viz_pose = None
             latest_parsed_result= None
+            time_of_measurement = get_current_time_seconds()
 
 
         ''' public static Pose2d toPose2D(double[] inData){
@@ -152,7 +155,7 @@ class LimelightSubsystem(Subsystem):
         return new Pose2d(tran2d, r2d);
     }'''
 
-        return (trust_vision_data , viz_pose, latest_parsed_result)
+        return (trust_vision_data , viz_pose, latest_parsed_result, time_of_measurement)
 
 
     #endsection specialty utilities
