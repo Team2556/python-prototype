@@ -109,7 +109,6 @@ class RobotContainer:
         # Vision
         self.limelight = limelight.LimelightSubsystem()
         for port  in np.arange( start= 5800, stop= 5809):
-            # PortForwarder.add(port, "limelight.local", port)
             wpinet.PortForwarder.getInstance().add(port, "limelight.local", port)
       
 
@@ -126,6 +125,7 @@ class RobotContainer:
         self.pathlist_dock_feed = [self.path_doc_feed_right, self.path_doc_feed_left]
 
         #section TeleAuto coral
+        #TODO: implement or replace with a better method
         #define numpy array of coral locations; there are 12 poles with 4 levels available for scoring for a total fof 48 scoring locations
         self.coral_locations = np.zeros((12, 4)) 
         # np.array([(x, y) for x, y in zip(range(12), range(4) * 12)])
@@ -218,12 +218,7 @@ class RobotContainer:
             (self._joystick2.start() & self._joystick2.a()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
         
         #section vision related commands
-        #take in vision data and update the odometery... there has to be a better way in crte code...
-        # self._joystick.y().negate().whileTrue( self.vis_odo_fuse_command.alongWith(commands2.PrintCommand("commanded to try VISION update. \nq\nqqq\nqqqqqqq\nqqqqqqqqqqqqqqqqqqqqqqqqqqqq\nqqqqqqq\n---\n"))  )
-        #Focus in on the target and move relative to it
-        # self._joystick.rightStick().whileTrue(
-        #     self.drivetrain.apply_request(lambda: self._driveTargetRelative) #might work until need dynamic values
-        # )
+        
         self._joystick.x().onTrue(SnapToLineCommand(self.drivetrain))
 
 

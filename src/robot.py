@@ -71,38 +71,15 @@ class MyRobot(commands2.TimedCommandRobot):
             self.container.invertBlueRedDrive = -1
 
         #section vision related commands
-        #update swerve odometry with vision data
-        #attmept to add in vision update
-
-        '''add_vision_measurement(vision_robot_pose: Pose2d, timestamp: phoenix6.units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)'''
-        # WHy won't this work in command_swerve_drivetrain ?? -- need to get the container instantiated limelight, but that would create a circular reference
-        
         current_pose_swerve = self.container.drivetrain.get_state_copy().pose #SwerveDriveState.pose #swerve_drive_state.pose
         # if trust vision data update the drivetrain odometer
-        
-        
         trust_vision_data, viz_pose, latest_parsed_result, time_of_measurement = self.container.limelight.trust_target(current_pose_swerve)
         if trust_vision_data:
             if latest_parsed_result:
-                # vision_measurement_std_devs = (.1, .1, 45*6/180) # {latest_parsed_result.vision_measurement_std_devs} #TODO: look into using MegaTag to get stddevs
-                print(f'-\n Running the robot periodic -- current_pose_delta: {current_pose_swerve - viz_pose} -----\n The vision stuff{latest_parsed_result.botpose_wpiblue=} With uncertainty ...need to use megatag\n----\n------Pose update {current_pose_swerve - self.container.drivetrain.get_state_copy().pose=}-----------------------\n-------\n--\n')
-                # self.container.drivetrain.set_vision_measurement_std_devs((.01, .01, 15*6/180))
-                # self.container.drivetrain.add_vision_measurement(viz_pose, fpga_to_current_time(time_of_measurement)) #, vision_measurement_std_devs)
-                # After_viz_update_odo_pose = self.container.drivetrain.get_state().pose
-
-                # self.container.drivetrain.odometry_thread.set_thread_priority(99)
-                # self.container.drivetrain.OdometryThread.stop(self.container.drivetrain.odometry_thread)
-                # self.container.drivetrain.reset_pose(After_viz_update_odo_pose)
-
-                self.container.drivetrain.use_vision(viz_pose, fpga_time_of_measurement=fpga_to_current_time(time_of_measurement))#(After_viz_update_odo_pose)
-
-                # self.container.drivetrain.OdometryThread.start(self.container.drivetrain.odometry_thread)
-                # self.container.drivetrain.odometry_thread.set_thread_priority(20)
-
-                # print(f"Why won't it stick: {After_viz_update_odo_pose-viz_pose} Vs what was {current_pose_swerve - viz_pose} ????????????????????????????????????????????????????????????")
-                
+                # print(f'-\n Running the robot periodic -- current_pose_delta: {current_pose_swerve - viz_pose} -----\n The vision stuff{latest_parsed_result.botpose_wpiblue=} With uncertainty ...need to use megatag\n----\n------Pose update {current_pose_swerve - self.container.drivetrain.get_state_copy().pose=}-----------------------\n-------\n--\n')
+                self.container.drivetrain.use_vision_odometry_update(viz_pose, fpga_time_of_measurement=fpga_to_current_time(time_of_measurement))              
         else:
-            pass#print(f'-\n Running the robot periodic NOT TRUSTING VISION -- -----\n----\n------------XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-----------------\n-------\n--\n')
+            pass
      
         #endsection vision related commands
         
@@ -144,7 +121,8 @@ class MyRobot(commands2.TimedCommandRobot):
         """This function is called periodically during operator control"""
         #section update closest paths
         current_pose_swerve = self.container.drivetrain.get_state_copy().pose
-        #self.container.set_closest_paths(current_pose_swerve)
+        # TODO: put this in command_swerve_drivtrain as function and set of closest paths as a attribute
+        # self.container.set_closest_paths(current_pose_swerve)
         #print(f'closest_proc_path_to_robot: {self.container.closest_proc_path_to_robot}')
                 
         # self.container.elevator.elevatorPeriodic()

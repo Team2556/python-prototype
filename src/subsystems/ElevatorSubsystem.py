@@ -95,15 +95,13 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
 
-        # print(f"Configured TalonFX {ElevatorConstants.kLeftMotorPort} with status: {status.name}\n {cfg.slot0}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-
         #create handel for the control
         # Make sure we start at 0
         self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         #TODO: add to teleop init a homing command, once we have the limit switches
         self.elevmotor_left.set_position(0)#self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
         #move up some
-        # self.elevmotor_left.set_control(request=self.position_voltage.with_position(self.distanceToRotations(.25))
+        # self.elevmotor_left.set_control(request=self.position_voltage.with_position(self.distanceToRotations(inchesToMeters(.25)))
 
 
     def updateSlot0(self,  k_p: float = None, k_i:float =None, k_d:float=None, k_g: float=None   ) -> None:
@@ -131,8 +129,6 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
                     break
             if not status.is_ok():
                 print(f"Could not apply updated gravity compensation, error code: {status.name}")
-            else:
-                print(f"Updated slot0 {self.cfg_slot0} with status: {status.name} /n  Get rid of this update for competition")
 
     def distanceToRotations(self, distance: float) -> float:
         return distance * ElevatorConstants.kElevatorGearing/(2*pi*ElevatorConstants.kElevatorDrumRadius)

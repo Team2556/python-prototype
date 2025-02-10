@@ -11,6 +11,7 @@
 
 import limelight
 import limelightresults
+# import limelightHelpers (only in Java/C++ so far; could write it up)
 import json
 import time
 from commands2 import Subsystem
@@ -46,9 +47,8 @@ class LimelightSubsystem(Subsystem):
             self.ll.enable_websocket()
             print(self.ll.get_pipeline_atindex(0))
             
-        #disable websocket
 
-    #update python inputs
+    #update python (on limelight) inputs
     def update_python_inputs(self, inputs):
         return self.ll.update_python_inputs(inputs)
 
@@ -118,7 +118,7 @@ class LimelightSubsystem(Subsystem):
                 time_of_measurement = get_current_time_seconds() - .001 * latency #only acounting for json unpacking 
  
                 trust_vision_data *= (residual < residual_threshold) 
-                '''General results do not have stddev
+                '''General results do not have stddev -- need to use MegaTag2
                 if latest_parsed_result.stddevs:
                     detect_stdDev = latest_parsed_result.stddevs
                     detect_stdDev_x = detect_stdDev[0]
@@ -132,7 +132,7 @@ class LimelightSubsystem(Subsystem):
                 detect_stdDev_x = None
                 detect_stdDev_y = None
                 trust_telemetry = [validity, residual, detect_stdDev_x, detect_stdDev_y]
-                print(f"trust_telemetry:{trust_vision_data} -> {trust_telemetry}     IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+                # print(f"trust_telemetry:{trust_vision_data} -> {trust_telemetry}     IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
                 
                 if override_and_trust: trust_vision_data = True
                 viz_pose = Pose2d(Translation2d(vision_bot_pose_to_use[0], vision_bot_pose_to_use[1]),
@@ -143,18 +143,6 @@ class LimelightSubsystem(Subsystem):
             latest_parsed_result= None
             time_of_measurement = get_current_time_seconds()
 
-
-        ''' public static Pose2d toPose2D(double[] inData){
-        if(inData.length < 6)
-        {
-            //System.err.println("Bad LL 2D Pose Data!");
-            return new Pose2d();
-        }
-        Translation2d tran2d = new Translation2d(inData[0], inData[1]);
-        Rotation2d r2d = new Rotation2d(Units.degreesToRadians(inData[5]));
-        return new Pose2d(tran2d, r2d);
-    }'''
-
         return (trust_vision_data , viz_pose, latest_parsed_result, time_of_measurement)
 
 
@@ -163,81 +151,16 @@ class LimelightSubsystem(Subsystem):
     def periodic(self):
         if self.discovered_limelights:
             try:
-                # while True:
                 result = self.ll.get_latest_results()
                 _parsed_result = limelightresults.parse_results(result)
                 if _parsed_result is not None:
                     print("valid targets: ", _parsed_result.validity, ", pipelineIndex: ", _parsed_result.pipeline_id,", Targeting Latency: ", _parsed_result.targeting_latency)
                     self.parsed_result = _parsed_result
-                    
-                    #for tag in parsed_result.fiducialResults:
-                    #    print(tag.robot_pose_target_space, tag.fiducial_id)
-                # time.sleep(1)  # Set this to 0 for max fps
+
             except KeyboardInterrupt:
                 print("Program interrupted by user, shutting down.")
 
-            # pass
-
-    # def init(self):
-    #     pass
 
     def end(self):
         if self.discovered_limelights: self.ll.disable_websocket()
     
-'''discovered_limelights = limelight.discover_limelights(debug=True)
-print("discovered limelights:", discovered_limelights)
-
-if discovered_limelights:
-    limelight_address = discovered_limelights[0] 
-    ll = limelight.Limelight(limelight_address)
-    results = ll.get_results()
-    status = ll.get_status()
-    print("-----")
-    print("targeting results:", results)
-    print("-----")
-    print("status:", status)
-    print("-----")
-    print("temp:", ll.get_temp())
-    print("-----")
-    print("name:", ll.get_name())
-    print("-----")
-    print("fps:", ll.get_fps())
-    print("-----")
-    print("hwreport:", ll.hw_report())
-
-    ll.enable_websocket()
-   
-    # print the current pipeline settings
-    print(ll.get_pipeline_atindex(0))
-
-    # update the current pipeline and flush to disk
-    pipeline_update = {
-    'area_max': 98.7,
-    'area_min': 1.98778
-    }
-    ll.update_pipeline(json.dumps(pipeline_update),flush=1)
-
-    print(ll.get_pipeline_atindex(0))
-
-    # switch to pipeline 1
-    ll.pipeline_switch(1)
-
-    # update custom user data
-    ll.update_python_inputs([4.2,0.1,9.87])
-    
-    
-    try:
-        while True:
-            result = ll.get_latest_results()
-            parsed_result = limelightresults.parse_results(result)
-            if parsed_result is not None:
-                print("valid targets: ", parsed_result.validity, ", pipelineIndex: ", parsed_result.pipeline_id,", Targeting Latency: ", parsed_result.targeting_latency)
-                #for tag in parsed_result.fiducialResults:
-                #    print(tag.robot_pose_target_space, tag.fiducial_id)
-            time.sleep(1)  # Set this to 0 for max fps
-
-
-    except KeyboardInterrupt:
-        print("Program interrupted by user, shutting down.")
-    finally:
-        ll.disable_websocket()'''

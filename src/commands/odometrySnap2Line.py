@@ -30,15 +30,10 @@ class SnapToLineCommand(Command):
         offset_segments = [self.rightHand_offset_segment(start, end, square_robot_key_size, square_robot_key_size/2) for start, end in self.segments]
         # print(f'segment compare: {[(f"wall:{wall}",f"offset:{off}") for wall, off in zip(self.segments,offset_segments)]}')
         (trust_snap, snap_dist, closest_point) = self.get_closest_point_on_segments(current_pose.translation(), segments=offset_segments)
-        #TODO: add way to address the rotation of the robot or use self.drivetrain.reset_translation()
+        #TODO: add way to address the rotation of the robot or use self.drivetrain.reset_translation(); not sure what sid of the robot is against the wall
         if trust_snap:
             self.drivetrain.add_vision_measurement(Pose2d(closest_point, current_pose.rotation()), timestamp=get_current_time_seconds(), vision_measurement_std_devs=(snap_dist, snap_dist, 3.14))
-            '''add_vision_measurement(vision_robot_pose: Pose2d, timestamp: phoenix6.units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)'''
-            ''':param vision_measurement_std_devs: Standard deviations of the vision pose
-                                            measurement (x position in meters, y
-                                            position in meters, and heading in radians).
-                                            Increase these numbers to trust the vision
-                                            pose measurement less.'''
+
         else:
             print(f'Not trusting snap, snap_dist: {snap_dist} \n-\n-\n-\n--------------------------------')
 
@@ -64,7 +59,7 @@ class SnapToLineCommand(Command):
 
     
     def rightHand_offset_segment(self, start: Translation2d, end: Translation2d, offset: meters, shorten: meters) -> tuple[Translation2d, Translation2d]:
-        '''Returns a new segment that is offset to the right of the original segment by the given distance. And shortened ON EACH END by the given distance.'''
+        '''Returns a new segment that is offset to the right of the original segment by the given distance (e.g., width of robot). And shortened ON EACH END by the given distance.'''
         line_vec = end - start
         line_len = line_vec.norm()
         line_unitvec = line_vec / line_len

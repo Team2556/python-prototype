@@ -339,14 +339,18 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self._sim_notifier = Notifier(_sim_periodic)
         self._sim_notifier.startPeriodic(self._SIM_LOOP_PERIOD)
     
-    def use_vision(self, viz_pose, fpga_time_of_measurement):
-        # self.tare_everything()
-        # self.reset_pose(After_viz_update_odo_pose)
-        self.set_vision_measurement_std_devs((.031, .031, 40*6/180))
+    def use_vision_odometry_update(self, viz_pose, fpga_time_of_measurement):
+        self.set_vision_measurement_std_devs((.031, .031, 40*3.14/180))
         self.add_vision_measurement(viz_pose, fpga_time_of_measurement) #, vision_measurement_std_devs)
         
+        # self.tare_everything()
+        # self.reset_pose(After_viz_update_odo_pose)
+        # self.container.drivetrain.odometry_thread.set_thread_priority(99)
+        # self.container.drivetrain.OdometryThread.stop(self.container.drivetrain.odometry_thread)
+        # self.container.drivetrain.reset_pose(After_viz_update_odo_pose)
+        # self.container.drivetrain.OdometryThread.start(self.container.drivetrain.odometry_thread)
+        # self.container.drivetrain.odometry_thread.set_thread_priority(20)
         # After_viz_update_odo_pose = self.container.drivetrain.get_state().pose
         # self.container.drivetrain.reset_pose(After_viz_update_odo_pose)
-
         # self.odometry_thread.set_thread_priority(99)
         # self.container.drivetrain.OdometryThread.stop(self.container.drivetrain.odometry_thread)
