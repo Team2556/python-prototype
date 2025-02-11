@@ -186,22 +186,22 @@ class RobotContainer:
                 self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -controlAugment.smooth(self._joystick.getLeftY(), exponential_for_curving=5) * self._max_speed
+                        -controlAugment.smooth(self._joystick.getLeftY(), exponential_for_curving=3) * self._max_speed
                         * self.invertBlueRedDrive 
                     )  # Drive forward with negative Y (forward)
                     .with_velocity_y(
-                        -controlAugment.smooth(self._joystick.getLeftX(), exponential_for_curving=5) * self._max_speed
+                        -controlAugment.smooth(self._joystick.getLeftX(), exponential_for_curving=3) * self._max_speed
                         * self.invertBlueRedDrive 
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
                         -controlAugment.smooth(self._joystick.getRightX()) * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
-                    .with_center_of_rotation(Translation2d(x= self.robotWidthBumpered*(controlAugment
+                    .with_center_of_rotation(Translation2d(x= self.robotWidthBumpered*.2*(controlAugment
                                                                                     .smooth(controlAugment
                                                                                             .one_side_control_only( self._joystick.getRightY(), 'Pos'))),
                                                             # want y translation to depend on direction of turn
                                                             y= math.copysign(1,self._joystick.getRightX())) *
-                                                                self.robotWidthBumpered*(controlAugment
+                                                                self.robotWidthBumpered*.2*(controlAugment
                                                                                             .smooth(controlAugment
                                                                                                     .one_side_control_only( self._joystick.getRightY(), 'Pos'))))
                     # shift the center of rotation to opposite front corner, if the driver pulls down on the right stick in addition to the side. 

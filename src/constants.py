@@ -128,6 +128,39 @@ class CAN_Address(IntEnum):
     EIGHTEEN = auto()
     NINETEEN = auto()
     TWENTY = auto()
+    TWENTYONE = auto()
+    TWENTYTWO = auto()
+    TWENTYTHREE = auto()
+    TWENTYFOUR = auto()
+    TWENTYFIVE = auto()
+    TWENTYSIX = auto()
+    TWENTYSEVEN = auto()
+    TWENTYEIGHT = auto()
+    TWENTYNINE = auto()
+    #coral group
+    THIRTY = auto()
+    THIRTYONE = auto()
+    THIRTYTWO = auto()
+    THIRTYTHREE = auto()
+    THIRTYFOUR = auto()
+    THIRTYFIVE = auto()
+    THIRTYSIX = auto()
+    THIRTYSEVEN = auto()
+    THIRTYEIGHT = auto()
+    THIRTYNINE = auto()
+    #Algae group
+    FORTY = auto()
+    FORTYONE = auto()
+    FORTYTWO = auto()
+    FORTYTHREE = auto()
+    FORTYFOUR = auto()
+    FORTYFIVE = auto()
+    FORTYSIX = auto()
+    FORTYSEVEN = auto()
+    FORTYEIGHT = auto()
+    FORTYNINE = auto()
+    FIFTY = auto()
+
 #endregion
 
 #region Elevator Constants
@@ -136,9 +169,10 @@ class ElevatorConstants():
         kLeftMotorPort = CAN_Address.FOURTEEN
         kRightMotorPort = CAN_Address.FIFTEEN
         kJoystickPort = 0
-        kpeak_forward_torque_current = 8 #120
-        kpeak_reverse_torque_current = -8 #-120
+        kpeak_forward_torque_current = 10 #120
+        kpeak_reverse_torque_current = -10 #-120
         kincrement_m_per_sec_held = .25
+        kHomingRate = 1/30 # 1 meter in 30 seconds
 
         kElevatorKp = 2.0
         kElevatorKi = 0.0
@@ -149,10 +183,11 @@ class ElevatorConstants():
 
         kMinElevatorHeight = 0.05 #0.0508  # 2 inches
         kMaxElevatorHeight = .59  # 50 inches
-        kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.02
-        kCoralLv1 = 0.1 #height in meters
-        kCoralLv2 = 0.32#556
-        kCoralLv3 = 0.5588
+        kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.00002
+        ScaredSafetyFactor = 2
+        kCoralLv1 = 0.1/ScaredSafetyFactor #height in meters
+        kCoralLv2 = 0.32/ScaredSafetyFactor#556
+        kCoralLv3 = 0.5588/ScaredSafetyFactor
 
         kMaxVelocityMetersPerSecond = 1.5
         kMaxAccelerationMetersPerSecSquared = 0.5
@@ -165,8 +200,12 @@ class ElevatorConstants():
 
         kElevatorOffsetMeters = 0 #TODO: add description of how we are using this
 
-        kTopLimitSwitchChannel = 2
-        kBottomLimitSwitchChannel = 3
+        kBottomLeftLimitSwitchChannel = Rio_DIO.ZERO
+        kBottomRightLimitSwitchChannel = Rio_DIO.ONE
+        kTopLeftLimitSwitchChannel = Rio_DIO.TWO
+        kTopRightLimitSwitchChannel = Rio_DIO.THREE #TODO: ? two on top also?
+
+
 
 
 #endregion
@@ -174,9 +213,12 @@ class Override_DriveConstant:
     ...
     
 class AlgaeConstants:
-    kIntakeCANAddress1 = 13 # TODO: Correct the CAN Addresses pls
-    kIntakeCANAddress2 = 14
-    kAlgaeLimitSwitchChannel = 15 # So it doesn't input when limit switch activated
+    kIntakeCANAddress1 = CAN_Address.FORTY # TODO: Correct the CAN Addresses pls
+    kIntakeCANAddress2 = CAN_Address.FORTYONE
+    kAlgaeLimitSwitchChannel = Rio_DIO.FOUR # So it doesn't input when limit switch activated
 
 class RobotDimensions:
     WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)
+
+class CoralConstants:
+    kCoralMotorPort = CAN_Address.THIRTY
