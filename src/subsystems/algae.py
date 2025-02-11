@@ -8,6 +8,12 @@ from commands2.subsystem import Subsystem
 
 import phoenix6
 
+'''
+What this does (so far hopefully I think):
+- One button does a "pivoting thing" (pushes the algae into the storage?)
+- One joystick does the spinny wheels
+'''
+
 class AlgaeHandler(Subsystem):
     '''This thing does algae intake and discharge'''
     def __init__(self):
@@ -16,20 +22,18 @@ class AlgaeHandler(Subsystem):
         motorChannel2 = AlgaeConstants.kIntakeCANAddress2
         limitSwitchChannel = AlgaeConstants.kAlgaeLimitSwitchChannel
         
-        # 1 = The one spinning clockwise when intaking
-        # 2 = The one spinning counterclockwise when intaking
+        # 1 = The one doing the wheels
+        # 2 = The one doing the pivoting
+        # TODO: Name the algae motor variables better
         self.algaeMotor1 = phoenix6.hardware.TalonFX(motorChannel1, "rio")
         self.algaeMotor2 = phoenix6.hardware.TalonFX(motorChannel2, "rio")
+        
+        # self.algaeMotor1.set_position()
         
         # Make it so if motor is set at 0 then it resists any turning if force is applied to it
         # So algae doesn't fall out
         self.algaeMotor1.setNeutralMode(phoenix6.signals.NeutralModeValue.BRAKE)
         self.algaeMotor2.setNeutralMode(phoenix6.signals.NeutralModeValue.BRAKE)
-        
-        # Make it so motor 2 spins opposite of motor 1
-        self.algaeMotor2.set_control(
-            request = phoenix6.controls.Follower(self.algaeMotor1.device_id, oppose_master_direction=True)
-        )
         
         # Creates a "CTRE Control Request Object"
         self.velocityOut = phoenix6.controls.VoltageOut(output=0)
@@ -54,7 +58,7 @@ class AlgaeHandler(Subsystem):
         
         # Change the input stuffs
         speed = self.curveOffInput(controllerRightYInput, self.deadband)
-        # TODO: Change this to use the one main curveOffInput thing later
+        # TODO: Change this to use the one main curveOffInput thing later (actually not really)
         
         # Account for limit switches (if limit switch active then you can't intake)
         if self.limitSwitch.get() and speed > 0 and self.toggleLimitSwitch:
