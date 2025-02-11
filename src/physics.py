@@ -57,7 +57,7 @@ class PhysicsEngine:
             minHeight=ElevatorConstants.kMinElevatorHeight,
             maxHeight=ElevatorConstants.kMaxElevatorHeight,
             simulateGravity=True,
-            startingHeight=0,
+            startingHeight=.2,
             measurementStdDevs=[0.0, 0.0]
             )
         # def __init__(self, plant: wpimath._controls._controls.system.LinearSystem_2_1_2, gearbox: wpimath._controls._controls.plant.DCMotor, minHeight: wpimath.units.meters, maxHeight: wpimath.units.meters, simulateGravity: bool, startingHeight: wpimath.units.meters, measurementStdDevs: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)] = [0.0, 0.0]) -> None:

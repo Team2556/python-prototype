@@ -102,11 +102,18 @@
       }
     },
     "transitory": {
+      "DriveState": {
+        "Pose2d##v_/DriveState/Pose": {
+          "Translation2d##v_translation": {
+            "open": true
+          },
+          "open": true
+        }
+      },
       "LiveWindow": {
         ".status": {
           "open": true
-        },
-        "open": true
+        }
       },
       "PathPlanner": {
         "HotReload": {

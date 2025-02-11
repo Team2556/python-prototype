@@ -189,8 +189,8 @@ class ElevatorConstants():
         kCoralLv2 = 0.32/ScaredSafetyFactor#556
         kCoralLv3 = 0.5588/ScaredSafetyFactor
 
-        kMaxVelocityMetersPerSecond = 1.5
-        kMaxAccelerationMetersPerSecSquared = 0.5
+        kMaxVelocityMetersPerSecond = 1.5/ScaredSafetyFactor
+        kMaxAccelerationMetersPerSecSquared = 0.5/ScaredSafetyFactor
 
         kSVolts = 0
         kGVolts = 0.0

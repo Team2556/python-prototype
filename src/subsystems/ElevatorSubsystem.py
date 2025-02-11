@@ -32,6 +32,13 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         self.elevmotor_left.setNeutralMode(NeutralModeValue.BRAKE)
         self.elevCANcoder_left = phoenix6.hardware.CANcoder(ElevatorConstants.kLeftMotorPort)
         self.elevCANcoder_right = phoenix6.hardware.CANcoder(ElevatorConstants.kRightMotorPort)
+        self.limit_bottomLeft = wpilib.DigitalInput(ElevatorConstants.kBottomLeftLimitSwitchChannel)
+        self.limit_bottomRight = wpilib.DigitalInput(ElevatorConstants.kBottomRightLimitSwitchChannel)
+        self.limit_topLeft = wpilib.DigitalInput(ElevatorConstants.kTopLeftLimitSwitchChannel)
+        self.limit_topRight = wpilib.DigitalInput(ElevatorConstants.kTopRightLimitSwitchChannel)
+
+        self.limit_bottom = (self.limit_bottomLeft.get() and self.limit_bottomRight.get())
+        self.limit_top = (self.limit_topLeft.get() and self.limit_topRight.get())
 
 
         cfg = configs.TalonFXConfiguration()
@@ -56,6 +63,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         cfg.stator_current_limit_enable = True
         cfg.torque_current.peak_forward_torque_current = ElevatorConstants.kpeak_forward_torque_current
         cfg.torque_current.peak_reverse_torque_current = ElevatorConstants.kpeak_reverse_torque_current
+        '''Would only work with CAN based (prob CRTE only) sensors as limitswitches
         elevmotorLimitswitch_cfg = (configs.HardwareLimitSwitchConfigs()
                                        .with_forward_limit_enable(True)
                                        .with_forward_limit_autoset_position_enable(True)
@@ -68,7 +76,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
                                        .with_reverse_limit_remote_sensor_id(ElevatorConstants.kBottomLimitSwitchChannel)
                                        .with_reverse_limit_type(signals.ReverseLimitTypeValue.NORMALLY_OPEN)
                                        )
-        cfg.with_hardware_limit_switch(elevmotorLimitswitch_cfg)
+        cfg.with_hardware_limit_switch(elevmotorLimitswitch_cfg)'''
 
         elevmotorSoftLimits_cfg = (configs.SoftwareLimitSwitchConfigs()
                                    .with_forward_soft_limit_enable(True)
@@ -97,10 +105,13 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         #create handel for the control
         # Make sure we start at 0
-        self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         #TODO: add to teleop init a homing command, once we have the limit switches
+        self.homing_control = (controls.VelocityVoltage(-ElevatorConstants.kHomingRate)
+                               .with_slot(0)
+                               .with_limit_reverse_motion(self.limit_bottom))
         self.elevmotor_left.set_position(0)#self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
         #move up some
+        self.position_voltage = controls.PositionVoltage(ElevatorConstants.kElevatorDistanceMovedAfterContactWithLimitSwitch).with_slot(0)
         # self.elevmotor_left.set_control(request=self.position_voltage.with_position(self.distanceToRotations(inchesToMeters(.25)))
 
 

@@ -108,14 +108,12 @@
             "open": true
           },
           "open": true
-        },
-        "open": true
+        }
       },
       "LiveWindow": {
         ".status": {
           "open": true
-        },
-        "open": true
+        }
       },
       "PathPlanner": {
         "HotReload": {
@@ -134,7 +132,8 @@
         "Elevator": {
           "Elevator Root": {
             "open": true
-          }
+          },
+          "open": true
         },
         "open": true
       },
