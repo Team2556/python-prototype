@@ -169,8 +169,8 @@ class ElevatorConstants():
         kLeftMotorPort = CAN_Address.FOURTEEN
         kRightMotorPort = CAN_Address.FIFTEEN
         kJoystickPort = 0
-        kpeak_forward_torque_current = 10 #120
-        kpeak_reverse_torque_current = -10 #-120
+        kpeak_forward_torque_current = 30 #120
+        kpeak_reverse_torque_current = -30 #-120
         kincrement_m_per_sec_held = .25
         kHomingRate = 1/30 # 1 meter in 30 seconds
 
