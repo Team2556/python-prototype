@@ -15,6 +15,7 @@ from constants import RobotDimensions, ElevatorConstants
 from subsystems import (ElevatorSubsystem,
                         limelight,
                         # oneMotor,
+                        coral,
                         )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -96,6 +97,7 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
+        self.coralTrack = coral.CoralTrack()
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
@@ -223,6 +225,19 @@ class RobotContainer:
 
 
         #endsection vision related commands
+        
+        # Coral Track controls 
+        self._joystick2.x().whileTrue(
+            commands2.cmd.run(
+                lambda: self.coralTrack.discharge(), self.coralTrack
+            )
+        )
+        
+        self.coralTrack.setDefaultCommand(
+            commands2.cmd.run(
+                lambda: self.coralTrack.default(), self.coralTrack
+            )
+        )
 
         # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
