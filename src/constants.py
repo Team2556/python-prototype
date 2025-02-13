@@ -174,7 +174,7 @@ class ElevatorConstants():
         kincrement_m_per_sec_held = .25
         kHomingRate = 1/30 # 1 meter in 30 seconds
 
-        kElevatorKp = 2.0
+        kElevatorKp = 1.0
         kElevatorKi = 0.0
         kElevatorKd = .0
         kElevatorGearing = 6 #10.0
@@ -184,7 +184,7 @@ class ElevatorConstants():
         kMinElevatorHeight = 0.00 #0.0508  # 2 inches
         kMaxElevatorHeight = inchesToMeters(26)  # 50 inches TODO: make this smaller
         kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.00002
-        ScaredSafetyFactor = 2
+        ScaredSafetyFactor = 200
         kCoralLv1 = 0.1/ScaredSafetyFactor #height in meters
         kCoralLv2 = 0.32/ScaredSafetyFactor#556
         kCoralLv3 = 0.5588/ScaredSafetyFactor
@@ -193,7 +193,7 @@ class ElevatorConstants():
         kMaxAccelerationMetersPerSecSquared = 0.5/ScaredSafetyFactor
 
         kSVolts = 0
-        kGVolts = 0.0
+        kGVolts = 0.01
 
         kVVoltSecondPerMeter = 0#1.5
         kAVoltSecondSquaredPerMeter = 0#0.75
