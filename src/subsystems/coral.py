@@ -39,18 +39,18 @@ class CoralTrack(Subsystem):
         self.motorController = rev.SparkFlex(CoralConstants.kCoralMotorPort, rev.SparkFlex.MotorType.kBrushless)
         
         # Mr. Belk did this
-        # self.globalConfig = rev.SparkMaxConfig()
-        # self.motorControllerConfig = rev.SparkMaxConfig()
-        # self.motorControllerConfig.apply(self.globalConfig)
-        # self.motorController.configure(
-        #     self.globalConfig,
-        #     rev.SparkBase.ResetMode.kResetSafeParameters,
-        #     rev.SparkBase.PersistMode.kPersistParameters,
-        # )
+        self.globalConfig = rev.SparkMaxConfig()
+        self.motorControllerConfig = rev.SparkMaxConfig()
+        self.motorControllerConfig.apply(self.globalConfig)
+        self.motorController.configure(
+            self.globalConfig,
+            rev.SparkBase.ResetMode.kResetSafeParameters,
+            rev.SparkBase.PersistMode.kPersistParameters,
+        )
         
         # Put breaker light stuff here
-        self.leftBreakerLight = DigitalInput(CoralConstants.kLeftBreakerLight)
-        self.rightBreakerLight = DigitalInput(CoralConstants.kRightBreakerLight)
+        # self.leftBreakerLight = DigitalInput(CoralConstants.kLeftBreakerLight)
+        # self.rightBreakerLight = DigitalInput(CoralConstants.kRightBreakerLight)
         
         # Setup the Timer
         self.timer = wpilib.Timer()
@@ -63,12 +63,12 @@ class CoralTrack(Subsystem):
         '''Centers the coral on the track using two breaker lights'''
         # Aidan did this yay
 
-        if self.rightBreakerLight.get() and not self.leftBreakerLight.get(): # Move track left
-            self.spinMotors(-self.centerMultiplier)
-        elif self.leftBreakerLight.get() and not self.rightBreakerLight.get(): # Move track right
-            self.spinMotors(self.centerMultiplier)
-        else: # Stop moving track
-            self.spinMotors(0)
+        # if self.rightBreakerLight.get() and not self.leftBreakerLight.get(): # Move track left
+        #     self.spinMotors(-self.centerMultiplier)
+        # elif self.leftBreakerLight.get() and not self.rightBreakerLight.get(): # Move track right
+        #     self.spinMotors(self.centerMultiplier)
+        # else: # Stop moving track
+        #     self.spinMotors(0)
         
     def discharge(self):
         '''Should be doing the discharge when a button is pressed
@@ -104,8 +104,8 @@ class CoralTrack(Subsystem):
         SmartDashboard.putNumber("Center Multiplier", self.centerMultiplier)
         SmartDashboard.putNumber("Discharge Multiplier", self.dischargeMultiplier)
         SmartDashboard.putNumber("Discharge Time", self.coralDischargeTime)
-        SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
-        SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
+        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
+        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
         # Put more stuff here maybe
         
     def updateSmartDashboard(self) -> None:
@@ -113,8 +113,8 @@ class CoralTrack(Subsystem):
         
         # Update values TO the Smart Dashboard (put stuff here)
         SmartDashboard.putNumber("Coral Track Motor", self.motorController.get())
-        SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
-        SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
+        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
+        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
         
         # Update values FROM the Smart Dashboard
         self.centerMultiplier = SmartDashboard.getNumber("Center Multiplier", self.centerMultiplier)
