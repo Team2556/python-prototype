@@ -222,3 +222,5 @@ class RobotDimensions:
 
 class CoralConstants:
     kCoralMotorPort = CAN_Address.THIRTY
+    kLeftBreakerLight = 8 # TODO: Get the actual IDs
+    kRightBreakerLight = 9
