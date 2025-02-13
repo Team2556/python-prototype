@@ -11,6 +11,7 @@
 
 import limelight
 import limelightresults
+from robotUtils.limelight import LimelightHelpers
 # import limelightHelpers (only in Java/C++ so far; could write it up)
 import json
 import time
