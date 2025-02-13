@@ -80,7 +80,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         elevmotorSoftLimits_cfg = (configs.SoftwareLimitSwitchConfigs()
                                    .with_forward_soft_limit_enable(True)
-                                   .with_forward_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kMaxElevatorHeight-inchesToMeters(5)))
+                                   .with_forward_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kMaxElevatorHeight))
                                    .with_reverse_soft_limit_enable(True)
                                    .with_reverse_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
                                    )
@@ -98,6 +98,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
         for _ in range(0, 5):
             status = self.elevmotor_left.configurator.apply(cfg)
+            status = self.elevmotor_right.configurator.apply(cfg)
             if status.is_ok():
                 break
         if not status.is_ok():
@@ -146,8 +147,9 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
     def rotationsToDistance(self, rotations: float) -> float:
         return rotations * 2*pi*ElevatorConstants.kElevatorDrumRadius/ElevatorConstants.kElevatorGearing
     
-    def update_setpoint(self, setpoint: float, incremental = True, constrain: bool = True) -> None:
+    def update_setpoint(self, setpoint: float, incremental = True, constrain: bool = False) -> None:
         '''Setpoint is in meters of elevator elevation from lowest physical limit'''
+        
         if incremental:
             self.setpoint += setpoint
         else:
@@ -162,9 +164,17 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
     
     def reset_zero_point_here(self, let_droop: bool = True) -> None:
         #put the motor in neutral - no breaking
-        if let_droop: self.elevmotor_left.setNeutralMode(NeutralModeValue.COAST)
-        self.elevmotor_left.set_position(0)
-
+        # if let_droop: self.elevmotor_left.set_control(self.elevmotor_left.setNeutralMode(NeutralModeValue.COAST))
+        
+        # self.elevmotor_left.set_position(0) #self.elevmotor_left.set_control(lambda: )
+        return commands2.cmd.run(lambda: self.elevmotor_left.set_position(0))
+        
+        
+    def let_elevator_drop(self) -> None:
+        #put the motor in neutral - no breaking
+        return commands2.cmd.run(lambda: self.elevmotor_left.setNeutralMode(NeutralModeValue.COAST) )
+    def elevator_motors_break(self):
+        return commands2.cmd.run(lambda: self.elevmotor_left.setNeutralMode(NeutralModeValue.BRAKE))
     
 
     def moveElevator(self, movement=None) -> None:

@@ -36,7 +36,7 @@ from commands.liftElevator import LiftElevatorCommand
 
 
 
-from subsystems import algae
+# from subsystems import algae
 
 class RobotContainer:
     """
@@ -86,7 +86,7 @@ class RobotContainer:
         
 
         
-        self.algae = algae.AlgaeHandler()
+        # self.algae = algae.AlgaeHandler()
 
         self._logger = Telemetry(self._max_speed)
 
@@ -106,6 +106,7 @@ class RobotContainer:
         if self.ENABLE_ELEVATOR: 
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
+            self._elevator_motors_break = self.elevator.elevator_motors_break
         #endsection elevator
 
         # Vision
@@ -217,7 +218,8 @@ class RobotContainer:
         # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
         if self.ENABLE_ELEVATOR: 
             self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
-            (self._joystick2.start() & self._joystick2.a()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
+            (self._joystick2.start() & self._joystick2.a()).whileTrue( self._reset_zero_point_here)#.onFalse(lambda: self._elevator_motors_break) #TODO: fix this to not crash :)
+            # (self._joystick2.start() & self._joystick2.x()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
         
         #section vision related commands
         
@@ -252,11 +254,11 @@ class RobotContainer:
         # Do the default command thing that tells algae controller stuff
         # Algae controls with controller 2 left joystick
         # It's negative because that's how xbox controllers work
-        self.algae.setDefaultCommand(
+        '''self.algae.setDefaultCommand(
             commands2.cmd.run(
                 lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
             )
-        )
+        )'''
 
         # self._joystick.pov(0).whileTrue(
         #     self.drivetrain.apply_request(

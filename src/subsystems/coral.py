@@ -37,7 +37,14 @@ class CoralTrack(Subsystem):
         
         # I'm assuming we're using rev.SparkFlex documantation
         self.motorController = rev.SparkFlex(CoralConstants.kCoralMotorPort, rev.SparkFlex.MotorType.kBrushless)
-        
+        self.globalConfig = rev.SparkMaxConfig()
+        self.motorControllerConfig = rev.SparkMaxConfig()
+        self.motorControllerConfig.apply(self.globalConfig)
+        self.motorController.configure(
+            self.globalConfig,
+            rev.SparkBase.ResetMode.kResetSafeParameters,
+            rev.SparkBase.PersistMode.kPersistParameters,
+        )
         # Put breaker light stuff here
         # self.leftBreakerLight = ...
         # self.rightBreakerLight = ...

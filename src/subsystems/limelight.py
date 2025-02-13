@@ -154,7 +154,7 @@ class LimelightSubsystem(Subsystem):
                 result = self.ll.get_latest_results()
                 _parsed_result = limelightresults.parse_results(result)
                 if _parsed_result is not None:
-                    print("valid targets: ", _parsed_result.validity, ", pipelineIndex: ", _parsed_result.pipeline_id,", Targeting Latency: ", _parsed_result.targeting_latency)
+                    # print("valid targets: ", _parsed_result.validity, ", pipelineIndex: ", _parsed_result.pipeline_id,", Targeting Latency: ", _parsed_result.targeting_latency)
                     self.parsed_result = _parsed_result
 
             except KeyboardInterrupt:

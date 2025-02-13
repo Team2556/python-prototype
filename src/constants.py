@@ -169,8 +169,8 @@ class ElevatorConstants():
         kLeftMotorPort = CAN_Address.FOURTEEN
         kRightMotorPort = CAN_Address.FIFTEEN
         kJoystickPort = 0
-        kpeak_forward_torque_current = 30 #120
-        kpeak_reverse_torque_current = -30 #-120
+        kpeak_forward_torque_current = 35 #120
+        kpeak_reverse_torque_current = -35 #-120
         kincrement_m_per_sec_held = .25
         kHomingRate = 1/30 # 1 meter in 30 seconds
 
@@ -181,8 +181,8 @@ class ElevatorConstants():
         kElevatorDrumRadius = .035/2   # half of 35mm in meters
         kCarriageMass = 4 # 4 kg
 
-        kMinElevatorHeight = 0.05 #0.0508  # 2 inches
-        kMaxElevatorHeight = .59  # 50 inches
+        kMinElevatorHeight = 0.00 #0.0508  # 2 inches
+        kMaxElevatorHeight = inchesToMeters(26)  # 50 inches TODO: make this smaller
         kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.00002
         ScaredSafetyFactor = 2
         kCoralLv1 = 0.1/ScaredSafetyFactor #height in meters
@@ -198,7 +198,7 @@ class ElevatorConstants():
         kVVoltSecondPerMeter = 0#1.5
         kAVoltSecondSquaredPerMeter = 0#0.75
 
-        kElevatorOffsetMeters = 0 #TODO: add description of how we are using this
+        kElevatorOffsetMeters = 0 #Used in softlimit minimum
 
         kBottomLeftLimitSwitchChannel = Rio_DIO.ZERO
         kBottomRightLimitSwitchChannel = Rio_DIO.ONE
