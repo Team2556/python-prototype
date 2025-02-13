@@ -15,7 +15,7 @@ Coral Control Pseudocode:
 '''
 
 import wpilib
-from wpilib import SmartDashboard
+from wpilib import DigitalInput, SmartDashboard
 from constants import CoralConstants
 
 from commands2.subsystem import Subsystem
@@ -46,8 +46,8 @@ class CoralTrack(Subsystem):
             rev.SparkBase.PersistMode.kPersistParameters,
         )
         # Put breaker light stuff here
-        # self.leftBreakerLight = ...
-        # self.rightBreakerLight = ...
+        self.leftBreakerLight = DigitalInput(0)
+        self.rightBreakerLight = DigitalInput(1)
         
         # Setup the Timer
         self.timer = wpilib.Timer()
@@ -58,9 +58,19 @@ class CoralTrack(Subsystem):
         
     def center(self):
         '''Centers the coral on the track using two breaker lights'''
-        self.spinMotors(0) # For now
         # The rest of the stuff here is Aidan's problem (hopefully)
         
+        ''' Will center the coral by making sure both robot beambrakes see a placed coral '''
+
+        if self.rightBreakerLight.get() and not self.leftBreakerLight.get(): # if right beambrake is sensing something but not the left beambrake, then:
+            # Move track left
+            self.spinMotors(-self.centerMultiplier)
+        elif self.leftBreakerLight.get() and not self.rightBreakerLight.get(): # elif left beambrake is sensing something but not the right beambrake, then:
+            # Move track right
+            self.spinMotors(self.centerMultiplier)
+        elif self.leftBreakerLight.get() and self.rightBreakerLight.get(): # elif left beambrake AND right beambrake senses something, then:
+            # Stop moving track
+            self.spinMotors(0)
         self.updateSmartDashboard() # Keep this at the end of the method
         
     def discharge(self):
@@ -78,8 +88,10 @@ class CoralTrack(Subsystem):
     def default(self):
         '''When discharge button is not pressed'''
         if self.timer.get() > self.coralDischargeTime:
-            self.center()
-        
+            beamBrakerLightsAddedToRobot = False
+            if beamBrakerLightsAddedToRobot:
+                self.center()
+                
     def spinMotors(self, value):
         '''Function that handles all the motors '''
         self.motorController.set(value)
@@ -91,8 +103,8 @@ class CoralTrack(Subsystem):
         SmartDashboard.putNumber("Center Multiplier", self.centerMultiplier)
         SmartDashboard.putNumber("Discharge Multiplier", self.dischargeMultiplier)
         SmartDashboard.putNumber("Discharge Time", self.coralDischargeTime)
-        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight)
-        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight)
+        SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight)
+        SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight)
         # Put more stuff here maybe
         
     def updateSmartDashboard(self) -> None:
@@ -100,8 +112,8 @@ class CoralTrack(Subsystem):
         
         # Update values TO the Smart Dashboard (put stuff here)
         SmartDashboard.putNumber("Coral Track Motor", self.motorController.get())
-        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight)
-        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight)
+        SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight)
+        SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight)
         
         # Update values FROM the Smart Dashboard
         self.centerMultiplier = SmartDashboard.getNumber("Center Multiplier", self.centerMultiplier)
