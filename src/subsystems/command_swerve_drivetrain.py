@@ -8,6 +8,8 @@ from typing import Callable, overload
 from wpilib import DriverStation, Notifier, RobotController
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Rotation2d
+
+from robotUtils.limelight import LimelightHelpers
 # from archive import odometry_fuse
 
 
@@ -148,6 +150,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             drivetrain_constants, arg0, arg1, arg2, arg3
         )
 
+
+        self.pigeon2.reset()
+        
         self._sim_notifier: Notifier | None = None
         self._last_sim_time: units.second = 0.0
 
@@ -324,6 +329,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                     else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
                 )
                 self._has_applied_operator_perspective = True
+        # if we are not in simulation, add vision measurement
+        '''may do this if don't need to evaluate a trust function (beyond limelight's validity)
+        if not utils.is_simulation():
+            self.use_vision_odometry_update()'''
         
 
     def _start_sim_thread(self):
@@ -340,9 +349,34 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self._sim_notifier.startPeriodic(self._SIM_LOOP_PERIOD)
     
     def use_vision_odometry_update(self, viz_pose, fpga_time_of_measurement):
-        self.set_vision_measurement_std_devs((.031, .031, 40*3.14/180))
-        self.add_vision_measurement(viz_pose, fpga_time_of_measurement) #, vision_measurement_std_devs)
+        # self.set_vision_measurement_std_devs((.031, .031, 40*3.14/180))
+        # self.add_vision_measurement(viz_pose, fpga_time_of_measurement) #, vision_measurement_std_devs)
+    
+        # def _add_vision_measurements(self) -> None:
+        """
+        Add vision measurement to MegaTag2
+        """
+
+        LimelightHelpers.set_robot_orientation(
+            "",
+            self.pigeon2.get_yaw().value,
+            self.pigeon2.get_angular_velocity_z_world().value,
+            self.pigeon2.get_pitch().value,
+            self.pigeon2.get_angular_velocity_y_world().value,
+            self.pigeon2.get_roll().value,
+            self.pigeon2.get_angular_velocity_x_world().value
+        )
+
+        # get botpose estimate with origin on blue side of field
+        mega_tag2 = LimelightHelpers.get_botpose_estimate_wpiblue_megatag2("")
         
+        #if we are spinning slower than 720 deg/sec and we see tags
+        if abs(self.pigeon2.get_angular_velocity_z_world().value) <= 720 and mega_tag2.tag_count > 0:
+            
+            # set and add vision measurement
+            self.set_vision_measurement_std_devs((0.7, 0.7, 9999999))
+            self.add_vision_measurement(mega_tag2.pose, utils.fpga_to_current_time(mega_tag2.timestamp_seconds))
+    
         # self.tare_everything()
         # self.reset_pose(After_viz_update_odo_pose)
         # self.container.drivetrain.odometry_thread.set_thread_priority(99)
