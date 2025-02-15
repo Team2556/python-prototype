@@ -160,6 +160,8 @@ class CAN_Address(IntEnum):
     FORTYEIGHT = auto()
     FORTYNINE = auto()
     FIFTY = auto()
+    #Climb group
+    FIFTYONE = auto()
 
 #endregion
 
@@ -224,3 +226,14 @@ class CoralConstants:
     kCoralMotorPort = CAN_Address.THIRTY
     kLeftBreakerLight = 8 # TODO: Get the actual IDs
     kRightBreakerLight = 9
+
+class ClimbConstants:
+    kClimbMotorPort = CAN_Address.FIFTYONE
+    kTopLimitSwitchChannel = Rio_DIO.FOUR
+    kBottomLimitSwitchChannel = Rio_DIO.FIVE
+    kClimbHookZeroEntry = 1
+    kMaxVelocityMetersPerSecond = 1
+    kMaxAccelerationMetersPerSecondSquared = 0.5
+    kPClimbController = 0
+    kIClimbController = 0
+    kDClimbController = 0
