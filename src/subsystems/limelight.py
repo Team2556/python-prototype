@@ -28,8 +28,13 @@ class LimelightSubsystem(Subsystem):
         print("discovered limelights:", self.discovered_limelights)
 
         if self.discovered_limelights:
-            limelight_address = self.discovered_limelights[0] 
-            self.ll = limelight.Limelight(limelight_address)
+            self.qty_limelights = len(self.discovered_limelights)
+            print("'\n-------------\n------------------\n'qty limelights:", self.qty_limelights,'\n-------------\n------------------\n')
+            limelight_address_1 = self.discovered_limelights[0] #TODO make us able to use multiple limelights; maybe a second subsystem
+            self.ll = limelight.Limelight(limelight_address_1)
+            if len(self.discovered_limelights) > 1:
+                limelight_address_2 = self.discovered_limelights[1]
+                self.ll2 = limelight.Limelight(limelight_address_2)
             results = self.ll.get_results()
             status = self.ll.get_status()
             print("-----")
@@ -44,6 +49,11 @@ class LimelightSubsystem(Subsystem):
             print("fps:", self.ll.get_fps())
             print("-----")
             print("hwreport:", self.ll.hw_report())
+
+            # self.ll.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
+            # self.ll2.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
+
+
 
             self.ll.enable_websocket()
             print(self.ll.get_pipeline_atindex(0))
@@ -97,7 +107,7 @@ class LimelightSubsystem(Subsystem):
         return self.ll.enable_websocket()
     
     #section specialty utilities
-    def trust_target(self, robot_pose: Pose2d, residual_threshold=1000000000, override_and_trust=False): #TODO: fix threshold
+    def trust_target(self, robot_pose: Pose2d, residual_threshold=1000000000, override_and_trust=True): #TODO: fix threshold
         #calculate distance to the detected target
         #will the results hav only one target's results? assume one for now
         # Done: check unit consistency: botpose is in meters, robot_pose is in meters
