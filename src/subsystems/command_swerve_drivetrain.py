@@ -5,7 +5,7 @@ from pathplannerlib.auto import AutoBuilder, RobotConfig
 from pathplannerlib.controller import PIDConstants, PPHolonomicDriveController
 from phoenix6 import SignalLogger, swerve, units, utils
 from typing import Callable, overload
-from wpilib import DriverStation, Notifier, RobotController
+from wpilib import DriverStation, Notifier, RobotController, SmartDashboard
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Rotation2d
 
@@ -333,7 +333,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         '''may do this if don't need to evaluate a trust function (beyond limelight's validity)
         if not utils.is_simulation():
             self.use_vision_odometry_update()'''
+        self.use_vision_odometry_update(limelight_to_use='limelight')
+        self.use_vision_odometry_update(limelight_to_use='limelight-four')
         
+        SmartDashboard.putNumber("Rotation In drivetrain", self.get_state().pose.rotation().degrees() )
 
     def _start_sim_thread(self):
         def _sim_periodic():
@@ -348,7 +351,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self._sim_notifier = Notifier(_sim_periodic)
         self._sim_notifier.startPeriodic(self._SIM_LOOP_PERIOD)
     
-    def use_vision_odometry_update(self, viz_pose, fpga_time_of_measurement):
+    def use_vision_odometry_update(self, limelight_to_use= "limelight"):
         # self.set_vision_measurement_std_devs((.031, .031, 40*3.14/180))
         # self.add_vision_measurement(viz_pose, fpga_time_of_measurement) #, vision_measurement_std_devs)
     
@@ -357,9 +360,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         Add vision measurement to MegaTag2
         """
 
+        SmartDashboard.putNumber("Rotation In drivetrain -VisionUpdate", self.get_state().pose.rotation().degrees() )
         LimelightHelpers.set_robot_orientation(
-            "",
-            self.get_state().pose.rotation().degrees,  #self.pigeon2.get_yaw().value,
+            limelight_to_use,
+            self.get_state().pose.rotation().degrees(),  #self.pigeon2.get_yaw().value,
             0,  #self.pigeon2.get_angular_velocity_z_world().value,
             0,  #self.pigeon2.get_pitch().value,
             0,  #self.pigeon2.get_angular_velocity_y_world().value,
@@ -368,7 +372,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         )
 
         # get botpose estimate with origin on blue side of field
-        mega_tag2 = LimelightHelpers.get_botpose_estimate_wpiblue_megatag2("limelight")
+        mega_tag2 = LimelightHelpers.get_botpose_estimate_wpiblue_megatag2(limelight_to_use)
         
         
         #if we are spinning slower than 720 deg/sec and we see tags
