@@ -22,14 +22,14 @@ from commands2.subsystem import Subsystem
 
 import rev
 
-# TODO: Figure out how to delete the log (hoot) stuff better
-
 class CoralTrack(Subsystem):
     '''
         Handles all the coral track stuff; the centering and discharge.
         Uses one controller input (press to discharge)
     '''
     def __init__(self):
+        # TODO: Figure out is setting motors to 1 means right
+        
         # These should be tuned sometime later
         self.centerMultiplier = 0.08
         self.dischargeMultiplier = 0.16
@@ -38,12 +38,10 @@ class CoralTrack(Subsystem):
         # I'm assuming we're using rev.SparkFlex documantation
         self.motorController = rev.SparkFlex(CoralConstants.kCoralMotorPort, rev.SparkFlex.MotorType.kBrushless)
         
-        # Mr. Belk did this
-        self.globalConfig = rev.SparkMaxConfig()
+        # Mr. Belk did this; it's supposed to give the motor some default settings
         self.motorControllerConfig = rev.SparkMaxConfig()
-        self.motorControllerConfig.apply(self.globalConfig)
         self.motorController.configure(
-            self.globalConfig,
+            self.motorControllerConfig,
             rev.SparkBase.ResetMode.kResetSafeParameters,
             rev.SparkBase.PersistMode.kPersistParameters,
         )
@@ -100,12 +98,12 @@ class CoralTrack(Subsystem):
     def setupSmartDashboard(self) -> None:
         '''Sets up the Smart Dashboard for with all the cool things'''
         SmartDashboard.putNumber("Coral Track Motor", self.motorController.get())
+        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
+        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
         
         SmartDashboard.putNumber("Center Multiplier", self.centerMultiplier)
         SmartDashboard.putNumber("Discharge Multiplier", self.dischargeMultiplier)
         SmartDashboard.putNumber("Discharge Time", self.coralDischargeTime)
-        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
-        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
         # Put more stuff here maybe
         
     def updateSmartDashboard(self) -> None:

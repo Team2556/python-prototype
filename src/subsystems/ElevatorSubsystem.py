@@ -25,22 +25,32 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         wpilib.SmartDashboard.putNumber("Elevator/Setpoint", 0.0)
         self.setpoint = wpilib.SmartDashboard.getNumber("Elevator/Setpoint", 0.0)
 
+        # Declare the motors
         self.elevmotor_right = phoenix6.hardware.TalonFX(ElevatorConstants.kRightMotorPort, "rio")
-        self.elevmotor_left = phoenix6.hardware.TalonFX( ElevatorConstants.kLeftMotorPort, "rio")
+        self.elevmotor_left = phoenix6.hardware.TalonFX(ElevatorConstants.kLeftMotorPort, "rio")
+        
+        # Make the right motor follow the left (so moving the left one moves the right one in the opposite direction)
         self.elevmotor_right.set_control(request=Follower(self.elevmotor_left.device_id, oppose_master_direction=True))
+        
+        # Make it so when motor speed is set to 0 then it stays at 0 and resists movement against it
         self.elevmotor_right.setNeutralMode(NeutralModeValue.BRAKE)
         self.elevmotor_left.setNeutralMode(NeutralModeValue.BRAKE)
+        
+        # Declare the encoders (they're not referenced later but still needed?)
         self.elevCANcoder_left = phoenix6.hardware.CANcoder(ElevatorConstants.kLeftMotorPort)
         self.elevCANcoder_right = phoenix6.hardware.CANcoder(ElevatorConstants.kRightMotorPort)
+        
+        # Declare Limit switches (2 on each direction)
         self.limit_bottomLeft = wpilib.DigitalInput(ElevatorConstants.kBottomLeftLimitSwitchChannel)
         self.limit_bottomRight = wpilib.DigitalInput(ElevatorConstants.kBottomRightLimitSwitchChannel)
         self.limit_topLeft = wpilib.DigitalInput(ElevatorConstants.kTopLeftLimitSwitchChannel)
         self.limit_topRight = wpilib.DigitalInput(ElevatorConstants.kTopRightLimitSwitchChannel)
 
+        # Declare booleans that record if both limit switches on one side are active
         self.limit_bottom = (self.limit_bottomLeft.get() and self.limit_bottomRight.get())
         self.limit_top = (self.limit_topLeft.get() and self.limit_topRight.get())
 
-
+        # Setup all the PID stuff
         cfg = configs.TalonFXConfiguration()
         cfg.slot0.k_p = ElevatorConstants.kElevatorKp
         cfg.slot0.k_i = ElevatorConstants.kElevatorKi
@@ -93,7 +103,6 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         self.cfg_slot0 = cfg.slot0
 
-        
         # Retry config apply up to 5 times, report if failure
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
         for _ in range(0, 5):
