@@ -360,7 +360,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         Add vision measurement to MegaTag2
         """
 
-        SmartDashboard.putNumber("Rotation In drivetrain -VisionUpdate", self.get_state().pose.rotation().degrees() )
+        SmartDashboard.putNumber(f"Rotation In drivetrain -VisionUpdate{limelight_to_use}", self.get_state().pose.rotation().degrees() )
         LimelightHelpers.set_robot_orientation(
             limelight_to_use,
             self.get_state().pose.rotation().degrees(),  #self.pigeon2.get_yaw().value,
