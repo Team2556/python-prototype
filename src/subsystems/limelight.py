@@ -116,7 +116,7 @@ class LimelightSubsystem(Subsystem):
             latest_parsed_result = limelightresults.parse_results(self.ll.get_latest_results())
             self.ll 
             detector_confidences = [detector.confidence for detector in latest_parsed_result.detectorResults]
-            print("detector confidences:", detector_confidences)
+            # print("detector confidences:", detector_confidences) Commented out by Sebastian because it was annoying
             if latest_parsed_result:
                 validity = latest_parsed_result.validity #what units are validity in ?
                 trust_vision_data *= (validity==1) 

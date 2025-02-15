@@ -15,7 +15,7 @@ Coral Control Pseudocode:
 '''
 
 import wpilib
-from wpilib import SmartDashboard
+from wpilib import DigitalInput, SmartDashboard
 from constants import CoralConstants
 
 from commands2.subsystem import Subsystem
@@ -37,6 +37,8 @@ class CoralTrack(Subsystem):
         
         # I'm assuming we're using rev.SparkFlex documantation
         self.motorController = rev.SparkFlex(CoralConstants.kCoralMotorPort, rev.SparkFlex.MotorType.kBrushless)
+        
+        # Mr. Belk did this
         self.globalConfig = rev.SparkMaxConfig()
         self.motorControllerConfig = rev.SparkMaxConfig()
         self.motorControllerConfig.apply(self.globalConfig)
@@ -45,9 +47,10 @@ class CoralTrack(Subsystem):
             rev.SparkBase.ResetMode.kResetSafeParameters,
             rev.SparkBase.PersistMode.kPersistParameters,
         )
+        
         # Put breaker light stuff here
-        # self.leftBreakerLight = ...
-        # self.rightBreakerLight = ...
+        # self.leftBreakerLight = DigitalInput(CoralConstants.kLeftBreakerLight)
+        # self.rightBreakerLight = DigitalInput(CoralConstants.kRightBreakerLight)
         
         # Setup the Timer
         self.timer = wpilib.Timer()
@@ -58,10 +61,14 @@ class CoralTrack(Subsystem):
         
     def center(self):
         '''Centers the coral on the track using two breaker lights'''
-        self.spinMotors(0) # For now
-        # The rest of the stuff here is Aidan's problem (hopefully)
-        
-        self.updateSmartDashboard() # Keep this at the end of the method
+        # Aidan did this yay
+
+        # if self.rightBreakerLight.get() and not self.leftBreakerLight.get(): # Move track left
+        #     self.spinMotors(-self.centerMultiplier)
+        # elif self.leftBreakerLight.get() and not self.rightBreakerLight.get(): # Move track right
+        #     self.spinMotors(self.centerMultiplier)
+        # else: # Stop moving track
+        #     self.spinMotors(0)
         
     def discharge(self):
         '''Should be doing the discharge when a button is pressed
@@ -78,8 +85,14 @@ class CoralTrack(Subsystem):
     def default(self):
         '''When discharge button is not pressed'''
         if self.timer.get() > self.coralDischargeTime:
-            self.center()
-        
+            beamBrakerLightsAddedToRobot = False
+            if beamBrakerLightsAddedToRobot:
+                self.center()
+            else:
+                self.spinMotors(0)
+                
+        self.updateSmartDashboard() # Keep this at the end of the method
+                
     def spinMotors(self, value):
         '''Function that handles all the motors '''
         self.motorController.set(value)
@@ -91,8 +104,8 @@ class CoralTrack(Subsystem):
         SmartDashboard.putNumber("Center Multiplier", self.centerMultiplier)
         SmartDashboard.putNumber("Discharge Multiplier", self.dischargeMultiplier)
         SmartDashboard.putNumber("Discharge Time", self.coralDischargeTime)
-        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight)
-        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight)
+        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
+        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
         # Put more stuff here maybe
         
     def updateSmartDashboard(self) -> None:
@@ -100,8 +113,8 @@ class CoralTrack(Subsystem):
         
         # Update values TO the Smart Dashboard (put stuff here)
         SmartDashboard.putNumber("Coral Track Motor", self.motorController.get())
-        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight)
-        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight)
+        # SmartDashboard.putBoolean(" - Left Breaker Light", self.leftBreakerLight.get())
+        # SmartDashboard.putBoolean(" - Right Breaker Light", self.rightBreakerLight.get())
         
         # Update values FROM the Smart Dashboard
         self.centerMultiplier = SmartDashboard.getNumber("Center Multiplier", self.centerMultiplier)
