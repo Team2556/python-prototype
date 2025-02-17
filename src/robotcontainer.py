@@ -102,7 +102,7 @@ class RobotContainer:
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         #section elevator
-        self.ENABLE_ELEVATOR = True
+        self.ENABLE_ELEVATOR = False
         if self.ENABLE_ELEVATOR: 
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
@@ -307,9 +307,12 @@ class RobotContainer:
         )
 
         # reset the field-centric heading on left bumper press
-        self._joystick.leftBumper().onTrue(
-            self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
-        )
+        self._joystick.leftBumper().onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_rotation( Rotation2d(np.pi*( DriverStation.getAlliance() == DriverStation.Alliance.kRed))) ) )
+        #self.drivetrain.seed_field_centric()))
+        (self._joystick.leftBumper() & self._joystick.a()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='a')) )
+        (self._joystick.leftBumper() & self._joystick.b()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='b')) )
+        (self._joystick.leftBumper() & self._joystick.x()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='x')) )
+        (self._joystick.leftBumper() & self._joystick.y()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='y')) )
 
         #section Autonomous During Teleop
          

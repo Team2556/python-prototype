@@ -71,15 +71,15 @@ class MyRobot(commands2.TimedCommandRobot):
             self.container.invertBlueRedDrive = -1
 
         #section vision related commands
-        current_pose_swerve = self.container.drivetrain.get_state_copy().pose #SwerveDriveState.pose #swerve_drive_state.pose
-        # if trust vision data update the drivetrain odometer
-        trust_vision_data, viz_pose, latest_parsed_result, time_of_measurement = self.container.limelight.trust_target(current_pose_swerve)
-        if trust_vision_data:
-            if latest_parsed_result:
-                # print(f'-\n Running the robot periodic -- current_pose_delta: {current_pose_swerve - viz_pose} -----\n The vision stuff{latest_parsed_result.botpose_wpiblue=} With uncertainty ...need to use megatag\n----\n------Pose update {current_pose_swerve - self.container.drivetrain.get_state_copy().pose=}-----------------------\n-------\n--\n')
-                self.container.drivetrain.use_vision_odometry_update(viz_pose, fpga_time_of_measurement=fpga_to_current_time(time_of_measurement))              
-        else:
-            pass
+        # current_pose_swerve = self.container.drivetrain.get_state_copy().pose #SwerveDriveState.pose #swerve_drive_state.pose
+        # # if trust vision data update the drivetrain odometer
+        # trust_vision_data, viz_pose, latest_parsed_result, time_of_measurement = self.container.limelight.trust_target(current_pose_swerve)
+        # if trust_vision_data:
+        #     if latest_parsed_result:
+        #         # print(f'-\n Running the robot periodic -- current_pose_delta: {current_pose_swerve - viz_pose} -----\n The vision stuff{latest_parsed_result.botpose_wpiblue=} With uncertainty ...need to use megatag\n----\n------Pose update {current_pose_swerve - self.container.drivetrain.get_state_copy().pose=}-----------------------\n-------\n--\n')
+        #         self.container.drivetrain.use_vision_odometry_update(viz_pose, fpga_time_of_measurement=fpga_to_current_time(time_of_measurement))              
+        # else:
+        #     pass
      
         #endsection vision related commands
         
