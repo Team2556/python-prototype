@@ -163,7 +163,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         SmartDashboard.putBoolean("Turn_On_VisionUpdate", False)
         self.megatag_chooser = SendableChooser()
-        self.megatag_chooser.setDefaultOption('MagaTag1', "MegaTag1")
+        self.megatag_chooser.setDefaultOption('MagaTag2', "MegaTag2")
         self.megatag_chooser.addOption('MagaTag2', "MegaTag2")
         SmartDashboard.putData("MegatTag Chooser", self.megatag_chooser)
 
@@ -395,7 +395,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         
         #if we are spinning slower than 720 deg/sec and we see tags
         if abs(self.pigeon2.get_angular_velocity_z_world().value) <= 720 and mega_tag.tag_count > 0:
-            self.VisionUpdateOn_bool = SmartDashboard.getBoolean("Turn_On_VisionUpdate", False)
+            self.VisionUpdateOn_bool = SmartDashboard.getBoolean("Turn_On_VisionUpdate", True)
             # set and add vision measurement
             if self.VisionUpdateOn_bool:
                 self.set_vision_measurement_std_devs((0.005, 0.005, 999999)) #originally: (0.7, 0.7, 9999999)
