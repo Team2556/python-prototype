@@ -16,6 +16,9 @@ Coral Control Pseudocode:
 
 import wpilib
 from wpilib import DigitalInput, SmartDashboard
+from wpilib.shuffleboard import Shuffleboard, BuiltInWidgets
+import ntcore._ntcore
+
 from constants import CoralConstants
 
 from commands2.subsystem import Subsystem
@@ -56,6 +59,8 @@ class CoralTrack(Subsystem):
         
         # Set up the SmartDashboard variables
         self.setupSmartDashboard()
+        
+        self.setupShuffleBoard()
         
     def center(self):
         '''Centers the coral on the track using two breaker lights'''
@@ -118,4 +123,17 @@ class CoralTrack(Subsystem):
         self.centerMultiplier = SmartDashboard.getNumber("Center Multiplier", self.centerMultiplier)
         self.dischargeMultiplier = SmartDashboard.getNumber("Discharge Multiplier", self.dischargeMultiplier)
         self.coralDischargeTime = SmartDashboard.getNumber("Discharge Time", self.coralDischargeTime)
+        
+    def setupShuffleBoard(self):
+        '''For testing because ShuffleBoard is theoretically cooler'''
+        Shuffleboard.getTab("Coral").addPersistent("Discharge Multiplier", self.dischargeMultiplier)
+        (Shuffleboard.getTab("Coral")
+            .addPersistent("Discharge Time", self.coralDischargeTime)
+            .withWidget(BuiltInWidgets.kNumberSlider)
+            .withSize(2, 1) # make the widget 2x1
+            .withPosition(4, 3) # place it in the top-left corner
+        ) # TODO: Actually this later
+        
+    def updateShuffleBoard(self):
+        '''For testing because ShuffleBoard is theoretically cooler'''
         
