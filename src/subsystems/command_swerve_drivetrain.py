@@ -161,11 +161,11 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
 
-        SmartDashboard.putBoolean("Turn_On_VisionUpdate", False)
+        SmartDashboard.putBoolean("HighConfidence_VisionUpdate", False)
         self.megatag_chooser = SendableChooser()
-        self.megatag_chooser.setDefaultOption('MagaTag2', "MegaTag2")
-        self.megatag_chooser.addOption('MagaTag2', "MegaTag2")
-        SmartDashboard.putData("MegatTag Chooser", self.megatag_chooser)
+        self.megatag_chooser.setDefaultOption('MegaTag1', "MegaTag1")
+        self.megatag_chooser.addOption('MegaTag2', "MegaTag2")
+        SmartDashboard.putData("MegaTag Chooser", self.megatag_chooser)
 
         # Swerve request to apply during path following
         self._apply_robot_speeds = swerve.requests.ApplyRobotSpeeds()
@@ -348,6 +348,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         
         SmartDashboard.putNumber("Rotation In drivetrain", self.get_state().pose.rotation().degrees() )
         SmartDashboard.putNumber("Rotation on the Pigeon", self.pigeon2.get_yaw().value)
+        SmartDashboard.putNumber("Rotation on the Pigeon -Wrapped", self.pigeon2.get_yaw().value % (360))
         SmartDashboard.putNumber("Rotation delta drivetrain-Pigeon", self.get_state().pose.rotation().degrees() - self.pigeon2.get_yaw().value)
         
         
@@ -380,12 +381,18 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         SmartDashboard.putNumber(f"Rotation In drivetrain -VisionUpdate{limelight_to_use}", self.get_state().pose.rotation().degrees() )
         LimelightHelpers.set_robot_orientation(
             limelight_to_use,
-            self.get_state().pose.rotation().degrees(),  #self.pigeon2.get_yaw().value,
-            0,  #self.pigeon2.get_angular_velocity_z_world().value,
-            0,  #self.pigeon2.get_pitch().value,
-            0,  #self.pigeon2.get_angular_velocity_y_world().value,
-            0,  #self.pigeon2.get_roll().value,
-            0,  #self.pigeon2.get_angular_velocity_x_world().value
+            self.get_state().pose.rotation().degrees(),  # OR
+            # self.pigeon2.get_yaw().value % (360),
+            # 0,  #
+            self.pigeon2.get_angular_velocity_z_world().value,
+            # 0,  #
+            self.pigeon2.get_pitch().value,
+            # 0,  #
+            self.pigeon2.get_angular_velocity_y_world().value,
+            # 0,  #
+            self.pigeon2.get_roll().value,
+            # 0,  #
+            self.pigeon2.get_angular_velocity_x_world().value
         )
         
         # get botpose estimate with origin on blue side of field
@@ -395,10 +402,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         
         #if we are spinning slower than 720 deg/sec and we see tags
         if abs(self.pigeon2.get_angular_velocity_z_world().value) <= 720 and mega_tag.tag_count > 0:
-            self.VisionUpdateOn_bool = SmartDashboard.getBoolean("Turn_On_VisionUpdate", True)
+            self.VisionUpdateOn_bool = SmartDashboard.getBoolean("HighConfidence_VisionUpdate", True)
             # set and add vision measurement
             if self.VisionUpdateOn_bool:
-                self.set_vision_measurement_std_devs((0.005, 0.005, 999999)) #originally: (0.7, 0.7, 9999999)
+                self.set_vision_measurement_std_devs((0.0095, 0.0095, 9999)) #originally: (0.7, 0.7, 9999999)
             else:
                 self.set_vision_measurement_std_devs((0.701737, 0.701737, 999999)) #originally: (0.7, 0.7, 9999999)
             
