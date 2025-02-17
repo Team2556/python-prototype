@@ -242,6 +242,13 @@ class RobotContainer:
                 lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
             )
         )
+        
+        # Algae is also using the D-pad
+        self._joystick2.povDown(
+            commands2.cmd.runOnce(
+                lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
+            )
+        )
 
         # self._joystick.pov(0).whileTrue(
         #     self.drivetrain.apply_request(

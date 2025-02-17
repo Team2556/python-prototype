@@ -205,17 +205,22 @@ class ElevatorConstants():
         kTopLeftLimitSwitchChannel = Rio_DIO.TWO
         kTopRightLimitSwitchChannel = Rio_DIO.THREE #TODO: ? two on top also?
 
-
-
-
 #endregion
 class Override_DriveConstant:
     ...
     
 class AlgaeConstants:
-    kIntakeCANAddress1 = CAN_Address.FORTY # TODO: Correct the CAN Addresses pls
-    kIntakeCANAddress2 = CAN_Address.FORTYONE
+    # Motor Channels
+    kPivotMotorChannel = CAN_Address.FORTY # TODO: Correct the CAN Addresses pls
+    kIntakeWheelsChannel = CAN_Address.FORTYONE
+    
+    # Limit Switch channel
     kAlgaeLimitSwitchChannel = Rio_DIO.FOUR # So it doesn't input when limit switch activated
+    
+    # Values to set pivoting motor to
+    kPivotIdleValue = 0 # Pivot position when idle
+    kPivotIntakePositionValue = 0 # Pivot position when grabbing algae
+    kPivotProcessingValue = 0 # Pivot position when about to send to processor
 
 class RobotDimensions:
     WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)
