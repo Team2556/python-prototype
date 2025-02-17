@@ -56,6 +56,7 @@
       "/SmartDashboard/Elevator": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Field-Vision": "Field2d",
+      "/SmartDashboard/MegatTag Chooser": "String Chooser",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",
       "/SmartDashboard/Module 2": "Mechanism2d",
@@ -132,7 +133,15 @@
         "Elevator": {
           "Elevator Root": {
             "open": true
-          },
+          }
+        },
+        "open": true
+      },
+      "limelight": {
+        "double[]##v_/limelight/fiducial_id_filters_set": {
+          "open": true
+        },
+        "double[]##v_/limelight/robot_orientation_set": {
           "open": true
         },
         "open": true

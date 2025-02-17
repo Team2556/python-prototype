@@ -32,9 +32,15 @@ class LimelightSubsystem(Subsystem):
             print("'\n-------------\n------------------\n'qty limelights:", self.qty_limelights,'\n-------------\n------------------\n')
             limelight_address_1 = self.discovered_limelights[0] #TODO make us able to use multiple limelights; maybe a second subsystem
             self.ll = limelight.Limelight(limelight_address_1)
+            # LL4 IMU Modes:
+            # 0 : use external submitted via set_robot_orientation; ignore interal completely
+            # 1 : use external submitted via set_robot_orientation; use internal fused yaw
+            # 2 : use internal yaw; ignore external completely
+            LimelightHelpers.set_imu_mode('limelight', mode=1)
             if self.qty_limelights > 1:
                 limelight_address_2 = self.discovered_limelights[1]
                 self.ll2 = limelight.Limelight(limelight_address_2)
+                LimelightHelpers.set_imu_mode('limelight-four', mode=1)
             results = self.ll.get_results()
             status = self.ll.get_status()
             print("-----")
@@ -52,7 +58,6 @@ class LimelightSubsystem(Subsystem):
 
             # self.ll.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
             # self.ll2.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
-
 
 
             self.ll.enable_websocket()

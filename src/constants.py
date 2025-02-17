@@ -15,8 +15,10 @@ CAM_MOUNT_HEIGHT = 12
 CAM_MOUNT_PITCH = 25
 
 
-AprilTagField=apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField(3))
-AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField(3)).getTags() #recommend using this instead of the class below
+AprilTagField=apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025Reefscape)
+
+AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025Reefscape).getTags() #recommend using this instead of the class below
+'''AprilTags is a list of all the april tag objects on the field, in order of number'''
 class AprilTags_height:
     def tag_heights(): #height of apriltags by order of number, in centimeters
         heights = numpy.array([135, 135, 117, 178, 178, 17, 17, 17, 17, 17, 17, 135, 135, 117, 178, 178, 17, 17, 17, 17, 17, 17])
