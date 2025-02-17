@@ -19,9 +19,13 @@ def smooth(joystick_value: float, exponential_for_curving: int = 3, blend: float
     elif smoothed_value < -1:
         smoothed_value = -1
     
+    if smoothed_value < .01 and smoothed_value > -.01:
+        smoothed_value = 0
+    
     # # return smoothed_value
     # smoothed_value = joystick_value ** 3
-    return smoothed_value
+    return smoothed_value 
+
     
 def one_side_control_only(joystick_value: float, PosOrNeg: str= 'Neg'):
     

@@ -5,6 +5,7 @@
 #
 
 import commands2
+
 import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
@@ -15,6 +16,7 @@ from constants import RobotDimensions, ElevatorConstants
 from subsystems import (ElevatorSubsystem,
                         limelight,
                         # oneMotor,
+                        coral,
                         )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -32,10 +34,12 @@ from commands.odometrySnap2Line import SnapToLineCommand
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
 from commands.liftElevator import LiftElevatorCommand
+import networktables as nt
+from networktables import util as ntutil
 
 
 
-from subsystems import algae
+# from subsystems import algae
 
 class RobotContainer:
     """
@@ -85,7 +89,7 @@ class RobotContainer:
         
 
         
-        self.algae = algae.AlgaeHandler()
+        # self.algae = algae.AlgaeHandler()
 
         self._logger = Telemetry(self._max_speed)
 
@@ -94,16 +98,25 @@ class RobotContainer:
         # This one's probably used for scoring stuff
         self._joystick2 = commands2.button.CommandXboxController(1)
 
+        # Using NetworkButton with a USB keyboard will require running a seperate python program on the driver's station
+        # python ../DriverstationUtils/keyboard_to_nt.py
+        # pressing {CTRL+C} will stop the program
+
+        self._keyboard_dock_left_feeder = commands2.button.NetworkButton("/SmartDashboard/keyboard","l")
+        self._keyboard_reset_odometry_by_drivers = commands2.button.NetworkButton("/SmartDashboard/keyboard","a") #SmartDashboard.getBoolean("/SmartDashboard/keyboard/a", False)
+
         self.drivetrain = TunerConstants.create_drivetrain()
 
+        self.coralTrack = coral.CoralTrack()
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         #section elevator
-        self.ENABLE_ELEVATOR = True
+        self.ENABLE_ELEVATOR = False
         if self.ENABLE_ELEVATOR: 
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
+            self._elevator_motors_break = self.elevator.elevator_motors_break
         #endsection elevator
 
         # Vision
@@ -215,7 +228,8 @@ class RobotContainer:
         # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
         if self.ENABLE_ELEVATOR: 
             self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
-            (self._joystick2.start() & self._joystick2.a()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
+            (self._joystick2.start() & self._joystick2.a()).whileTrue( self._reset_zero_point_here)#.onFalse(lambda: self._elevator_motors_break) #TODO: fix this to not crash :)
+            # (self._joystick2.start() & self._joystick2.x()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
         
         #section vision related commands
         
@@ -223,6 +237,19 @@ class RobotContainer:
 
 
         #endsection vision related commands
+        
+        # Coral Track controls 
+        self._joystick2.x().whileTrue(
+            commands2.cmd.run(
+                lambda: self.coralTrack.discharge(), self.coralTrack
+            )
+        )
+        
+        self.coralTrack.setDefaultCommand(
+            commands2.cmd.run(
+                lambda: self.coralTrack.default(), self.coralTrack
+            )
+        )
 
         # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
@@ -237,7 +264,7 @@ class RobotContainer:
         # Do the default command thing that tells algae controller stuff
         # Algae controls with controller 2 left joystick
         # It's negative because that's how xbox controllers work
-        self.algae.setDefaultCommand(
+        '''self.algae.setDefaultCommand(
             commands2.cmd.run(
                 lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
             )
@@ -297,9 +324,12 @@ class RobotContainer:
         )
 
         # reset the field-centric heading on left bumper press
-        self._joystick.leftBumper().onTrue(
-            self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
-        )
+        self._joystick.leftBumper().onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_rotation( Rotation2d(np.pi*( DriverStation.getAlliance() == DriverStation.Alliance.kRed))) ) )
+        #self.drivetrain.seed_field_centric()))
+        (self._joystick.leftBumper() & self._joystick.a()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='a')) )
+        (self._joystick.leftBumper() & self._joystick.b()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='b')) )
+        (self._joystick.leftBumper() & self._joystick.x()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='x')) )
+        (self._joystick.leftBumper() & self._joystick.y()).onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='y')) )
 
         #section Autonomous During Teleop
          
@@ -335,10 +365,14 @@ class RobotContainer:
                                                                                     )
         
         rect_leftFeedArea = Rectangle2d(Translation2d(0,4.5),Translation2d(8.70,7.70))#.transformBy(self.rotate_rectangle_by)
-        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
+        #can make the Networktables button an alternative to joystick button
+        ((self._keyboard_dock_left_feeder.or_(self._joystick.a() & self._joystick.povDown())) & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_left,
                                                                         pathfinding_constraints=pathfinding_constraints_global )
                                                                                     )
+        # Can make the Networktables button trigger an action
+        self._keyboard_reset_odometry_by_drivers.onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='a')) )
+        
         
         '''#this method uses the robot periodic updated closest path to robot
         pathfinding_constraints_global = PathConstraints(3/3, 4/3, degreesToRadians(540/2), degreesToRadians(720/2),12,False)#was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)

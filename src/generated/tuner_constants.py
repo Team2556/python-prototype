@@ -82,7 +82,8 @@ class TunerConstants:
 
     # Every 1 rotation of the azimuth results in _couple_ratio drive motor turns;
     # This may need to be tuned to your individual robot
-    _couple_ratio = 3.5714285714285716
+    # Protobot: turned in steer direction 4 times, drive motor turned 2 plus 7 out of the 43 drive bevel teeth
+    _couple_ratio = (2 + 7/43) / 4 # generated: 3.5714285714285716
 
     _drive_gear_ratio = 6.746031746031747
     _steer_gear_ratio = 12.8

@@ -15,8 +15,10 @@ CAM_MOUNT_HEIGHT = 12
 CAM_MOUNT_PITCH = 25
 
 
-AprilTagField=apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField(3))
-AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField(3)).getTags() #recommend using this instead of the class below
+AprilTagField=apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025Reefscape)
+
+AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025Reefscape).getTags() #recommend using this instead of the class below
+'''AprilTags is a list of all the april tag objects on the field, in order of number'''
 class AprilTags_height:
     def tag_heights(): #height of apriltags by order of number, in centimeters
         heights = numpy.array([135, 135, 117, 178, 178, 17, 17, 17, 17, 17, 17, 135, 135, 117, 178, 178, 17, 17, 17, 17, 17, 17])
@@ -169,22 +171,22 @@ class ElevatorConstants():
         kLeftMotorPort = CAN_Address.FOURTEEN
         kRightMotorPort = CAN_Address.FIFTEEN
         kJoystickPort = 0
-        kpeak_forward_torque_current = 10 #120
-        kpeak_reverse_torque_current = -10 #-120
+        kpeak_forward_torque_current = 35 #120
+        kpeak_reverse_torque_current = -35 #-120
         kincrement_m_per_sec_held = .25
         kHomingRate = 1/30 # 1 meter in 30 seconds
 
-        kElevatorKp = 2.0
+        kElevatorKp = 1.0
         kElevatorKi = 0.0
         kElevatorKd = .0
         kElevatorGearing = 6 #10.0
         kElevatorDrumRadius = .035/2   # half of 35mm in meters
         kCarriageMass = 4 # 4 kg
 
-        kMinElevatorHeight = 0.05 #0.0508  # 2 inches
-        kMaxElevatorHeight = .59  # 50 inches
+        kMinElevatorHeight = 0.00 #0.0508  # 2 inches
+        kMaxElevatorHeight = inchesToMeters(26)  # 50 inches TODO: make this smaller
         kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.00002
-        ScaredSafetyFactor = 2
+        ScaredSafetyFactor = 200
         kCoralLv1 = 0.1/ScaredSafetyFactor #height in meters
         kCoralLv2 = 0.32/ScaredSafetyFactor#556
         kCoralLv3 = 0.5588/ScaredSafetyFactor
@@ -193,12 +195,12 @@ class ElevatorConstants():
         kMaxAccelerationMetersPerSecSquared = 0.5/ScaredSafetyFactor
 
         kSVolts = 0
-        kGVolts = 0.0
+        kGVolts = 0.01
 
         kVVoltSecondPerMeter = 0#1.5
         kAVoltSecondSquaredPerMeter = 0#0.75
 
-        kElevatorOffsetMeters = 0 #TODO: add description of how we are using this
+        kElevatorOffsetMeters = 0 #Used in softlimit minimum
 
         kBottomLeftLimitSwitchChannel = Rio_DIO.ZERO
         kBottomRightLimitSwitchChannel = Rio_DIO.ONE
@@ -227,3 +229,5 @@ class RobotDimensions:
 
 class CoralConstants:
     kCoralMotorPort = CAN_Address.THIRTY
+    kLeftBreakerLight = 8 # TODO: Get the actual IDs
+    kRightBreakerLight = 9

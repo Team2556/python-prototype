@@ -25,22 +25,32 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         wpilib.SmartDashboard.putNumber("Elevator/Setpoint", 0.0)
         self.setpoint = wpilib.SmartDashboard.getNumber("Elevator/Setpoint", 0.0)
 
+        # Declare the motors
         self.elevmotor_right = phoenix6.hardware.TalonFX(ElevatorConstants.kRightMotorPort, "rio")
-        self.elevmotor_left = phoenix6.hardware.TalonFX( ElevatorConstants.kLeftMotorPort, "rio")
+        self.elevmotor_left = phoenix6.hardware.TalonFX(ElevatorConstants.kLeftMotorPort, "rio")
+        
+        # Make the right motor follow the left (so moving the left one moves the right one in the opposite direction)
         self.elevmotor_right.set_control(request=Follower(self.elevmotor_left.device_id, oppose_master_direction=True))
+        
+        # Make it so when motor speed is set to 0 then it stays at 0 and resists movement against it
         self.elevmotor_right.setNeutralMode(NeutralModeValue.BRAKE)
         self.elevmotor_left.setNeutralMode(NeutralModeValue.BRAKE)
+        
+        # Declare the encoders (they're not referenced later but still needed?)
         self.elevCANcoder_left = phoenix6.hardware.CANcoder(ElevatorConstants.kLeftMotorPort)
         self.elevCANcoder_right = phoenix6.hardware.CANcoder(ElevatorConstants.kRightMotorPort)
+        
+        # Declare Limit switches (2 on each direction)
         self.limit_bottomLeft = wpilib.DigitalInput(ElevatorConstants.kBottomLeftLimitSwitchChannel)
         self.limit_bottomRight = wpilib.DigitalInput(ElevatorConstants.kBottomRightLimitSwitchChannel)
         self.limit_topLeft = wpilib.DigitalInput(ElevatorConstants.kTopLeftLimitSwitchChannel)
         self.limit_topRight = wpilib.DigitalInput(ElevatorConstants.kTopRightLimitSwitchChannel)
 
+        # Declare booleans that record if both limit switches on one side are active
         self.limit_bottom = (self.limit_bottomLeft.get() and self.limit_bottomRight.get())
         self.limit_top = (self.limit_topLeft.get() and self.limit_topRight.get())
 
-
+        # Setup all the PID stuff
         cfg = configs.TalonFXConfiguration()
         cfg.slot0.k_p = ElevatorConstants.kElevatorKp
         cfg.slot0.k_i = ElevatorConstants.kElevatorKi
@@ -80,7 +90,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         elevmotorSoftLimits_cfg = (configs.SoftwareLimitSwitchConfigs()
                                    .with_forward_soft_limit_enable(True)
-                                   .with_forward_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kMaxElevatorHeight-inchesToMeters(5)))
+                                   .with_forward_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kMaxElevatorHeight))
                                    .with_reverse_soft_limit_enable(True)
                                    .with_reverse_soft_limit_threshold(self.distanceToRotations(ElevatorConstants.kElevatorOffsetMeters))
                                    )
@@ -93,11 +103,11 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
 
         self.cfg_slot0 = cfg.slot0
 
-        
         # Retry config apply up to 5 times, report if failure
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
         for _ in range(0, 5):
             status = self.elevmotor_left.configurator.apply(cfg)
+            status = self.elevmotor_right.configurator.apply(cfg)
             if status.is_ok():
                 break
         if not status.is_ok():
@@ -146,8 +156,9 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
     def rotationsToDistance(self, rotations: float) -> float:
         return rotations * 2*pi*ElevatorConstants.kElevatorDrumRadius/ElevatorConstants.kElevatorGearing
     
-    def update_setpoint(self, setpoint: float, incremental = True, constrain: bool = True) -> None:
+    def update_setpoint(self, setpoint: float, incremental = True, constrain: bool = False) -> None:
         '''Setpoint is in meters of elevator elevation from lowest physical limit'''
+        
         if incremental:
             self.setpoint += setpoint
         else:
@@ -162,9 +173,17 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
     
     def reset_zero_point_here(self, let_droop: bool = True) -> None:
         #put the motor in neutral - no breaking
-        if let_droop: self.elevmotor_left.setNeutralMode(NeutralModeValue.COAST)
-        self.elevmotor_left.set_position(0)
-
+        # if let_droop: self.elevmotor_left.set_control(self.elevmotor_left.setNeutralMode(NeutralModeValue.COAST))
+        
+        # self.elevmotor_left.set_position(0) #self.elevmotor_left.set_control(lambda: )
+        return commands2.cmd.run(lambda: self.elevmotor_left.set_position(0))
+        
+        
+    def let_elevator_drop(self) -> None:
+        #put the motor in neutral - no breaking
+        return commands2.cmd.run(lambda: self.elevmotor_left.setNeutralMode(NeutralModeValue.COAST) )
+    def elevator_motors_break(self):
+        return commands2.cmd.run(lambda: self.elevmotor_left.setNeutralMode(NeutralModeValue.BRAKE))
     
 
     def moveElevator(self, movement=None) -> None:
