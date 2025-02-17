@@ -5,6 +5,7 @@
 #
 
 import commands2
+
 import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
@@ -33,6 +34,8 @@ from commands.odometrySnap2Line import SnapToLineCommand
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
 from commands.liftElevator import LiftElevatorCommand
+import networktables as nt
+from networktables import util as ntutil
 
 
 
@@ -94,6 +97,13 @@ class RobotContainer:
         self._joystick = commands2.button.CommandXboxController(0)
         # This one's probably used for scoring stuff
         self._joystick2 = commands2.button.CommandXboxController(1)
+
+        # Using NetworkButton with a USB keyboard will require running a seperate python program on the driver's station
+        # python ../DriverstationUtils/keyboard_to_nt.py
+        # pressing {CTRL+C} will stop the program
+
+        self._keyboard_dock_left_feeder = commands2.button.NetworkButton("/SmartDashboard/keyboard","l")
+        self._keyboard_reset_odometry_by_drivers = commands2.button.NetworkButton("/SmartDashboard/keyboard","a") #SmartDashboard.getBoolean("/SmartDashboard/keyboard/a", False)
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
@@ -348,10 +358,14 @@ class RobotContainer:
                                                                                     )
         
         rect_leftFeedArea = Rectangle2d(Translation2d(0,4.5),Translation2d(8.70,7.70))#.transformBy(self.rotate_rectangle_by)
-        (self._joystick.a() & self._joystick.povDown() & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
+        #can make the Networktables button an alternative to joystick button
+        ((self._keyboard_dock_left_feeder.or_(self._joystick.a() & self._joystick.povDown())) & commands2.button.Trigger(lambda: rect_leftFeedArea.contains(AutoBuilder.getCurrentPose().translation())) ).onTrue(
                                         AutoBuilder.pathfindThenFollowPath( goal_path= self.path_doc_feed_left,
                                                                         pathfinding_constraints=pathfinding_constraints_global )
                                                                                     )
+        # Can make the Networktables button trigger an action
+        self._keyboard_reset_odometry_by_drivers.onTrue( self.drivetrain.runOnce(lambda: self.drivetrain.reset_pose_by_zone(zone='a')) )
+        
         
         '''#this method uses the robot periodic updated closest path to robot
         pathfinding_constraints_global = PathConstraints(3/3, 4/3, degreesToRadians(540/2), degreesToRadians(720/2),12,False)#was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
