@@ -210,24 +210,33 @@ class ElevatorConstants():
 #endregion
 class Override_DriveConstant:
     ...
-    
+
+class RobotDimensions:
+    WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)
+
 class AlgaeConstants:
     # Motor Channels
     kPivotMotorChannel = CAN_Address.FORTY # TODO: Correct the CAN Addresses pls
     kIntakeWheelsChannel = CAN_Address.FORTYONE
     
-    # Limit Switch channel
-    kAlgaeLimitSwitchChannel = Rio_DIO.FOUR # So it doesn't input when limit switch activated
+    # Limit Switch channel (So it doesn't input when limit switch activated)
+    kAlgaeLimitSwitchChannel = Rio_DIO.FOUR # TODO: Get the actual IDs
     
     # Values to set pivoting motor to
     kPivotIdleValue = 0 # Pivot position when idle
     kPivotIntakePositionValue = 0 # Pivot position when grabbing algae
     kPivotProcessingValue = 0 # Pivot position when about to send to processor
 
-class RobotDimensions:
-    WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)
-
 class CoralConstants:
-    kCoralMotorPort = CAN_Address.THIRTY
-    kLeftBreakerLight = 8 # TODO: Get the actual IDs
-    kRightBreakerLight = 9
+    kCoralTrackChannel = CAN_Address.THIRTY
+    
+    kLeftSolenoidChannel = 1 # TODO: Get the actual IDs
+    kRightSolenoidChannel = 2
+    
+    # Coral track tuning constants
+    kTrackCenterMultiplier = 0.08
+    kTrackDischargeMultiplier = 0.16
+    kCoralDischargeTime = 1.5
+    
+    kLeftBreakerLight = Rio_DIO.FIVE # TODO: Get the actual IDs
+    kRightBreakerLight = Rio_DIO.SIX

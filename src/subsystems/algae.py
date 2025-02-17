@@ -20,7 +20,22 @@ What this does (so far hopefully I think):
 - Extra Idea: Automatically move the wheels depending on the set position
     - Probably needs some delay (which will be a costant) to let motors pivot correctly
     - It will have to check elevator position for intaking and processing (so robotstate file yay)
+    
+Algae Control (ideal) Pseudocode:
+    - If Up D-pad pressed:
+        - Set pivot to intake position (90deg if 0 is straight down)
+        - If limit switch active:
+            - Set wheels to 0
+        - Else:
+            - Set wheels to intake (1)
+    - Elif Left (or Right bc why not) D-pad pressed:
+        - Set pivot to discharge position (My guess is like 25deg if 0 is straight down)
+        - Set wheels to discharge (-1)
+    - Elif Down D-pad pressed:
+        - Set pivot to discharge position (0deg if 0 is straight down)
+        - Set wheels to 0
 '''
+# TODO: The pseudocode above is not started yet so umm... (do it)
 
 class AlgaeHandler(Subsystem):
     '''This thing does algae intake and discharge'''
@@ -30,8 +45,6 @@ class AlgaeHandler(Subsystem):
         self.intakeMotor = phoenix6.hardware.TalonFX(AlgaeConstants.kIntakeWheelsChannel, "rio")
         # Declare limit switch
         self.limitSwitch = wpilib.DigitalInput(AlgaeConstants.kAlgaeLimitSwitchChannel)
-        
-        self.pivotMotor.set_position()
         
         # Make it so if motor is set at 0 then it resists any turning if force is applied to it
         # So algae doesn't fall out
@@ -99,23 +112,23 @@ class AlgaeHandler(Subsystem):
         
     def setupSmartDashboard(self) -> None:
         '''Sets up the Smart Dashboard for Algae with all the cool things'''
-        SmartDashboard.putNumber("Pivot Motor", self.pivotMotor.get_position())
+        SmartDashboard.putString("Pivot Motor", self.pivotMotor.get_position().__str__())
         SmartDashboard.putNumber("Intake Motor", self.intakeMotor.get())
         SmartDashboard.putBoolean("Limit Switch", self.limitSwitch.get())
         
         SmartDashboard.putNumber("Intake Deadband", self.deadband)
-        SmartDashboard.putNumber("Intake Multiplier", self.motorSpeedMultiplier)
+        SmartDashboard.putNumber("Intake Multiplier", self.intakeMultiplier)
         SmartDashboard.putBoolean("Toggle Limit Switch", self.toggleLimitSwitch)
         
     def updateSmartDashboard(self) -> None:
         '''Updates the Smart Dashboard for Algae with all the cool things'''
         
         # Update values TO the Smart Dashboard
-        SmartDashboard.putNumber("Pivot Motor", self.pivotMotor.get_position())
+        SmartDashboard.putString("Pivot Motor", self.pivotMotor.get_position().__str__())
         SmartDashboard.putNumber("Intake Motor", self.intakeMotor.get())
         SmartDashboard.putBoolean("Limit Switch", self.limitSwitch.get())
         
         # Update values FROM the Smart Dashboard
         self.deadband = SmartDashboard.getNumber("Intake Deadband", self.deadband)
-        self.motorSpeedMultiplier = SmartDashboard.getNumber("Intake Multiplier", self.motorSpeedMultiplier)
+        self.motorSpeedMultiplier = SmartDashboard.getNumber("Intake Multiplier", self.intakeMultiplier)
         self.toggleLimitSwitch = SmartDashboard.getBoolean("Toggle Limit Switch", self.toggleLimitSwitch)

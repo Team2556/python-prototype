@@ -15,6 +15,7 @@ from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
 from subsystems import (ElevatorSubsystem,
                         limelight,
+                        algae,
                         # oneMotor,
                         coral,
                         )
@@ -89,7 +90,7 @@ class RobotContainer:
         
 
         
-        # self.algae = algae.AlgaeHandler()
+        self.algae = algae.AlgaeHandler()
 
         self._logger = Telemetry(self._max_speed)
 
@@ -238,10 +239,10 @@ class RobotContainer:
 
         #endsection vision related commands
         
-        # Coral Track controls 
+        # Coral Track/Flipper controls 
         self._joystick2.x().whileTrue(
             commands2.cmd.run(
-                lambda: self.coralTrack.discharge(), self.coralTrack
+                lambda: self.coralTrack.dischargeButtonPressed(), self.coralTrack
             )
         )
         
@@ -264,19 +265,19 @@ class RobotContainer:
         # Do the default command thing that tells algae controller stuff
         # Algae controls with controller 2 left joystick
         # It's negative because that's how xbox controllers work
-        '''self.algae.setDefaultCommand(
-            commands2.cmd.run(
-                lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
-            )
-        )
+        # self.algae.setDefaultCommand(
+        #     commands2.cmd.run(
+        #         lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
+        #     )
+        # )
         
-        # Algae is also using the D-pad
-        self._joystick2.povDown(
-            commands2.cmd.runOnce(
-                lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
-            )
-        )
-
+        # # Algae is also using the D-pad
+        # self._joystick2.povDown().whileTrue(
+        #     commands2.cmd.runOnce(
+        #         lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
+        #     )
+        # )
+        '''
         # self._joystick.pov(0).whileTrue(
         #     self.drivetrain.apply_request(
         #         lambda: self._forward_straight.with_velocity_x(0.5).with_velocity_y(0)
@@ -403,4 +404,4 @@ class RobotContainer:
         :returns: the command to run in autonomous
         """
         #return commands2.cmd.print_("No autonomous command configured")
-        return self._auto_chooser.getSelected()
+        return self._auto_chooser.getSelected()'''
