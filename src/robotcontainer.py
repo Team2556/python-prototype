@@ -9,13 +9,13 @@ import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
 
-import constants
+from constants import ClimbConstants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
 from subsystems import (ElevatorSubsystem,
                         limelight,
                         # oneMotor,
-                        coral,
+                        coral, ClimbSubsystem
                         )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -33,6 +33,7 @@ from commands.odometrySnap2Line import SnapToLineCommand
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
 from commands.liftElevator import LiftElevatorCommand
+from commands.ClimbCommand import ClimbCommand
 
 
 
@@ -99,6 +100,7 @@ class RobotContainer:
 
         self.coralTrack = coral.CoralTrack()
 
+        self.climb = ClimbSubsystem.ClimbSubsystem()
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         #section elevator
@@ -250,7 +252,17 @@ class RobotContainer:
                 )
             )
         )
-        
+        # Climb Controls
+        self._joystick2.povUp().whileTrue(
+            commands2.cmd.run(
+                lambda: self.climb.setMotorOutputManual(ClimbConstants.kSpeed), self.climb
+            )
+        )
+        self._joystick2.povDown().whileTrue(
+            commands2.cmd.run(
+                lambda: self.climb.setMotorOutputManual(-ClimbConstants.kSpeed), self.climb
+            )
+        )
         # Do the default command thing that tells algae controller stuff
         # Algae controls with controller 2 left joystick
         # It's negative because that's how xbox controllers work

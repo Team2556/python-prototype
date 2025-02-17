@@ -229,11 +229,19 @@ class CoralConstants:
 
 class ClimbConstants:
     kClimbMotorPort = CAN_Address.FIFTYONE
-    kTopLimitSwitchChannel = Rio_DIO.FOUR
-    kBottomLimitSwitchChannel = Rio_DIO.FIVE
+    kTopLimitSwitchChannel = Rio_DIO.FIVE
+    kBottomLimitSwitchChannel = Rio_DIO.SIX
     kClimbHookZeroEntry = 1
-    kMaxVelocityMetersPerSecond = 1
+    kSpeed = 1.0
     kMaxAccelerationMetersPerSecondSquared = 0.5
-    kPClimbController = 0
-    kIClimbController = 0
-    kDClimbController = 0
+    #kPClimbController = 1
+    #kIClimbController = 0
+    #kDClimbController = 0
+    kClimbMaxHeight = 1.6081375
+    kClimbMinHeight = 0.815975
+    kClimbSlightlyExtendedHeight = 0.9
+    kClimbMinHeightEncoderEstimate = -3583.037109375
+    kS = 0
+    kV = 0
+    kA = 0
+    kClimbMaxPosConfirmationExtraHeight = 0.1
