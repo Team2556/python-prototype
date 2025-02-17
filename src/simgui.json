@@ -135,6 +135,12 @@
             "open": true
           }
         },
+        "VisionSystemSim-SimPhoton_system": {
+          "open": true
+        },
+        "keyboard": {
+          "open": true
+        },
         "open": true
       },
       "limelight": {
@@ -143,8 +149,7 @@
         },
         "double[]##v_/limelight/robot_orientation_set": {
           "open": true
-        },
-        "open": true
+        }
       },
       "photonvision": {
         "photonvision": {
