@@ -878,7 +878,7 @@
               "Colors/apriltag": "#FFFFFFFF"
             }
           },
-          "14,5": {
+          "12,4": {
             "size": [
               1,
               1
@@ -1129,9 +1129,9 @@
               "_showGlyph": false
             }
           },
-          "12,4": {
+          "12,5": {
             "size": [
-              2,
+              3,
               2
             ],
             "content": {
@@ -1196,7 +1196,7 @@
               "_showGlyph": false
             }
           },
-          "15,5": {
+          "13,4": {
             "size": [
               1,
               1
@@ -1208,21 +1208,184 @@
               "_glyph": 148,
               "_showGlyph": false
             }
+          },
+          "18,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Motor",
+              "_title": "Algae/Pivot Motor",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "18,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Motor",
+              "_title": "Algae/Intake Motor",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "15,5": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Algae/Limit Switch",
+              "_title": "Algae/Limit Switch",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "18,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Time",
+              "_title": "Algae/Pivot Time",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "18,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Multiplier",
+              "_title": "Algae/Intake Multiplier",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "17,5": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Algae/Toggle Limit Switch",
+              "_title": "Algae/Toggle Limit Switch",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
           }
         }
       }
     },
     {
-      "title": "LiveWindow",
+      "title": "Algae",
       "autoPopulate": true,
-      "autoPopulatePrefix": "LiveWindow/",
+      "autoPopulatePrefix": "SmartDashboard/Algae/",
       "widgetPane": {
         "gridSize": 64.0,
         "showGrid": true,
         "hgap": 16.0,
         "vgap": 16.0,
         "titleType": 0,
-        "tiles": {}
+        "tiles": {
+          "3,2": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Motor",
+              "_title": "Pivot Motor",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "6,2": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Motor",
+              "_title": "Intake Motor",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "10,4": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Algae/Limit Switch",
+              "_title": "Limit Switch",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "3,5": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Time",
+              "_title": "Pivot Time",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "6,5": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Multiplier",
+              "_title": "Intake Multiplier",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "10,2": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Toggle Switch",
+              "_source0": "network_table:///SmartDashboard/Algae/Toggle Limit Switch",
+              "_title": "Toggle Limit Switch",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          }
+        }
       }
     }
   ],

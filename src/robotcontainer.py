@@ -262,21 +262,33 @@ class RobotContainer:
             )
         )
         
-        # Do the default command thing that tells algae controller stuff
-        # Algae controls with controller 2 left joystick
-        # It's negative because that's how xbox controllers work
-        # self.algae.setDefaultCommand(
-        #     commands2.cmd.run(
-        #         lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
-        #     )
-        # )
+        # Algae controls (using the D-pad)
+        # Left and right are the same thing because idk what the buttons will otherwise be used for
         
-        # # Algae is also using the D-pad
-        # self._joystick2.povDown().whileTrue(
-        #     commands2.cmd.runOnce(
-        #         lambda: self.algae.cycle(self._joystick2.getRightY() * -1), self.algae
-        #     )
-        # )
+        self._joystick2.povDown().whileTrue(
+            commands2.cmd.runOnce(
+                lambda: self.algae.idle(), self.algae
+            )
+        )
+        
+        self._joystick2.povLeft().whileTrue(
+            commands2.cmd.runOnce(
+                lambda: self.algae.processing(), self.algae
+            )
+        )
+        
+        self._joystick2.povRight().whileTrue(
+            commands2.cmd.runOnce(
+                lambda: self.algae.processing(), self.algae
+            )
+        )
+        
+        self._joystick2.povUp().whileTrue(
+            commands2.cmd.runOnce(
+                lambda: self.algae.intaking(), self.algae
+            )
+        )
+        
         '''
         # self._joystick.pov(0).whileTrue(
         #     self.drivetrain.apply_request(

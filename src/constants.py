@@ -224,8 +224,11 @@ class AlgaeConstants:
     
     # Values to set pivoting motor to
     kPivotIdleValue = 0 # Pivot position when idle
-    kPivotIntakePositionValue = 0 # Pivot position when grabbing algae
-    kPivotProcessingValue = 0 # Pivot position when about to send to processor
+    kPivotIntakePositionValue = 0.25 # Pivot position when grabbing algae
+    kPivotProcessingValue = 0.07 # Pivot position when about to send to processor
+    
+    kIntakeMultiplier = 0.5 # Intake wheels multiply by this speed
+    kPivotTime = 0.5 # The time it takes to switch between positions
 
 class CoralConstants:
     kCoralTrackChannel = CAN_Address.THIRTY

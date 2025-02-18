@@ -121,7 +121,7 @@ class CoralTrack(Subsystem):
             if beamBrakerLightsAddedToRobot:
                 self.center()
             else:
-                self.spinTrackMotor(0) # Temporary thing(s) for now
+                self.spinTrackMotor(0) # Temporary thing for now
                 self.changeFlippers(True)
         else:
             self.discharge()
