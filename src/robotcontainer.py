@@ -17,7 +17,6 @@ from subsystems import (ElevatorSubsystem,
                         limelight,
                         algae,
                         # oneMotor,
-                        coral,
                         )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -107,8 +106,6 @@ class RobotContainer:
         self._keyboard_reset_odometry_by_drivers = commands2.button.NetworkButton("/SmartDashboard/keyboard","a") #SmartDashboard.getBoolean("/SmartDashboard/keyboard/a", False)
 
         self.drivetrain = TunerConstants.create_drivetrain()
-
-        self.coralTrack = coral.CoralTrack()
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
@@ -239,18 +236,18 @@ class RobotContainer:
 
         #endsection vision related commands
         
-        # Coral Track/Flipper controls 
-        self._joystick2.x().whileTrue(
-            commands2.cmd.run(
-                lambda: self.coralTrack.dischargeButtonPressed(), self.coralTrack
-            )
-        )
+        # Coral Track/Flipper controls (GET RID OF THIS WHEN MERGING)
+        # self._joystick2.x().whileTrue(
+        #     commands2.cmd.run(
+        #         lambda: self.coralTrack.dischargeButtonPressed(), self.coralTrack
+        #     )
+        # )
         
-        self.coralTrack.setDefaultCommand(
-            commands2.cmd.run(
-                lambda: self.coralTrack.default(), self.coralTrack
-            )
-        )
+        # self.coralTrack.setDefaultCommand(
+        #     commands2.cmd.run(
+        #         lambda: self.coralTrack.default(), self.coralTrack
+        #     )
+        # )
 
         # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(

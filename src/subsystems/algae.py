@@ -9,18 +9,6 @@ from commands2.subsystem import Subsystem
 import phoenix6
 
 '''
-What this does (so far hopefully I think):
-- One button does a "pivoting thing" (pushes the algae into the storage?)
-- One joystick does the spinny wheels (but maybe not)
-
-- For the pivoting, there will be three values to set the angle to:
-    - Idle, intaking, and processing
-- Three different buttons should set to all of these
-
-- Extra Idea: Automatically move the wheels depending on the set position
-    - Probably needs some delay (which will be a costant) to let motors pivot correctly
-    - It will have to check elevator position for intaking and processing (so robotstate file yay)
-    
 Algae Control (ideal) Pseudocode:
     - If Up D-pad pressed:
         - Set pivot to intake position (90deg if 0 is straight down)
@@ -35,7 +23,6 @@ Algae Control (ideal) Pseudocode:
         - Set pivot to discharge position (0deg if 0 is straight down)
         - Set wheels to 0
 '''
-# TODO: The pseudocode above is not started yet so umm... (do it)
 
 class AlgaeHandler(Subsystem):
     '''This thing does algae intake and discharge'''
@@ -56,6 +43,10 @@ class AlgaeHandler(Subsystem):
         
         self.intakeMultiplier = AlgaeConstants.kIntakeMultiplier # Needs to be between -1 and 1
         self.pivotTime = AlgaeConstants.kPivotTime
+        # These three need to be between 0 and 0.5
+        self.pivotIntakePositionValue = AlgaeConstants.kPivotIntakePositionValue 
+        self.pivotProcessingValue = AlgaeConstants.kPivotProcessingValue
+        self.pivotIdleValue = AlgaeConstants.kPivotIdleValue
         
         # Testing variable that ignores limit switches if False (will always be True during games)
         self.toggleLimitSwitch = True
@@ -64,40 +55,46 @@ class AlgaeHandler(Subsystem):
         self.toggleSmartDashboard = True
         if self.toggleSmartDashboard:
             self.setupSmartDashboard()
+        
+    def periodic(self):
+        '''To periodically update SmartDashboard and check'''
+        self.updateSmartDashboard()
             
     # These are the three set stating functions
     def idle(self):
-        self.changePosition(AlgaeConstants.kPivotIntakePositionValue, AlgaeConstants.kPivotTime)
+        '''Sets the subsystem to idle position (straight down)'''
+        self.changePosition(self.pivotIntakePositionValue, self.pivotTime)
         self.spinIntakeMotor(0)
-        self.updateSmartDashboard()
         
     def processing(self):
-        self.changePosition(AlgaeConstants.kPivotProcessingValue, AlgaeConstants.kPivotTime)
-        self.spinIntakeMotor(-self.intakeMultiplier)
-        self.updateSmartDashboard()
+        '''Sets the subsystem to processing position (kinda at an angle so it can spit out)'''
+        self.changePosition(self.pivotProcessingValue, self.pivotTime)
+        self.spinIntakeMotor(self.intakeMultiplier * -1)
     
     def intaking(self):
-        self.changePosition(AlgaeConstants.kPivotIdleValue, AlgaeConstants.kPivotTime)
+        '''Sets the subsystem to intaking position ()'''
+        self.changePosition(self.pivotIdleValue, self.pivotTime)
         if self.toggleLimitSwitch and self.limitSwitch.get():
             self.spinIntakeMotor(self.intakeMultiplier)
-        elif self.toggleLimitSwitch and not self.limitSwitch.get():
+        else: 
             self.spinIntakeMotor(0)
-        # Cool trick: when simulating, self.limitSwitch.get() is always true
-        # so you can use self.toggleLimitSwitch() to test if this works when simulating
-        self.updateSmartDashboard()
     
+    # Motor spinning functions
     def changePosition(self, position, seconds):
         '''Sets the position of the pivot motor (obvoiusly)'''
         # Seconds is the time it takes to move to that position because PID is boring
-        self.intakeMotor.set_position(position, seconds)
+        self.pivotMotor.set_position(position, seconds)
     
     def spinIntakeMotor(self, speed) -> None:
         '''Spins the intake motor (speed=1 is intake, speed=-1 is discharge hopefully)'''
         # self.intakeMotor.set_control(self.velocityOut.with_output(speed))
-        self.intakeMotor.set(speed)
+        self.intakeMotor.setVoltage(speed)
+        print(self.intakeMotor.get_motor_voltage())
         
+    # The SmartDashboard/NetworkTables stuffs
     def setupSmartDashboard(self) -> None:
         '''Sets up the Smart Dashboard for Algae with all the cool things'''
+        
         SmartDashboard.putString("Algae/Pivot Motor", self.pivotMotor.get_position().__str__())
         SmartDashboard.putNumber("Algae/Intake Motor", self.intakeMotor.get())
         SmartDashboard.putBoolean("Algae/Limit Switch", self.limitSwitch.get())
@@ -110,12 +107,11 @@ class AlgaeHandler(Subsystem):
         '''Updates the Smart Dashboard for Algae with all the cool things'''
         
         # Update values TO the Smart Dashboard
-        print(self.pivotMotor.get_position().__str__())
         SmartDashboard.putString("Algae/Pivot Motor", self.pivotMotor.get_position().__str__())
         SmartDashboard.putNumber("Algae/Intake Motor", self.intakeMotor.get())
         SmartDashboard.putBoolean("Algae/Limit Switch", self.limitSwitch.get())
         
         # Update values FROM the Smart Dashboard
         self.pivotTime = SmartDashboard.getNumber("Algae/Pivot Time", self.pivotTime)
-        self.motorSpeedMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", self.intakeMultiplier)
+        self.intakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", self.intakeMultiplier)
         self.toggleLimitSwitch = SmartDashboard.getBoolean("Algae/cvToggle Limit Switch", self.toggleLimitSwitch)

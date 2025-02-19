@@ -227,19 +227,26 @@ class AlgaeConstants:
     kPivotIntakePositionValue = 0.25 # Pivot position when grabbing algae
     kPivotProcessingValue = 0.07 # Pivot position when about to send to processor
     
-    kIntakeMultiplier = 0.5 # Intake wheels multiply by this speed
-    kPivotTime = 0.5 # The time it takes to switch between positions
+    # Intake wheels multiply by this speed
+    kIntakeMultiplier = 0.2
+    
+    # The time it takes to switch between positions
+    kPivotTime = 1
+    
+    # The delay from spinning the wheels to spit out the algae once processing input is pressed
+    kProcessDelay = 0.5
 
-class CoralConstants:
-    kCoralTrackChannel = CAN_Address.THIRTY
+# vvv OUTDATED GET RID OF WHEN MERGING vvv
+# class CoralConstants:
+#     kCoralTrackChannel = CAN_Address.THIRTY
     
-    kLeftSolenoidChannel = 1 # TODO: Get the actual IDs
-    kRightSolenoidChannel = 2
+#     kLeftSolenoidChannel = 1 # TODO: Get the actual IDs
+#     kRightSolenoidChannel = 2
     
-    # Coral track tuning constants
-    kTrackCenterMultiplier = 0.08
-    kTrackDischargeMultiplier = 0.16
-    kCoralDischargeTime = 1.5
+#     # Coral track tuning constants
+#     kTrackCenterMultiplier = 0.08
+#     kTrackDischargeMultiplier = 0.16
+#     kCoralDischargeTime = 1.5
     
-    kLeftBreakerLight = Rio_DIO.FIVE # TODO: Get the actual IDs
-    kRightBreakerLight = Rio_DIO.SIX
+#     kLeftBreakerLight = Rio_DIO.FIVE # TODO: Get the actual IDs
+#     kRightBreakerLight = Rio_DIO.SIX
