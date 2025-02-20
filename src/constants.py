@@ -15,9 +15,9 @@ CAM_MOUNT_HEIGHT = 12
 CAM_MOUNT_PITCH = 25
 
 
-AprilTagField=apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025Reefscape)
+AprilTagField=apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025ReefscapeWelded)
 
-AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025Reefscape).getTags() #recommend using this instead of the class below
+AprilTags= apriltag.AprilTagFieldLayout.loadField(apriltag.AprilTagField.k2025ReefscapeWelded).getTags() #recommend using this instead of the class below
 '''AprilTags is a list of all the april tag objects on the field, in order of number'''
 class AprilTags_height:
     def tag_heights(): #height of apriltags by order of number, in centimeters
@@ -221,20 +221,6 @@ class AlgaeConstants:
     
     # Limit Switch channel (So it doesn't input when limit switch activated)
     kAlgaeLimitSwitchChannel = Rio_DIO.FOUR # TODO: Get the actual IDs
-    
-    # Values to set pivoting motor to
-    kPivotIdleValue = 0 # Pivot position when idle
-    kPivotIntakePositionValue = 0.25 # Pivot position when grabbing algae
-    kPivotProcessingValue = 0.07 # Pivot position when about to send to processor
-    
-    # Intake wheels multiply by this speed
-    kIntakeMultiplier = 0.2
-    
-    # The time it takes to switch between positions
-    kPivotTime = 1
-    
-    # The delay from spinning the wheels to spit out the algae once processing input is pressed
-    kProcessDelay = 0.5
 
 # vvv OUTDATED GET RID OF WHEN MERGING vvv
 # class CoralConstants:

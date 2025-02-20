@@ -13,6 +13,7 @@ from commands2.sysid import SysIdRoutine
 import constants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
+from commands import algaeCommand
 from subsystems import (ElevatorSubsystem,
                         limelight,
                         algae,
@@ -86,10 +87,6 @@ class RobotContainer:
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
         )
-        
-
-        
-        self.algae = algae.AlgaeHandler()
 
         self._logger = Telemetry(self._max_speed)
 
@@ -97,6 +94,9 @@ class RobotContainer:
         self._joystick = commands2.button.CommandXboxController(0)
         # This one's probably used for scoring stuff
         self._joystick2 = commands2.button.CommandXboxController(1)
+        
+        self.algae = algae.AlgaeHandler()
+        self.algaeCommand = algaeCommand.AlgaeCommand(self.algae, self._joystick2)
 
         # Using NetworkButton with a USB keyboard will require running a seperate python program on the driver's station
         # python ../DriverstationUtils/keyboard_to_nt.py
@@ -111,7 +111,7 @@ class RobotContainer:
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         #section elevator
         self.ENABLE_ELEVATOR = False
-        if self.ENABLE_ELEVATOR: 
+        if self.ENABLE_ELEVATOR:
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
             self._elevator_motors_break = self.elevator.elevator_motors_break
