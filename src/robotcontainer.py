@@ -13,10 +13,9 @@ from commands2.sysid import SysIdRoutine
 import constants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
-from subsystems import (ElevatorSubsystem,
-                        limelight,
-                        # oneMotor,
-                        coral,
+from subsystems import (ElevatorSubsystem, coralSubsystem,
+                        limelight, pneumaticSubsystem
+                        # oneMotor,,
                         )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -25,6 +24,7 @@ from pathplannerlib.auto import AutoBuilder, PathfindThenFollowPath, PathPlanner
 from pathplannerlib.path import PathPlannerPath, PathConstraints
 from phoenix6 import swerve
 from phoenix6.hardware import TalonFX
+import wpilib
 from wpilib import SmartDashboard, DriverStation
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
 from wpimath.units import rotationsToRadians, degrees, radians, degreesToRadians, radiansToDegrees, metersToInches, inchesToMeters
@@ -34,6 +34,7 @@ from commands.odometrySnap2Line import SnapToLineCommand
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
 from commands.liftElevator import LiftElevatorCommand
+from commands import coralCommand
 import networktables as nt
 from networktables import util as ntutil
 
@@ -57,6 +58,9 @@ class RobotContainer:
         SmartDashboard.putNumber("Elevator/Kd",ElevatorConstants.kElevatorKd)
         SmartDashboard.putNumber("Elevator/Kg",ElevatorConstants.kGVolts)
         # SmartDashboard.putNumber("Elevator/Kf",0.0)
+        
+        self.timer = wpilib.Timer()
+        self.timer.start()
 
         self._max_speed = SmartDashboard.getNumber("Max Speed", TunerConstants.speed_at_12_volts)
         '''speed_at_12_volts desired top speed'''
@@ -107,7 +111,9 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        self.coralTrack = coral.CoralTrack()
+        self.coral_track = coralSubsystem.CoralTrack()
+        self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()
+        
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
@@ -124,6 +130,7 @@ class RobotContainer:
         for port  in np.arange( start= 5800, stop= 5809):
             wpinet.PortForwarder.getInstance().add(port, "limelight.local", port)
       
+        self.coral_command = coralCommand.CoralCommand(self.coral_track, self.pneumaticsHub, self.timer)
 
         # Path follower
         self._auto_chooser = AutoBuilder.buildAutoChooser("SetOdo_DriverWallRtFeeder")
@@ -195,6 +202,8 @@ class RobotContainer:
         # Note that X is defined as forward according to WPILib convention,
         # and Y is defined as to the left according to WPILib convention.
         # Drivetrain will execute this command periodically
+        
+        
         self.drivetrain.setDefaultCommand(
                 self.drivetrain.apply_request(
                 lambda: (
@@ -241,16 +250,10 @@ class RobotContainer:
         # Coral Track controls 
         self._joystick2.x().whileTrue(
             commands2.cmd.run(
-                lambda: self.coralTrack.discharge(), self.coralTrack
+                lambda: self.coral_command.enable_discharge(), self.coral_track
             )
         )
-        
-        self.coralTrack.setDefaultCommand(
-            commands2.cmd.run(
-                lambda: self.coralTrack.default(), self.coralTrack
-            )
-        )
-
+    
         # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
             self.drivetrain.apply_request(

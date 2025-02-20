@@ -20,7 +20,7 @@ class PneumaticSubsystem(commands2.Subsystem):
             for channel in range(16)
         ]
 
-    def enableSolenoid(self, channel):
+    def enable_solenoid(self, channel):
         """Enables a Solenoid based on channel."""
         solenoid = self.solenoids[channel]
         
@@ -30,7 +30,7 @@ class PneumaticSubsystem(commands2.Subsystem):
 
         solenoid.set(True)
 
-    def disableSolenoid(self, channel):
+    def disable_solenoid(self, channel):
         """Disables a Solenoid based on channel."""
         solenoid = self.solenoids[channel]
         
@@ -40,7 +40,7 @@ class PneumaticSubsystem(commands2.Subsystem):
 
         solenoid.set(False)
     
-    def getSolenoid(self, channel: bool):
+    def get_solenoid(self, channel: bool):
         """Returns state of Solenoid based on channel."""
         solenoid = self.solenoids[channel]
         
@@ -50,7 +50,7 @@ class PneumaticSubsystem(commands2.Subsystem):
 
         solenoid.get()
     
-    def pulseSolenoid(self, channel: bool, duration: float = 0.1):
+    def pulse_solenoid(self, channel: bool, duration: float = 0.1):
         """Pulses a Solenoid based on channel."""
         solenoid = self.solenoids[channel]
         
@@ -61,7 +61,7 @@ class PneumaticSubsystem(commands2.Subsystem):
         solenoid.setPulseDuration(duration)
         solenoid.startPulse()
         
-    def toggleSolenoid(self, channel: bool):
+    def toggle_solenoid(self, channel: bool):
         """Returns state of Solenoid based on channel."""
         solenoid = self.solenoids[channel]
         

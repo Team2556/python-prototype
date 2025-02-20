@@ -226,3 +226,7 @@ class CoralConstants:
     kCoralMotorPort = CAN_Address.THIRTY
     kLeftBreakerLight = 8 # TODO: Get the actual IDs
     kRightBreakerLight = 9
+    kCenterBreakerLight = 10
+    
+class PneumaticConstants:
+    kHub = CAN_Address.FORTYFOUR
