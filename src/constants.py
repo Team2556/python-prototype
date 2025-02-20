@@ -6,6 +6,7 @@ from phoenix6.units import *
 from wpimath.units import degrees, radians, degreesToRadians, radiansToDegrees, inchesToMeters, inches
 from wpimath.trajectory import TrapezoidProfile
 from wpilib import SmartDashboard
+from phoenix6.configs.config_groups import Slot0Configs
 
 
 VISION_DES_ANGLE_deg = 25
@@ -239,9 +240,18 @@ class ClimbConstants:
     #kDClimbController = 0
     kClimbMaxHeight = 1.6081375
     kClimbMinHeight = 0.815975
-    kClimbSlightlyExtendedHeight = 0.9
-    kClimbMinHeightEncoderEstimate = -3583.037109375
+    # kClimbSlightlyExtendedHeight = 0.9
+    # kClimbMinHeightEncoderEstimate = -3583.037109375
     kS = 0
     kV = 0
     kA = 0
     kClimbMaxPosConfirmationExtraHeight = 0.1
+    GEAR_RATIO = 15376/45
+    GAINS = (Slot0Configs()
+                .with_k_p(1.0)
+                .with_k_i(0.0)
+                .with_k_d(0.0)
+                .with_k_s(0.0)
+                .with_k_v(0.0)
+                .with_k_a(0.0)
+            )
