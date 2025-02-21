@@ -31,7 +31,9 @@ class CoralTrack(commands2.Subsystem):
 
         if is_Right and not is_Left:
             self.set_motor(-speed)
-
+            return
+        
+        # If Neither or Both detectors return True
         self.disable_motor()
 
     def set_motor(self, speed):

@@ -29,13 +29,14 @@ class CoralCommand(commands2.Command):
 
     def execute(self):
         """Defualt Command for Coral Track"""
+        
         # If Discharge Sequence Disables
         if not self.discharge_enabled:
             self.coral_track.center_coral()
             return
 
         # If Discharge Sequence Over
-        if self.timer - self.discharge_start_time > 1.5:
+        if self.timer.get() - self.discharge_start_time > 1.5:
             self.disable_discharge()
             return
 
