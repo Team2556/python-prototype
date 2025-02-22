@@ -23,7 +23,7 @@ class PneumaticSubsystem(commands2.Subsystem):
     def enable_solenoid(self, channel):
         """Enables a Solenoid based on channel."""
         solenoid = self.solenoids[channel]
-        
+
         if not solenoid:
             print("Solenoid Not Found")
             return
@@ -33,38 +33,38 @@ class PneumaticSubsystem(commands2.Subsystem):
     def disable_solenoid(self, channel):
         """Disables a Solenoid based on channel."""
         solenoid = self.solenoids[channel]
-        
+
         if not solenoid:
             print("Solenoid Not Found")
             return
 
         solenoid.set(False)
-    
+
     def get_solenoid(self, channel: bool):
         """Returns state of Solenoid based on channel."""
         solenoid = self.solenoids[channel]
-        
+
         if not solenoid:
             print("Solenoid Not Found")
             return
 
         solenoid.get()
-    
+
     def pulse_solenoid(self, channel: bool, duration: float = 0.1):
         """Pulses a Solenoid based on channel."""
         solenoid = self.solenoids[channel]
-        
+
         if not solenoid:
             print("Solenoid Not Found")
             return
 
         solenoid.setPulseDuration(duration)
         solenoid.startPulse()
-        
+
     def toggle_solenoid(self, channel: bool):
         """Returns state of Solenoid based on channel."""
         solenoid = self.solenoids[channel]
-        
+
         if not solenoid:
             print("Solenoid Not Found")
             return

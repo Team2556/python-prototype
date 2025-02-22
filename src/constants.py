@@ -282,4 +282,4 @@ class CoralConstants:
 
 
 class PneumaticConstants:
-    kHub = CAN_Address.FORTYFOUR
+    kHub = CAN_Address.FORTY
