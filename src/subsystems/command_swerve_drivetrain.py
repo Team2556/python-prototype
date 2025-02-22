@@ -154,6 +154,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
 
         self.pigeon2.reset()
+        self.skip_counter = 0 # increment with ever iteration, use to set frequency of certain actions
 
         self._sim_notifier: Notifier | None = None
         self._last_sim_time: units.second = 0.0
@@ -328,6 +329,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         # This allows us to correct the perspective in case the robot code restarts mid-match.
         # Otherwise, only check and apply the operator perspective if the DS is disabled.
         # This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
+        self.skip_counter +=1
+
         if not self._has_applied_operator_perspective or DriverStation.isDisabled():
             alliance_color = DriverStation.getAlliance()
             if alliance_color is not None:
@@ -341,15 +344,23 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         '''may do this if don't need to evaluate a trust function (beyond limelight's validity)
         if not utils.is_simulation():
             self.use_vision_odometry_update()'''
-        self.ignore_backs_of_AprilTags('limelight')
-        self.ignore_backs_of_AprilTags('limelight-four')
-        self.use_vision_odometry_update(limelight_to_use='limelight')
-        self.use_vision_odometry_update(limelight_to_use='limelight-four')
+        #TODO:  is this taking too long ? yeah, sort of
+        # self.ignore_backs_of_AprilTags('limelight')
+        # self.ignore_backs_of_AprilTags('limelight-four')
+        #TODO:  is this taking too long ? YES! 
+        skip_tripper_base = 50
+        if self.skip_counter % skip_tripper_base ==0:
+            # with this and all sub part of use_vision..., robot is still responsive when skipped at 1/1000
+            self.use_vision_odometry_update(limelight_to_use='limelight')
+        #TODO:  is this taking too long ? 
+        if (self.skip_counter+skip_tripper_base/2) % skip_tripper_base ==0:
+            self.use_vision_odometry_update(limelight_to_use='limelight-four')
         
-        SmartDashboard.putNumber("Rotation In drivetrain", self.get_state().pose.rotation().degrees() )
-        SmartDashboard.putNumber("Rotation on the Pigeon", self.pigeon2.get_yaw().value)
-        SmartDashboard.putNumber("Rotation on the Pigeon -Wrapped", self.pigeon2.get_yaw().value % (360))
-        SmartDashboard.putNumber("Rotation delta drivetrain-Pigeon", self.get_state().pose.rotation().degrees() - self.pigeon2.get_yaw().value)
+        
+        # SmartDashboard.putNumber("Rotation In drivetrain", self.get_state().pose.rotation().degrees() )
+        # SmartDashboard.putNumber("Rotation on the Pigeon", self.pigeon2.get_yaw().value)
+        # SmartDashboard.putNumber("Rotation on the Pigeon -Wrapped", self.pigeon2.get_yaw().value % (360))
+        # SmartDashboard.putNumber("Rotation delta drivetrain-Pigeon", self.get_state().pose.rotation().degrees() - self.pigeon2.get_yaw().value)
         
         
         
@@ -370,19 +381,19 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self._sim_notifier.startPeriodic(self._SIM_LOOP_PERIOD)
     
     def use_vision_odometry_update(self, limelight_to_use= "limelight"):
+        
         # self.set_vision_measurement_std_devs((.031, .031, 40*3.14/180))
         # self.add_vision_measurement(viz_pose, fpga_time_of_measurement) #, vision_measurement_std_devs)
     
         # def _add_vision_measurements(self) -> None:
         """
-        Add vision measurement to MegaTag2
+        Add vision measurement to MegaTag 1 or 2
         """
-
-        SmartDashboard.putNumber(f"Rotation In drivetrain -VisionUpdate{limelight_to_use}", self.get_state().pose.rotation().degrees() )
+        # with this, robot is still responsive when skipped at 1/1000
         LimelightHelpers.set_robot_orientation(
             limelight_to_use,
-            self.get_state().pose.rotation().degrees(),  # OR
-            # self.pigeon2.get_yaw().value % (360),
+            # self.get_state().pose.rotation().degrees(),  # OR
+            self.pigeon2.get_yaw().value % (360),
             # 0,  #
             self.pigeon2.get_angular_velocity_z_world().value,
             # 0,  #
@@ -396,19 +407,24 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         )
         
         # get botpose estimate with origin on blue side of field
+        # is this taking too long? 
+        # with this, robot is still responsive when skipped at 1/1000
         mega_tag_choice = {'MegaTag2': LimelightHelpers.get_botpose_estimate_wpiblue_megatag2(limelight_to_use),
         'MegaTag1': LimelightHelpers.get_botpose_estimate_wpiblue(limelight_to_use)}
         mega_tag = mega_tag_choice[self.megatag_chooser.getSelected()]
-        
+        # mega_tag=LimelightHelpers.get_botpose_estimate_wpiblue(limelight_to_use)
         #if we are spinning slower than 720 deg/sec and we see tags
+        # with this, robot is still responsive when skipped at 1/1000        
         if abs(self.pigeon2.get_angular_velocity_z_world().value) <= 720 and mega_tag.tag_count > 0:
             self.VisionUpdateOn_bool = SmartDashboard.getBoolean("HighConfidence_VisionUpdate", True)
             # set and add vision measurement
             if self.VisionUpdateOn_bool:
-                self.set_vision_measurement_std_devs((0.0095, 0.0095, 9999)) #originally: (0.7, 0.7, 9999999)
+                self.set_vision_measurement_std_devs((0.0095, 0.0095, 1)) #originally: (0.7, 0.7, 9999999)
             else:
-                self.set_vision_measurement_std_devs((0.701737, 0.701737, 999999)) #originally: (0.7, 0.7, 9999999)
+                self.set_vision_measurement_std_devs((0.0701737, 0.0701737, 9999999)) #originally: (0.7, 0.7, 9999999)
             
+            # is this taking too long? 
+            # with this, robot is still responsive when skipped at 1/1000
             self.add_vision_measurement(mega_tag.pose, utils.fpga_to_current_time(mega_tag.timestamp_seconds))
         
     def ignore_backs_of_AprilTags(self, limelight_to_use='limelight') -> None:

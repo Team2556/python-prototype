@@ -56,6 +56,7 @@
       "/SmartDashboard/Elevator": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Field-Vision": "Field2d",
+      "/SmartDashboard/MegaTag Chooser": "String Chooser",
       "/SmartDashboard/MegatTag Chooser": "String Chooser",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",

@@ -76,7 +76,7 @@ class TunerConstants:
 
     # Theoretical free speed (m/s) at 12 V applied output;
     # This needs to be tuned to your individual robot
-    speed_at_12_volts: units.meters_per_second = 4.73 # TODO: #10 Change this to the actual speed 
+    speed_at_12_volts: units.meters_per_second = 2.73 # TODO: #10 Change this to the actual speed 
     #getting 34.5 rotations/sec at 4 volts .'. 34.5 * 2 * pi * 0.0508 = 10.9 m/s
     
 
