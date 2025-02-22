@@ -40,18 +40,6 @@ class LEDHandler(commands2.Subsystem):
                 self.priority_color = [None, 0, 0]
         else:
             self.set_color(self.default_color)
-        
-        if not len(self.color_backlog):
-            self.set_color("purple")
-            return
-        
-        self.set_color(self.color_backlog[0][0], self.color_backlog[0][1], self.color_backlog[0][2])
-        
-        if self.color_backlog[0][-1] > self.color_backlog[0][-2]:
-            self.color_backlog.pop(0)
-        else:
-            self.color_backlog[0][-1] += tick_duration
-        
 
     def set_priority_color(self, color, duration=1):
         self.priority_color = [color, duration, 0]
