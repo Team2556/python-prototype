@@ -247,6 +247,7 @@ class ClimbConstants:
     kA = 0
     kClimbMaxPosConfirmationExtraHeight = 0.1
     GEAR_RATIO = 15376/45
+    kPositionConversionFactor = 0.1965
     GAINS = (Slot0Configs()
                 .with_k_p(1.0)
                 .with_k_i(0.0)
