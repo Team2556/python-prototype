@@ -19,6 +19,7 @@ from subsystems import (
     limelight,
     pneumaticSubsystem,
     # oneMotor,,
+    ultrasonics
 )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -91,17 +92,26 @@ class RobotContainer:
                 self._max_angular_rate * 0.05
             )  # Add a 5% deadband on output
             .with_drive_request_type(
-                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+                swerve.SwerveModule.DriveRequestType.VELOCITY #OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive
         )
+        """
+        Control the drive motor using a velocity closed-loop request.
+        The control output type is determined by SwerveModuleConstants.DriveMotorClosedLoopOutput
+        """
+
 
         self._brake = swerve.requests.SwerveDriveBrake()
         self._point = swerve.requests.PointWheelsAt()
-        self._forward_straight = swerve.requests.RobotCentric().with_drive_request_type(
-            swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+        self._forward_straight = (
+            swerve.requests.RobotCentric()
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.VELOCITY #.OPEN_LOOP_VOLTAGE
+            )
         )
 
         # self.algae = algae.AlgaeHandler()
+        # self.ultrasonic = ultrasonics.Ultrasonics()
 
         self._logger = Telemetry(self._max_speed)
 

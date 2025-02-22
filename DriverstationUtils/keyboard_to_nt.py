@@ -14,7 +14,7 @@ def main():
 
     ntcoreinst = ntcore.NetworkTableInstance.getDefault()
 
-    print("Setting up NetworkTables client \n \n press {CTRL+C} to exit \n")
+    print("Setting up NetworkTables client \n \n press {CTRL+C} to exit \nj")
     ntcoreinst.startClient4("KeyboardToNT")
     ntcoreinst.setServer("127.0.0.1")
     ntcoreinst.startDSClient()

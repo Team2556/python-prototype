@@ -18,12 +18,16 @@ import time
 from commands2 import Subsystem
 from wpimath.geometry import Pose2d, Transform2d, Translation2d, Rotation2d
 from wpimath.units import degreesToRadians
+# from wpilib import SmartDashboard   
+import ntcore as nt
 import numpy as np
 from phoenix6.utils import get_current_time_seconds
 
 class LimelightSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
+        
+
         self.discovered_limelights = limelight.discover_limelights()#debug=True)
         print("discovered limelights:", self.discovered_limelights)
 
@@ -37,10 +41,15 @@ class LimelightSubsystem(Subsystem):
             # 1 : use external submitted via set_robot_orientation; use internal fused yaw
             # 2 : use internal yaw; ignore external completely
             LimelightHelpers.set_imu_mode('limelight', mode=1)
+            self.ll.upload_fieldmap('src/WPIcalFieldToUse/Practice_Blue_field_calibration.fmap', index=None)
+            # self.ll.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
+            
             if self.qty_limelights > 1:
                 limelight_address_2 = self.discovered_limelights[1]
                 self.ll2 = limelight.Limelight(limelight_address_2)
                 LimelightHelpers.set_imu_mode('limelight-four', mode=1)
+                self.ll2.upload_fieldmap('src/WPIcalFieldToUse/Practice_Red_field_calibration.fmap', index=None)
+                # self.ll2.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
             results = self.ll.get_results()
             status = self.ll.get_status()
             print("-----")
@@ -55,9 +64,6 @@ class LimelightSubsystem(Subsystem):
             print("fps:", self.ll.get_fps())
             print("-----")
             print("hwreport:", self.ll.hw_report())
-
-            # self.ll.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
-            # self.ll2.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
 
 
             self.ll.enable_websocket()
@@ -173,16 +179,6 @@ class LimelightSubsystem(Subsystem):
     #endsection specialty utilities
 
     def periodic(self):
-        '''if self.discovered_limelights:
-            try:
-                result = self.ll.get_latest_results()
-                _parsed_result = limelightresults.parse_results(result)
-                if _parsed_result is not None:
-                    # print("valid targets: ", _parsed_result.validity, ", pipelineIndex: ", _parsed_result.pipeline_id,", Targeting Latency: ", _parsed_result.targeting_latency)
-                    self.parsed_result = _parsed_result
-
-            except KeyboardInterrupt:
-                print("Program interrupted by user, shutting down.")'''
         pass
 
 
