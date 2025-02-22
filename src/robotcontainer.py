@@ -18,6 +18,7 @@ from subsystems import (
     coralSubsystem,
     limelight,
     pneumaticSubsystem,
+    LEDControl,
     # oneMotor,,
 )
 from telemetry import Telemetry
@@ -125,6 +126,7 @@ class RobotContainer:
 
         self.coral_track = coralSubsystem.CoralTrack()
         self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()
+        self.LED_handler = LEDControl.LEDHandler(self.timer)
 
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
@@ -540,6 +542,10 @@ class RobotContainer:
 
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
+        )
+
+        self.LED_handler.setDefaultCommand(
+            commands2.cmd.run(lambda: self.LED_handler.default(), self.LED_handler)
         )
 
     def getAutonomousCommand(self) -> commands2.Command:
