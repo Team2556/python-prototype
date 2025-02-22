@@ -141,8 +141,8 @@ class TunerConstants:
     _front_left_steer_motor_inverted = False
     _front_left_encoder_inverted = False
 
-    _front_left_x_pos: units.meter =  .596 /2 #.596 /2 = 11.73#
-    _front_left_y_pos: units.meter =  .596 /2 #.596 /2 = 11.73#
+    _front_left_x_pos: units.meter =  .596 /2 #.596 /2 = 11.73 in#
+    _front_left_y_pos: units.meter =  .596 /2 #.596 /2 = 11.73 in#
 
     # Front Right
     _front_right_drive_motor_id = 7
