@@ -21,19 +21,19 @@ class ClimbSubsystem(StateSubsystem):
         
     
 
-    position_conversion_factor = ClimbConstants.kPositionConversionFactor
-    speed = ClimbConstants.kSpeed
-    _motor_config = (TalonFXConfiguration()
-                     .with_slot0(ClimbConstants.GAINS)
-                     .with_motor_output(MotorOutputConfigs().with_neutral_mode(NeutralModeValue.BRAKE))
-                     .with_feedback(FeedbackConfigs().with_sensor_to_mechanism_ratio(ClimbConstants.GEAR_RATIO))
-                     )
     def __init__(self) -> None:
         super().__init__("Climb", self.SubsystemState.STOP)
         climbmotor_configurator = self.climbmotor.configurator
         self.climbmotor = hardware.TalonFX(ClimbConstants.kClimbMotorPort, "rio")
         self.climbCANcoder = hardware.CANcoder(ClimbConstants.kClimbMotorPort)
         self.limit_bottom = wpilib.DigitalInput(ClimbConstants.kBottomLimitSwitchChannel)
+        self.position_conversion_factor = ClimbConstants.kPositionConversionFactor
+        self.speed = ClimbConstants.kSpeed
+        self._motor_config = (TalonFXConfiguration()
+                        .with_slot0(ClimbConstants.GAINS)
+                        .with_motor_output(MotorOutputConfigs().with_neutral_mode(NeutralModeValue.BRAKE))
+                        .with_feedback(FeedbackConfigs().with_sensor_to_mechanism_ratio(ClimbConstants.GEAR_RATIO))
+                        )
         self.limit_top = wpilib.DigitalInput(ClimbConstants.kTopLimitSwitchChannel)
         self.climb_request = VoltageOut(0)
         climbmotor_configurator.apply(self._motor_config)

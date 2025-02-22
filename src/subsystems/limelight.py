@@ -22,6 +22,7 @@ from wpimath.units import degreesToRadians
 import ntcore as nt
 import numpy as np
 from phoenix6.utils import get_current_time_seconds
+from phoenix6 import SignalLogger
 
 class LimelightSubsystem(Subsystem):
     def __init__(self):
@@ -65,12 +66,24 @@ class LimelightSubsystem(Subsystem):
             print("-----")
             print("hwreport:", self.ll.hw_report())
 
+            
+
+            SignalLogger.write_double_array("limelight MT1 Pose", self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue('limelight')))
+            SignalLogger.write_double_array("limelight MT2 Pose", self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue_megatag2('limelight')))
+            SignalLogger.write_double_array("limelight-four MT1 Pose", self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue('limelight-four')))
+            SignalLogger.write_double_array("limelight-four MT2 Pose", self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue_megatag2('limelight-four')))
 
             self.ll.enable_websocket()
             if self.qty_limelights>1:
                 self.ll2.enable_websocket()
             # print(self.ll.get_pipeline_atindex(0))
             
+
+    def stripped_down_pose(self, botpose):
+        '''return the pose (only) as a float array'''
+        #return PoseEstimate(pose, adjusted_timestamp, latency, tag_count, tag_span, tag_dist, tag_area, raw_fiducials, is_megatag_2)
+        stripped_pose= [botpose[0].x, botpose[0].y, botpose[0].rotation.degrees]
+        return stripped_pose
 
     #update python (on limelight) inputs
     def update_python_inputs(self, inputs):
