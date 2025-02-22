@@ -76,13 +76,14 @@ class TunerConstants:
 
     # Theoretical free speed (m/s) at 12 V applied output;
     # This needs to be tuned to your individual robot
-    speed_at_12_volts: units.meters_per_second = 4.73 # TODO: #10 Change this to the actual speed 
+    speed_at_12_volts: units.meters_per_second = 2.73 # TODO: #10 Change this to the actual speed 
     #getting 34.5 rotations/sec at 4 volts .'. 34.5 * 2 * pi * 0.0508 = 10.9 m/s
     
 
     # Every 1 rotation of the azimuth results in _couple_ratio drive motor turns;
     # This may need to be tuned to your individual robot
-    _couple_ratio = 3.5714285714285716
+    # Protobot: turned in steer direction 4 times, drive motor turned 2 plus 7 out of the 43 drive bevel teeth
+    _couple_ratio = (2 + 7/43) / 4 # generated: 3.5714285714285716
 
     _drive_gear_ratio = 6.746031746031747
     _steer_gear_ratio = 12.8
@@ -140,8 +141,8 @@ class TunerConstants:
     _front_left_steer_motor_inverted = False
     _front_left_encoder_inverted = False
 
-    _front_left_x_pos: units.meter = inchesToMeters(11.75)
-    _front_left_y_pos: units.meter = inchesToMeters(11.75)
+    _front_left_x_pos: units.meter =  .596 /2 #.596 /2 = 11.73#
+    _front_left_y_pos: units.meter =  .596 /2 #.596 /2 = 11.73#
 
     # Front Right
     _front_right_drive_motor_id = 7
@@ -151,8 +152,8 @@ class TunerConstants:
     _front_right_steer_motor_inverted = False
     _front_right_encoder_inverted = False
 
-    _front_right_x_pos: units.meter = inchesToMeters(11.75)
-    _front_right_y_pos: units.meter = inchesToMeters(-11.75)
+    _front_right_x_pos: units.meter = .596 /2
+    _front_right_y_pos: units.meter = -.596 /2
 
     # Back Left
     _back_left_drive_motor_id = 4
@@ -162,8 +163,8 @@ class TunerConstants:
     _back_left_steer_motor_inverted = False
     _back_left_encoder_inverted = False
 
-    _back_left_x_pos: units.meter = inchesToMeters(-11.75)
-    _back_left_y_pos: units.meter = inchesToMeters(11.75)
+    _back_left_x_pos: units.meter = -.596 /2
+    _back_left_y_pos: units.meter = .596 /2
 
     # Back Right
     _back_right_drive_motor_id = 1
@@ -173,8 +174,8 @@ class TunerConstants:
     _back_right_steer_motor_inverted = False
     _back_right_encoder_inverted = False
 
-    _back_right_x_pos: units.meter = inchesToMeters(-11.75)
-    _back_right_y_pos: units.meter = inchesToMeters(-11.75)
+    _back_right_x_pos: units.meter = -.596 /2
+    _back_right_y_pos: units.meter = -.596 /2
 
 
     front_left = _constants_creator.create_module_constants(

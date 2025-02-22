@@ -18,18 +18,38 @@ import time
 from commands2 import Subsystem
 from wpimath.geometry import Pose2d, Transform2d, Translation2d, Rotation2d
 from wpimath.units import degreesToRadians
+# from wpilib import SmartDashboard   
+import ntcore as nt
 import numpy as np
 from phoenix6.utils import get_current_time_seconds
 
 class LimelightSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
+        
+
         self.discovered_limelights = limelight.discover_limelights()#debug=True)
         print("discovered limelights:", self.discovered_limelights)
 
         if self.discovered_limelights:
-            limelight_address = self.discovered_limelights[0] 
-            self.ll = limelight.Limelight(limelight_address)
+            self.qty_limelights = len(self.discovered_limelights)
+            print("'\n-------------\n------------------\n'qty limelights:", self.qty_limelights,'\n-------------\n------------------\n')
+            limelight_address_1 = self.discovered_limelights[0] #TODO make us able to use multiple limelights; maybe a second subsystem
+            self.ll = limelight.Limelight(limelight_address_1)
+            # LL4 IMU Modes:
+            # 0 : use external submitted via set_robot_orientation; ignore interal completely
+            # 1 : use external submitted via set_robot_orientation; use internal fused yaw
+            # 2 : use internal yaw; ignore external completely
+            LimelightHelpers.set_imu_mode('limelight', mode=1)
+            self.ll.upload_fieldmap('src/WPIcalFieldToUse/Practice_Blue_field_calibration.fmap', index=None)
+            # self.ll.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
+            
+            if self.qty_limelights > 1:
+                limelight_address_2 = self.discovered_limelights[1]
+                self.ll2 = limelight.Limelight(limelight_address_2)
+                LimelightHelpers.set_imu_mode('limelight-four', mode=1)
+                self.ll2.upload_fieldmap('src/WPIcalFieldToUse/Practice_Red_field_calibration.fmap', index=None)
+                # self.ll2.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
             results = self.ll.get_results()
             status = self.ll.get_status()
             print("-----")
@@ -45,8 +65,11 @@ class LimelightSubsystem(Subsystem):
             print("-----")
             print("hwreport:", self.ll.hw_report())
 
+
             self.ll.enable_websocket()
-            print(self.ll.get_pipeline_atindex(0))
+            if self.qty_limelights>1:
+                self.ll2.enable_websocket()
+            # print(self.ll.get_pipeline_atindex(0))
             
 
     #update python (on limelight) inputs
@@ -96,8 +119,14 @@ class LimelightSubsystem(Subsystem):
     def enable_websocket(self):
         return self.ll.enable_websocket()
     
+    def set_imu_mode_align(self):
+        return self.ll.set_imu_mode(1)
+    def set_imu_mode_independent(self):
+        return self.ll.set_imu_mode(2)
+    
+    
     #section specialty utilities
-    def trust_target(self, robot_pose: Pose2d, residual_threshold=1000000000, override_and_trust=False): #TODO: fix threshold
+    '''def trust_target(self, robot_pose: Pose2d, residual_threshold=1000000000, override_and_trust=True): #TODO: fix threshold
         #calculate distance to the detected target
         #will the results hav only one target's results? assume one for now
         # Done: check unit consistency: botpose is in meters, robot_pose is in meters
@@ -119,7 +148,7 @@ class LimelightSubsystem(Subsystem):
                 time_of_measurement = get_current_time_seconds() - .001 * latency #only acounting for json unpacking 
  
                 trust_vision_data *= (residual < residual_threshold) 
-                '''General results do not have stddev -- need to use MegaTag2
+                ''' '''General results do not have stddev -- need to use MegaTag2
                 if latest_parsed_result.stddevs:
                     detect_stdDev = latest_parsed_result.stddevs
                     detect_stdDev_x = detect_stdDev[0]
@@ -128,7 +157,7 @@ class LimelightSubsystem(Subsystem):
                     trust_vision_data *= (residual < 2 * max_stdDev) 
                     #if the residual is within 2 standard deviations, 
                     # and the residual is less than 1 meter, 
-                    '''
+                    ''' '''
                 # trust the target
                 detect_stdDev_x = None
                 detect_stdDev_y = None
@@ -144,24 +173,18 @@ class LimelightSubsystem(Subsystem):
             latest_parsed_result= None
             time_of_measurement = get_current_time_seconds()
 
-        return (trust_vision_data , viz_pose, latest_parsed_result, time_of_measurement)
+        return (trust_vision_data , viz_pose, latest_parsed_result, time_of_measurement)'''
 
 
     #endsection specialty utilities
 
     def periodic(self):
-        if self.discovered_limelights:
-            try:
-                result = self.ll.get_latest_results()
-                _parsed_result = limelightresults.parse_results(result)
-                if _parsed_result is not None:
-                    # print("valid targets: ", _parsed_result.validity, ", pipelineIndex: ", _parsed_result.pipeline_id,", Targeting Latency: ", _parsed_result.targeting_latency)
-                    self.parsed_result = _parsed_result
-
-            except KeyboardInterrupt:
-                print("Program interrupted by user, shutting down.")
+        pass
 
 
     def end(self):
-        if self.discovered_limelights: self.ll.disable_websocket()
+        if self.discovered_limelights: 
+            self.ll.disable_websocket()
+            if self.qty_limelights>1:
+                self.ll2.disable_websocket()
     

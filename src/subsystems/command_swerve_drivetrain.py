@@ -5,9 +5,13 @@ from pathplannerlib.auto import AutoBuilder, RobotConfig
 from pathplannerlib.controller import PIDConstants, PPHolonomicDriveController
 from phoenix6 import SignalLogger, swerve, units, utils
 from typing import Callable, overload
-from wpilib import DriverStation, Notifier, RobotController
+from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, SendableChooser
 from wpilib.sysid import SysIdRoutineLog
-from wpimath.geometry import Rotation2d
+from wpimath.geometry import Rotation2d, Pose2d
+
+from robotUtils.limelight import LimelightHelpers
+import numpy as np
+from constants import AprilTags
 # from archive import odometry_fuse
 
 
@@ -148,11 +152,21 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             drivetrain_constants, arg0, arg1, arg2, arg3
         )
 
+
+        self.pigeon2.reset()
+        self.skip_counter = 0 # increment with ever iteration, use to set frequency of certain actions
+
         self._sim_notifier: Notifier | None = None
         self._last_sim_time: units.second = 0.0
 
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
+
+        SmartDashboard.putBoolean("HighConfidence_VisionUpdate", False)
+        self.megatag_chooser = SendableChooser()
+        self.megatag_chooser.setDefaultOption('MegaTag1', "MegaTag1")
+        self.megatag_chooser.addOption('MegaTag2', "MegaTag2")
+        SmartDashboard.putData("MegaTag Chooser", self.megatag_chooser)
 
         # Swerve request to apply during path following
         self._apply_robot_speeds = swerve.requests.ApplyRobotSpeeds()
@@ -315,6 +329,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         # This allows us to correct the perspective in case the robot code restarts mid-match.
         # Otherwise, only check and apply the operator perspective if the DS is disabled.
         # This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
+        self.skip_counter +=1
+
         if not self._has_applied_operator_perspective or DriverStation.isDisabled():
             alliance_color = DriverStation.getAlliance()
             if alliance_color is not None:
@@ -325,6 +341,19 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                 )
                 self._has_applied_operator_perspective = True
         
+        skip_tripper_base = 50
+
+        #TODO:  is this taking too long ? yeah, sort of:: Try with skipping
+        # self.ignore_backs_of_AprilTags('limelight')
+        # self.ignore_backs_of_AprilTags('limelight-four')
+
+        if self.skip_counter % skip_tripper_base ==0:
+            # with this and all sub part of use_vision..., robot is still responsive when skipped at 1/1000
+            self.use_vision_odometry_update(limelight_to_use='limelight')
+
+        if (self.skip_counter+skip_tripper_base/2) % skip_tripper_base ==0:
+            self.use_vision_odometry_update(limelight_to_use='limelight-four')
+
 
     def _start_sim_thread(self):
         def _sim_periodic():
@@ -339,10 +368,92 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self._sim_notifier = Notifier(_sim_periodic)
         self._sim_notifier.startPeriodic(self._SIM_LOOP_PERIOD)
     
-    def use_vision_odometry_update(self, viz_pose, fpga_time_of_measurement):
-        self.set_vision_measurement_std_devs((.031, .031, 40*3.14/180))
-        self.add_vision_measurement(viz_pose, fpga_time_of_measurement) #, vision_measurement_std_devs)
+    def use_vision_odometry_update(self, limelight_to_use= "limelight"):
+        """
+        Add vision measurement to MegaTag 1 or 2
+        """
+        # with this, robot is still responsive when skipped at 1/1000
+        LimelightHelpers.set_robot_orientation(
+            limelight_to_use,
+            # self.get_state().pose.rotation().degrees(),  # OR
+            self.pigeon2.get_yaw().value % (360),
+            # 0,  #
+            self.pigeon2.get_angular_velocity_z_world().value,
+            # 0,  #
+            self.pigeon2.get_pitch().value,
+            # 0,  #
+            self.pigeon2.get_angular_velocity_y_world().value,
+            # 0,  #
+            self.pigeon2.get_roll().value,
+            # 0,  #
+            self.pigeon2.get_angular_velocity_x_world().value
+        )
         
+        # get botpose estimate with origin on blue side of field; MegaTag1 seems to be working better
+        mega_tag_choice = {'MegaTag2': LimelightHelpers.get_botpose_estimate_wpiblue_megatag2(limelight_to_use),
+        'MegaTag1': LimelightHelpers.get_botpose_estimate_wpiblue(limelight_to_use)}
+        mega_tag = mega_tag_choice[self.megatag_chooser.getSelected()]
+
+        #if we are spinning slower than 720 deg/sec and we see tags    
+        if abs(self.pigeon2.get_angular_velocity_z_world().value) <= 720 and mega_tag.tag_count > 0:
+            self.VisionUpdateOn_bool = SmartDashboard.getBoolean("HighConfidence_VisionUpdate", True)
+            # set and add vision measurement
+            if self.VisionUpdateOn_bool:
+                self.set_vision_measurement_std_devs((0.0095, 0.0095, 1)) #originally: (0.7, 0.7, 9999999)
+            else:
+                self.set_vision_measurement_std_devs((0.0701737, 0.0701737, 9999999)) #originally: (0.7, 0.7, 9999999)
+
+            self.add_vision_measurement(mega_tag.pose, utils.fpga_to_current_time(mega_tag.timestamp_seconds))
+        
+    def ignore_backs_of_AprilTags(self, limelight_to_use='limelight') -> None:
+        """
+        Ignore the backs of AprilTags in vision measurements.
+        Make a list of april tags that do not have backs towards robot's position.
+        Set the fiducial id filters override to the list of april tags that do not have backs towards robot's position.
+        """
+        # get botpose estimate with origin on blue side of field
+        bot_x, bot_y = self.get_state().pose.translation().x, self.get_state().pose.translation().y
+        tag_poses = [tag.pose for tag in AprilTags]
+        tag_ids = np.array([tag.ID for tag in AprilTags])
+        tag_x, tag_y, tag_theta = [pose.x for pose in tag_poses], [pose.y for pose in tag_poses], [pose.rotation().z for pose in tag_poses]
+
+        theta_t_b = np.arctan2(np.subtract(bot_y, tag_y ), np.subtract(bot_x,tag_x ))
+        #normalize values to -pi yo +pi
+        theta_delta = (tag_theta - theta_t_b + np.pi) % (2 * np.pi) - np.pi            
+        # if less than 90deg difference, then the tag is facing the robot
+        facing_robot_bool = np.abs(theta_delta) <= np.pi /2
+        facing_robot_ids = tag_ids[facing_robot_bool]
+        #tags not on this list will be ignored
+        LimelightHelpers.set_fiducial_id_filters_override(limelight_to_use, facing_robot_ids.tolist())  
+    
+    def reset_pose_by_zone(self, zone='b') -> None:
+        """Resets the pose of the robot by zone. values change based on Alliance color
+        The 4 zones are about 2 meters off the cardnal points of the reef"""
+        # get the alliance color
+        alliance_color = DriverStation.getAlliance()
+        # use a match statement to get the correct pose
+        if alliance_color == DriverStation.Alliance.kRed:
+            straight_ahaead = Rotation2d.fromDegrees(180)
+            if zone == 'y':
+                self.reset_pose(Pose2d(10.75, 4, straight_ahaead))
+            elif zone == 'b':
+                self.reset_pose(Pose2d(13.0, 6.0,straight_ahaead))
+            elif zone == 'a':
+                self.reset_pose(Pose2d(16, 4, straight_ahaead))
+            elif zone == 'x':
+                self.reset_pose(Pose2d(13, 1.7, straight_ahaead))
+        else:
+            if zone == 'y':
+                self.reset_pose(Pose2d(6.5, 4, Rotation2d.fromDegrees(0)))
+            elif zone == 'b':
+                self.reset_pose(Pose2d(4.5, 1.7, Rotation2d.fromDegrees(0)))
+            elif zone == 'a':
+                self.reset_pose(Pose2d(2, 4, Rotation2d.fromDegrees(0)))
+            elif zone == 'x':
+                self.reset_pose(Pose2d(4.5, 6, Rotation2d.fromDegrees(0)))
+
+
+       
         # self.tare_everything()
         # self.reset_pose(After_viz_update_odo_pose)
         # self.container.drivetrain.odometry_thread.set_thread_priority(99)
