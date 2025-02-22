@@ -192,6 +192,9 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
             movement = self.setpoint
         self.elevmotor_left.set_control(self.position_voltage.with_position(self.distanceToRotations(movement)))
         # self.elevmotor_left.set_control(self.position_voltage.   with_position(self.distanceToRotations(movement)))
+    
+    def get_position(self):
+        return self.rotationsToDistance(self.elevmotor_left.get_position().value)
         
     def periodic(self):
         wpilib.SmartDashboard.putNumber("Elevator/Position_calced", self.rotationsToDistance(self.elevmotor_left.get_position().value))

@@ -93,7 +93,7 @@ class RobotContainer:
             )  # Add a 5% deadband on output
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.VELOCITY #OPEN_LOOP_VOLTAGE
-            )  # Use open-loop control for drive 
+            )  # Use open-loop control for drive
         )
         """
         Control the drive motor using a velocity closed-loop request.
