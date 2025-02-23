@@ -9,6 +9,7 @@ from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, Sen
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Rotation2d, Pose2d
 
+
 from robotUtils.limelight import LimelightHelpers
 import numpy as np
 from constants import AprilTags
@@ -350,7 +351,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         if (self.skip_counter+skip_tripper_base/2) % skip_tripper_base ==0:
             self.use_vision_odometry_update(limelight_to_use='limelight-four')
-            
+
         #TODO:  is this taking too long ? yeah, sort of:: Try with skipping
         if (self.skip_counter + skip_tripper_base/4) % skip_tripper_base ==0:
             self.ignore_backs_of_AprilTags('limelight')
