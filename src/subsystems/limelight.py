@@ -22,6 +22,7 @@ from wpimath.units import degreesToRadians
 import ntcore as nt
 import numpy as np
 from phoenix6.utils import get_current_time_seconds
+from phoenix6 import SignalLogger
 
 class LimelightSubsystem(Subsystem):
     def __init__(self):
@@ -65,12 +66,27 @@ class LimelightSubsystem(Subsystem):
             print("-----")
             print("hwreport:", self.ll.hw_report())
 
-
+            
+            strip_MT1_ll = self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue('limelight'))
+            strip_MT2_ll = self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue_megatag2('limelight'))
+            strip_MT1_ll4 = self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue('limelight-four'))
+            strip_MT2_ll4 = self.stripped_down_pose(LimelightHelpers.get_botpose_estimate_wpiblue_megatag2('limelight-four'))
+            SignalLogger.write_double_array("limelight MT1 Pose", strip_MT1_ll)
+            SignalLogger.write_double_array("limelight MT2 Pose", strip_MT2_ll)
+            SignalLogger.write_double_array("limelight-four MT1 Pose", strip_MT1_ll4)
+            SignalLogger.write_double_array("limelight-four MT2 Pose", strip_MT2_ll4)
+            
             self.ll.enable_websocket()
             if self.qty_limelights>1:
                 self.ll2.enable_websocket()
             # print(self.ll.get_pipeline_atindex(0))
             
+
+    def stripped_down_pose(self, botpose):
+        '''return the pose (only) as a float array'''
+        #return PoseEstimate(pose, adjusted_timestamp, latency, tag_count, tag_span, tag_dist, tag_area, raw_fiducials, is_megatag_2)
+        stripped_pose= [botpose.pose.translation().x, botpose.pose.translation().y, botpose.pose.rotation().degrees()]
+        return stripped_pose
 
     #update python (on limelight) inputs
     def update_python_inputs(self, inputs):

@@ -15,7 +15,22 @@ dependencies = [
     "mypy",
     'limelightlib-python',
     'keyboard',
-    
+    'robotpy[apriltag]', 
+    'robotpy[commands2]', 
+    'robotpy[cscore]', 
+    'robotpy[navx]', 
+    'robotpy[pathplannerlib]', 
+    'robotpy[rev]', 
+    'robotpy[sim]',
+    "phoenix6",#~=25.2",
+    # "numpy==2.2.1.dev0; platform_machine == 'roborio'",#'numpy',
+    'limelightlib-python',
+    'photonlibpy',
+    'robotpy-apriltag',
+    # 'opencv-python',
+    #'scipy'
+    'pynetworktables',
+    'pyfrc',
 ]
 
 [tool.pytest.ini_options]
@@ -64,6 +79,7 @@ requires = [
     'pynetworktables',
     'pyfrc',
     
+
 
     # 'robotpy-ctre',# conflicts with the version specifier below phoenix6~25.2
     

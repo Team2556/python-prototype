@@ -14,12 +14,12 @@ from constants import ClimbConstants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
 from subsystems import (
-    ElevatorSubsystem,
-    coralSubsystem,
+    # ElevatorSubsystem,
+    #coralSubsystem,
     limelight,
-    pneumaticSubsystem,
+    # pneumaticSubsystem,
     # oneMotor,
-    ultrasonics, ClimbSubsystem
+    ultrasonics, #ClimbSubsystem
 )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -47,7 +47,7 @@ from commands.odometrySnap2Line import SnapToLineCommand
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
 from commands.liftElevator import LiftElevatorCommand
-from commands import coralCommand
+# from commands import coralCommand
 import networktables as nt
 from networktables import util as ntutil
 
@@ -134,14 +134,16 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        self.coral_track = coralSubsystem.CoralTrack()
-        self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()
+        # self.coral_track = coralSubsystem.CoralTrack()
+        pneumaticENABLE = False
+        if pneumaticENABLE:
+            self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()
 
-        self.climb = ClimbSubsystem.ClimbSubsystem()
+        # self.climb = ClimbSubsystem.ClimbSubsystem()
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         # section elevator
-        self.ENABLE_ELEVATOR = True
+        self.ENABLE_ELEVATOR = False
         if self.ENABLE_ELEVATOR:
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
@@ -153,9 +155,9 @@ class RobotContainer:
         for port in np.arange(start=5800, stop=5809):
             wpinet.PortForwarder.getInstance().add(port, "limelight.local", port)
 
-        self.coral_command = coralCommand.CoralCommand(
-            self.coral_track, self.pneumaticsHub, self.elevator, self.timer
-        )
+        # self.coral_command = coralCommand.CoralCommand(
+        #     self.coral_track, self.pneumaticsHub, self.elevator, self.timer
+        # )
 
         # Path follower
         self._auto_chooser = AutoBuilder.buildAutoChooser("SetOdo_DriverWallRtFeeder")
@@ -310,13 +312,13 @@ class RobotContainer:
         # endsection vision related commands
 
         # Coral Track controls
-        self.coral_track.setDefaultCommand(self.coral_command)
+        # self.coral_track.setDefaultCommand(self.coral_command)
 
-        self._joystick2.x().whileTrue(
-            commands2.cmd.run(
-                lambda: self.coral_command.enable_discharge(), self.coral_track
-            )
-        )
+        # self._joystick2.x().whileTrue(
+        #     commands2.cmd.run(
+        #         lambda: self.coral_command.enable_discharge(), self.coral_track
+        #     )
+        # )
 
         # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(
@@ -455,10 +457,10 @@ class RobotContainer:
         # print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
 
         pathfinding_constraints_global = PathConstraints(
-            3 / 3,
-            4 / 3,
-            degreesToRadians(540 / 2),
-            degreesToRadians(720 / 2),
+            3 / 5,
+            4 / 4,
+            degreesToRadians(540 / 10),
+            degreesToRadians(720 / 10),
             12,
             False,
         )  # was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)

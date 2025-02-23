@@ -307,3 +307,6 @@ class ClimbConstants:
                 .with_k_v(0.0)
                 .with_k_a(0.0)
             )
+
+class PneumaticConstants:
+    kHub = 40

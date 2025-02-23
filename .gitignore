@@ -1,6 +1,7 @@
 #CTRE recorded telemetry 
 *.hoot
 ctre_sim/*
+FieldVideos_toCalibrate/*.MOV
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
