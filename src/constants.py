@@ -24,11 +24,11 @@ CAM_MOUNT_PITCH = 25
 
 
 AprilTagField = apriltag.AprilTagFieldLayout.loadField(
-    apriltag.AprilTagField.k2025Reefscape#Welded
+    apriltag.AprilTagField.k2025ReefscapeWelded
 )
 
 AprilTags = apriltag.AprilTagFieldLayout.loadField(
-    apriltag.AprilTagField.k2025Reefscape#Welded
+    apriltag.AprilTagField.k2025ReefscapeWelded
 ).getTags()  # recommend using this instead of the class below
 """AprilTags is a list of all the april tag objects on the field, in order of number"""
 

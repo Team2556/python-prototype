@@ -275,9 +275,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             ),
             PPHolonomicDriveController(
                 # PID constants for translation
-                PIDConstants(10.0, 0.0, 0.0),
+                PIDConstants(1.0, 0.0, 0.0),
                 # PID constants for rotation
-                PIDConstants(7.0, 0.0, 0.0)
+                PIDConstants(.004, 0.0, 0.0)
             ),
             config,
             # Assume the path needs to be flipped for Red vs Blue, this is normally the case
@@ -343,9 +343,6 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         
         skip_tripper_base = 50
 
-        #TODO:  is this taking too long ? yeah, sort of:: Try with skipping
-        # self.ignore_backs_of_AprilTags('limelight')
-        # self.ignore_backs_of_AprilTags('limelight-four')
 
         if self.skip_counter % skip_tripper_base ==0:
             # with this and all sub part of use_vision..., robot is still responsive when skipped at 1/1000
@@ -353,6 +350,11 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         if (self.skip_counter+skip_tripper_base/2) % skip_tripper_base ==0:
             self.use_vision_odometry_update(limelight_to_use='limelight-four')
+            
+        #TODO:  is this taking too long ? yeah, sort of:: Try with skipping
+        if (self.skip_counter + skip_tripper_base/4) % skip_tripper_base ==0:
+            self.ignore_backs_of_AprilTags('limelight')
+            self.ignore_backs_of_AprilTags('limelight-four')
 
 
     def _start_sim_thread(self):
@@ -424,8 +426,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         facing_robot_bool = np.abs(theta_delta) <= np.pi /2
         facing_robot_ids = tag_ids[facing_robot_bool]
         #tags not on this list will be ignored
-        LimelightHelpers.set_fiducial_id_filters_override(limelight_to_use, facing_robot_ids.tolist())  
-    
+        LimelightHelpers.set_fiducial_id_filters_override(limelight_to_use, facing_robot_ids.tolist())
+
     def reset_pose_by_zone(self, zone='b') -> None:
         """Resets the pose of the robot by zone. values change based on Alliance color
         The 4 zones are about 2 meters off the cardnal points of the reef"""

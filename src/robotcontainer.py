@@ -14,10 +14,10 @@ from constants import ClimbConstants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
 from subsystems import (
-    ElevatorSubsystem,
+    # ElevatorSubsystem,
     #coralSubsystem,
     limelight,
-    pneumaticSubsystem,
+    # pneumaticSubsystem,
     # oneMotor,
     ultrasonics, #ClimbSubsystem
 )
@@ -135,13 +135,15 @@ class RobotContainer:
         self.drivetrain = TunerConstants.create_drivetrain()
 
         # self.coral_track = coralSubsystem.CoralTrack()
-        self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()
+        pneumaticENABLE = False
+        if pneumaticENABLE:
+            self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()
 
         # self.climb = ClimbSubsystem.ClimbSubsystem()
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         # section elevator
-        self.ENABLE_ELEVATOR = True
+        self.ENABLE_ELEVATOR = False
         if self.ENABLE_ELEVATOR:
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
@@ -455,10 +457,10 @@ class RobotContainer:
         # print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
 
         pathfinding_constraints_global = PathConstraints(
-            3 / 3,
-            4 / 3,
-            degreesToRadians(540 / 2),
-            degreesToRadians(720 / 2),
+            3 / 5,
+            4 / 4,
+            degreesToRadians(540 / 10),
+            degreesToRadians(720 / 10),
             12,
             False,
         )  # was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
