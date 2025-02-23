@@ -23,7 +23,7 @@ dependencies = [
     'robotpy[rev]', 
     'robotpy[sim]',
     "phoenix6",#~=25.2",
-    "numpy==2.2.1.dev0; platform_machine == 'roborio'",#'numpy',
+    # "numpy==2.2.1.dev0; platform_machine == 'roborio'",#'numpy',
     'limelightlib-python',
     'photonlibpy',
     'robotpy-apriltag',
