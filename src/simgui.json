@@ -125,7 +125,8 @@
       "Pose": {
         "double[]##v_/Pose/robotPose": {
           "open": true
-        }
+        },
+        "open": true
       },
       "Shuffleboard": {
         "open": true
@@ -173,8 +174,5 @@
       "open": true
     },
     "visible": true
-  },
-  "NetworkTables View": {
-    "visible": false
   }
 }

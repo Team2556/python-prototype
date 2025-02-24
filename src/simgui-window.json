@@ -11,8 +11,8 @@
       "style": "0",
       "userScale": "2",
       "width": "1924",
-      "xpos": "-7",
-      "ypos": "66"
+      "xpos": "-1",
+      "ypos": "167"
     }
   },
   "Table": {
@@ -46,13 +46,13 @@
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "945,134",
-      "Size": "1046,633"
+      "Pos": "277,-40",
+      "Size": "1025,511"
     },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "24,156",
-      "Size": "210,214"
+      "Size": "202,214"
     },
     "###Joysticks": {
       "Collapsed": "0",
@@ -66,18 +66,18 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "1296,48",
+      "Pos": "1147,50",
       "Size": "937,852"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "987,708",
+      "Pos": "1104,664",
       "Size": "937,181"
     },
     "###Other Devices": {
       "Collapsed": "0",
-      "Pos": "939,113",
-      "Size": "312,868"
+      "Pos": "985,44",
+      "Size": "312,599"
     },
     "###RoboRIO": {
       "Collapsed": "0",

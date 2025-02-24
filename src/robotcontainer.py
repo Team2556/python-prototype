@@ -43,6 +43,7 @@ from wpimath.units import (
 import wpinet
 import math
 from commands.odometrySnap2Line import SnapToLineCommand
+from commands.driveOurOwnWay import DriveOurOwnWay
 
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
@@ -131,6 +132,9 @@ class RobotContainer:
         self._keyboard_reset_odometry_by_drivers = commands2.button.NetworkButton(
             "/SmartDashboard/keyboard", "a"
         )  # SmartDashboard.getBoolean("/SmartDashboard/keyboard/a", False)
+        self.keyboard_goto_position_7_7 = commands2.button.NetworkButton(
+            "/SmartDashboard/keyboard", "7"
+        )
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
@@ -546,7 +550,13 @@ class RobotContainer:
                 lambda: self.drivetrain.reset_pose_by_zone(zone="a")
             )
         )
-
+        
+        self.keyboard_goto_position_7_7.onTrue(DriveOurOwnWay( #TODO: back to issue of getting odometry
+            finish=Pose2d(7, 7, Rotation2d(0)),
+            drivetrain=self.drivetrain,
+            pathfindingConstraints_global=pathfinding_constraints_global,
+        ))
+                
         """#this method uses the robot periodic updated closest path to robot
         pathfinding_constraints_global = PathConstraints(3/3, 4/3, degreesToRadians(540/2), degreesToRadians(720/2),12,False)#was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
         # teleAuto to processing
