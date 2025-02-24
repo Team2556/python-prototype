@@ -38,10 +38,6 @@ from commands.liftElevator import LiftElevatorCommand
 import networktables as nt
 from networktables import util as ntutil
 
-
-
-# from subsystems import algae
-
 class RobotContainer:
     """
     This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -256,33 +252,6 @@ class RobotContainer:
                     Rotation2d(-self._joystick.getLeftY() * self.invertBlueRedDrive , 
                                -self._joystick.getLeftX() * self.invertBlueRedDrive )
                 )
-            )
-        )
-        
-        # Algae controls (using the D-pad)
-        # Left and right are the same thing because idk what the buttons will otherwise be used for
-        
-        self._joystick2.povDown().whileTrue(
-            commands2.cmd.runOnce(
-                lambda: self.algae.idle(), self.algae
-            )
-        )
-        
-        self._joystick2.povLeft().whileTrue(
-            commands2.cmd.runOnce(
-                lambda: self.algae.processing(), self.algae
-            )
-        )
-        
-        self._joystick2.povRight().whileTrue(
-            commands2.cmd.runOnce(
-                lambda: self.algae.processing(), self.algae
-            )
-        )
-        
-        self._joystick2.povUp().whileTrue(
-            commands2.cmd.runOnce(
-                lambda: self.algae.intaking(), self.algae
             )
         )
         

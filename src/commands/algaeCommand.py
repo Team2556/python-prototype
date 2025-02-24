@@ -1,13 +1,13 @@
 '''Does the algae commands'''
 
-import wpilib
+from wpilib import Timer, SmartDashboard
 
-import keyboard # Figure out later
+# import keyboard # Figure out later
 
 from commands2 import Command, button, cmd
 from subsystems import algae
 
-import constants
+from constants import AlgaeConstants
 
 '''
 Algae Control (ideal) Pseudocode:
@@ -47,7 +47,7 @@ class AlgaeCommand(Command):
         # The delay from spinning the wheels to spit out the algae once processing input is pressed (thats what the timer is for)
         self.processDelay = 0.5
         
-        self.timer = wpilib.Timer()
+        self.timer = Timer() # (from wpilib)
         
         self.algaePivotPosition = "idle"
         
@@ -56,37 +56,80 @@ class AlgaeCommand(Command):
 
         # These inputs should hopefully be replaced with a keyboard thing
         self.joystick.povUp().whileTrue(
-            cmd.run(lambda: self.intakePosition(), self.algaeSubsystem)
+            cmd.runOnce(lambda: self.intakePosition(), self.algaeSubsystem)
         )
         self.joystick.povRight().whileTrue(
-            cmd.run(lambda: self.processingPosition(), self.algaeSubsystem)
+            cmd.runOnce(lambda: self.processingPosition(), self.algaeSubsystem)
         )
-        self.joystick.povUp().whileTrue(
-            cmd.run(lambda: self.idlePosition(), self.algaeSubsystem)
+        self.joystick.povDown().whileTrue(
+            cmd.runOnce(lambda: self.idlePosition(), self.algaeSubsystem)
         )
         
+        self.setupSmartDashboard()
+        
     def execute(self):
+        # Runs periodically
+        # Stop intaking if limit switch active
+        if self.algaePivotPosition == "intaking":
+            if self.toggleLimitSwitch and self.algaeSubsystem.limitSwitch.get():
+                self.algaeSubsystem.spinIntakeMotor(self.intakeMultiplier)
+            else: 
+                self.algaeSubsystem.spinIntakeMotor(0)
+        # Start spinning the wheels the other way (self.pivotProcessingValue) after it starts processing
         if self.timer.get() > self.pivotProcessingValue and self.algaePivotPosition == "processing":
             self.algaeSubsystem.changePosition(self.pivotProcessingValue, self.pivotTime)
             self.timer.stop()
             self.timer.reset()
+        self.updateSmartDashboard()
+        print("uw8nygtyubeigfyudgsinbydbtfgcweiugxnftuewbctfruevwtdfyuiutwey")
     
     def intakePosition(self):
+        '''Sets algae manipulator to intaking position'''
         self.algaePivotPosition = "intaking"
         self.algaeSubsystem.changePosition(self.pivotIntakePositionValue, self.pivotTime)
         if self.toggleLimitSwitch and self.algaeSubsystem.limitSwitch.get():
             self.algaeSubsystem.spinIntakeMotor(self.intakeMultiplier)
         else: 
             self.algaeSubsystem.spinIntakeMotor(0)  
+        print(self.algaePivotPosition)
     
     def processingPosition(self):
+        '''Sets algae manipulator to processing position'''
         self.algaePivotPosition = "processing"
         self.timer.restart()
         self.algaeSubsystem.changePosition(self.pivotProcessingValue, self.pivotTime)
+        print(self.algaePivotPosition)
     
     def idlePosition(self):
+        '''Sets algae manipulator to idle position'''
         self.algaePivotPosition = "idle"
         self.algaeSubsystem.changePosition(self.pivotIdleValue, self.pivotTime) 
         self.algaeSubsystem.spinIntakeMotor(0)
+        print(self.algaePivotPosition)
         
     # Do (only) tuning SmartDashboard stuff here
+    
+    def setupSmartDashboard(self):
+        '''Sets up the NetworkTables stuff for algae info'''
+        
+        # Setup values TO the Dashboard
+        SmartDashboard.putString("Algae/Pivot Motor", self.algaeSubsystem.pivotMotor.get_position().__str__())
+        SmartDashboard.putNumber("Algae/Intake Motor", self.algaeSubsystem.intakeMotor.get())
+        SmartDashboard.putBoolean("Algae/Limit Switch", self.algaeSubsystem.limitSwitch.get())
+        
+        SmartDashboard.putNumber("Algae/Pivot Time", self.pivotTime)
+        SmartDashboard.putNumber("Algae/Intake Multiplier", self.intakeMultiplier)
+        SmartDashboard.putBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
+        
+    def updateSmartDashboard(self):
+        '''Updates the NetworkTables stuff for algae info'''
+        
+        # Update values TO the Dashboard
+        SmartDashboard.putString("Algae/Pivot Motor", self.algaeSubsystem.pivotMotor.get_position().__str__())
+        SmartDashboard.putNumber("Algae/Intake Motor", self.algaeSubsystem.intakeMotor.get())
+        SmartDashboard.putBoolean("Algae/Limit Switch", self.algaeSubsystem.limitSwitch.get())
+        
+        # Update values FROM the Dashboard
+        self.pivotTime = SmartDashboard.getNumber("Algae/Pivot Time", self.pivotTime)
+        self.intakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", self.intakeMultiplier)
+        self.toggleLimitSwitch = SmartDashboard.getBoolean("Algae/cvToggle Limit Switch", self.toggleLimitSwitch)
