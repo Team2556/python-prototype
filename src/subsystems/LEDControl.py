@@ -26,12 +26,12 @@ class LEDHandler(commands2.Subsystem):
             "blue": wpilib.LEDPattern.solid(wpilib.Color.kBlue),
         }
         self.priority_color = [None, 0, 0]
-        self.default_color = 'purple'
+        self.default_color = "purple"
 
     def default(self):
         tick_duration = self.timer.get() - self.prev_time
         self.prev_time = self.timer.get()
-        
+
         if self.priority_color[0]:
             self.set_color(self.priority_color[0])
 
@@ -43,16 +43,16 @@ class LEDHandler(commands2.Subsystem):
 
     def set_priority_color(self, color, duration=1):
         self.priority_color = [color, duration, 0]
-    
+
     def set_default_color(self, color):
-        self.default_color = color;
+        self.default_color = color
 
     def set_color(self, color, start=0, end=-1):
         if not color.lower() in self.LED_patterns:
-            print('Color Not Found')
-            self.set_color('purple')
+            print("Color Not Found")
+            self.set_color("purple")
             return
-        
+
         target_LED_buffer = self.LED_buffer[start:end]
         self.LED_patterns[color.lower()].applyTo(target_LED_buffer)
         self.LED.setData(target_LED_buffer)
