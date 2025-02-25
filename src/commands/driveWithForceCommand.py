@@ -8,7 +8,7 @@ from wpimath.kinematics import ChassisSpeeds
 from phoenix6 import swerve
 # from robotcontainer import drivetrain  # Replace with your actual drivetrain subsystem name
 
-class DriveToPointForce(Command):
+class DriveToPointForce():
     def __init__(self, drivetrain, target: Pose2d, obstacle: Translation2d, 
                  max_speed: float, 
                  max_angular_rate: float,
@@ -16,8 +16,8 @@ class DriveToPointForce(Command):
                  influence_radius: float=1.25, 
                  k_attr: float=.5, 
                  k_rep: float = 2.0, 
-                 tolerance: float = .1):
-        super().__init__()
+                 tolerance: float = 1.5):
+        # super().__init__()
         # Store inputs
         self.drivetrain = drivetrain
         self.target = target
@@ -44,9 +44,13 @@ class DriveToPointForce(Command):
         )
 
         # Require the drivetrain to prevent other commands from using it
-        self.addRequirements(drivetrain)
+        # self.addRequirements(drivetrain)
 
     def execute(self):
+        pass
+        # return super().execute()
+
+    def execute_it(self):
         # Get current robot position from odometry
         current_pose: Pose2d = self.drivetrain.get_state().pose  # Ensure your drivetrain has this method
         robot_pos: Translation2d = current_pose.translation()
@@ -60,41 +64,41 @@ class DriveToPointForce(Command):
         # Calculate repulsive force (push away from obstacle)
         delta_obstacle = robot_pos - self.obstacle
         dist = delta_obstacle.norm() 
-        print(f'dist: {dist} {dist < self.influence_radius=} Is this correct???/n===/n===/n===')
+        # print(f'dist: {dist} {dist < self.influence_radius=} Is this correct???/n===/n===/n===')
         f_rep = Translation2d(0, 0)  # Default: no repulsion
         if dist < self.influence_radius:
             # Repulsive force scales inversely with distance
             magnitude = self.k_rep * (1 / dist - 1 / self.influence_radius)
-            f_rep = delta_obstacle * (magnitude / dist)
+            f_rep = delta_obstacle * (magnitude / dist**2)
 
         # Combine forces
         f_total = f_attr + f_rep
         norm = f_total.norm()
-        print(f'/nf_total: {f_total} norm: {norm} --/n--/n')
-        if norm > 0:
+        # print(f'/nf_total: {f_total} norm: {norm} --/n--/n')
+        current_pose = self.drivetrain.get_state().pose
+        distance = current_pose.translation().distance(self.target.translation())
+
+        if distance < self.tolerance:
+            print(f'dist < self.tolerance: {distance} {self.tolerance} 000--/n--/n')
+            # self.drivetrain.interrupt()
+            return self._drive.with_velocity_x(0).with_velocity_y(0).with_rotational_rate(0)
+            # self.isFinished()
+            # self.end(interrupted=False)
+            
+
+        # elif norm > 0:
+        else:
             # Normalize and scale to max speed
             velocity = f_total * (self.max_speed / norm)
             print(f'/nf_total: {f_total} norm: {norm} 000--/n--{velocity}/n-00-{velocity.x=}  {velocity.y=}/n')
-            # Convert to chassis speeds (no rotation for simplicity)
-            # chassis_speeds = ChassisSpeeds(velocity.x, velocity.y, 0.0)
-            # Send speeds to drivetrain
-            # self.drivetrain.set_speeds(chassis_speeds)  # Adjust method name if different
-            self.drivetrain.apply_request(
-                lambda: (
-                        self._drive.with_velocity_x(
-                            1000*velocity.x)
-                        .with_velocity_y(
-                            -1000*velocity.y)
-                        .with_rotational_rate(0)
-                )
-            )
-                    # shift the center of rotation to opposite front corner, if the driver pulls down on the right stick in addition to the side.
-                    # This should allow some nice defensive roll-off maneuvers
-                # )
+
+            return   self._drive.with_velocity_x(-velocity.x).with_velocity_y(-velocity.y).with_rotational_rate(0)
+
             
 
     def isFinished(self):
-        # End when close enough to the target
+        # End when close enough to the 
+        
         current_pose = self.drivetrain.get_state().pose
         distance = current_pose.translation().distance(self.target.translation())
         return distance < self.tolerance
@@ -104,10 +108,4 @@ class DriveToPointForce(Command):
         # self.drivetrain.set_speeds(ChassisSpeeds(0, 0, 0))
         print('end of drive with force!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
         
-        self.drivetrain.apply_request(
-            lambda: (
-                self._drive.with_velocity_x(0)
-                .with_velocity_y(0)
-                .with_rotational_rate(0)
-            )
-        )
+        return self._drive.with_velocity_x(0).with_velocity_y(0).with_rotational_rate(0)

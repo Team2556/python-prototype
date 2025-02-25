@@ -114,6 +114,18 @@ class RobotContainer:
             )
         )
 
+        self.drivetrain = TunerConstants.create_drivetrain()
+
+        self.hex_centers = [Translation2d(x=4.489323, y=4.025900),
+                                    Translation2d(x=13.058902, y=4.025900)], 
+        self.hex_sizes = [.831723, .831723], 
+        # self._driveToPointForce = DriveToPointForce(drivetrain=self.drivetrain, 
+        #                                                          target=Pose2d(2, 2, Rotation2d(0)), 
+        #                                                          obstacle=self.hex_centers[0][0],
+        #                                                          max_speed=self._max_speed,
+        #                                                          max_angular_rate=self._max_angular_rate,
+        #                                                          )
+
         # self.algae = algae.AlgaeHandler()
         # self.ultrasonic = ultrasonics.Ultrasonics()
 
@@ -138,7 +150,6 @@ class RobotContainer:
             "/SmartDashboard/keyboard", "7"
         )
 
-        self.drivetrain = TunerConstants.create_drivetrain()
 
         # self.coral_track = coralSubsystem.CoralTrack()
         pneumaticENABLE = False
@@ -553,20 +564,23 @@ class RobotContainer:
                 lambda: self.drivetrain.reset_pose_by_zone(zone="a")
             )
         )
-        hex_centers = [Translation2d(x=4.489323, y=4.025900),
-                                    Translation2d(x=13.058902, y=4.025900)], 
-        hex_sizes = [.831723, .831723], 
-        self.keyboard_goto_position_7_7.onTrue( self.test_drive)
-            #  DriveToPointForce(drivetrain=self.drivetrain, 
-            #                                                      target=Pose2d(7, 7, Rotation2d(0)), 
-            #                                                      obstacle=hex_centers[0][0],
-            #                                                      max_speed=self._max_speed,
-            #                                                      max_angular_rate=self._max_angular_rate,))
+        self.drivetrain.__subclasshook__
+        self.keyboard_goto_position_7_7.onTrue(  
+            self.drivetrain.apply_request(
+                lambda: 
+                    DriveToPointForce(drivetrain=self.drivetrain, 
+                                            target=Pose2d(2, 2, Rotation2d(0)), 
+                                            obstacle=self.hex_centers[0][0],
+                                            obstacle_radius=2.0,
+                                            max_speed=self._max_speed,
+                                            max_angular_rate=self._max_angular_rate,
+                                            k_attr=1.0,
+                                            k_rep=20.0,
+                                            influence_radius=5.25,
+                                            tolerance=.05
+                                            ).execute_it()
+            ))
 
-            # DriveOurOwnWay( #TODO: back to issue of getting odometry
-            # finish=Pose2d(7, 7, Rotation2d(0)),
-            # drivetrain=self.drivetrain,
-            # pathfindingConstraints_global=pathfinding_constraints_global,
                 
         """#this method uses the robot periodic updated closest path to robot
         pathfinding_constraints_global = PathConstraints(3/3, 4/3, degreesToRadians(540/2), degreesToRadians(720/2),12,False)#was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
