@@ -67,30 +67,29 @@ class AlgaeCommand(Command):
         
         self.setupSmartDashboard()
         
+    def initialize(self):...
+        # Runs when the command is scheduled, not like __init__ that rins when the class is made
+        
     def execute(self):
         # Runs periodically
         # Stop intaking if limit switch active
         if self.algaePivotPosition == "intaking":
             if self.toggleLimitSwitch and self.algaeSubsystem.limitSwitch.get():
-                self.algaeSubsystem.spinIntakeMotor(self.intakeMultiplier)
-            else: 
                 self.algaeSubsystem.spinIntakeMotor(0)
+            else: 
+                self.algaeSubsystem.spinIntakeMotor(self.intakeMultiplier)
         # Start spinning the wheels the other way (self.pivotProcessingValue) after it starts processing
-        if self.timer.get() > self.pivotProcessingValue and self.algaePivotPosition == "processing":
-            self.algaeSubsystem.changePosition(self.pivotProcessingValue, self.pivotTime)
+        if self.timer.get() > self.processDelay:
+            if self.algaePivotPosition == "processing":
+                self.algaeSubsystem.spinIntakeMotor(-self.intakeMultiplier)
             self.timer.stop()
             self.timer.reset()
         self.updateSmartDashboard()
-        print("uw8nygtyubeigfyudgsinbydbtfgcweiugxnftuewbctfruevwtdfyuiutwey")
     
     def intakePosition(self):
         '''Sets algae manipulator to intaking position'''
         self.algaePivotPosition = "intaking"
         self.algaeSubsystem.changePosition(self.pivotIntakePositionValue, self.pivotTime)
-        if self.toggleLimitSwitch and self.algaeSubsystem.limitSwitch.get():
-            self.algaeSubsystem.spinIntakeMotor(self.intakeMultiplier)
-        else: 
-            self.algaeSubsystem.spinIntakeMotor(0)  
         print(self.algaePivotPosition)
     
     def processingPosition(self):
@@ -107,29 +106,45 @@ class AlgaeCommand(Command):
         self.algaeSubsystem.spinIntakeMotor(0)
         print(self.algaePivotPosition)
         
-    # Do (only) tuning SmartDashboard stuff here
+    # Do SmartDashboard stuff here
     
     def setupSmartDashboard(self):
         '''Sets up the NetworkTables stuff for algae info'''
         
         # Setup values TO the Dashboard
-        SmartDashboard.putString("Algae/Pivot Motor", self.algaeSubsystem.pivotMotor.get_position().__str__())
-        SmartDashboard.putNumber("Algae/Intake Motor", self.algaeSubsystem.intakeMotor.get())
-        SmartDashboard.putBoolean("Algae/Limit Switch", self.algaeSubsystem.limitSwitch.get())
-        
-        SmartDashboard.putNumber("Algae/Pivot Time", self.pivotTime)
-        SmartDashboard.putNumber("Algae/Intake Multiplier", self.intakeMultiplier)
-        SmartDashboard.putBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
+        self.updateSDInfo()
+        self.setupTuningInfo()
         
     def updateSmartDashboard(self):
         '''Updates the NetworkTables stuff for algae info'''
         
         # Update values TO the Dashboard
+        self.updateSDInfo()
+        
+        # Update values FROM the Dashboard
+        self.getTuningInfo()
+    
+    def updateSDInfo(self):
         SmartDashboard.putString("Algae/Pivot Motor", self.algaeSubsystem.pivotMotor.get_position().__str__())
         SmartDashboard.putNumber("Algae/Intake Motor", self.algaeSubsystem.intakeMotor.get())
         SmartDashboard.putBoolean("Algae/Limit Switch", self.algaeSubsystem.limitSwitch.get())
-        
-        # Update values FROM the Dashboard
+        SmartDashboard.putNumber("Algae/Processing Timer", round(self.timer.get(), 2))
+        SmartDashboard.putString("Algae/Pivot Position", self.algaePivotPosition)
+    
+    def setupTuningInfo(self):
+        SmartDashboard.putNumber("Algae/Pivot Time", self.pivotTime)
+        SmartDashboard.putNumber("Algae/Intake Multiplier", self.intakeMultiplier)
+        SmartDashboard.putBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
+        SmartDashboard.putNumber("Algae/Processing Delay", self.processDelay)
+        SmartDashboard.putNumber("Algae/Intake Position", self.pivotIntakePositionValue)
+        SmartDashboard.putNumber("Algae/Processing Position", self.pivotProcessingValue)
+        SmartDashboard.putNumber("Algae/Idle Position", self.pivotIdleValue)
+         
+    def getTuningInfo(self):
         self.pivotTime = SmartDashboard.getNumber("Algae/Pivot Time", self.pivotTime)
         self.intakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", self.intakeMultiplier)
-        self.toggleLimitSwitch = SmartDashboard.getBoolean("Algae/cvToggle Limit Switch", self.toggleLimitSwitch)
+        self.toggleLimitSwitch = SmartDashboard.getBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
+        self.processDelay = SmartDashboard.getNumber("Algae/Processing Delay", self.processDelay)
+        self.pivotIntakePositionValue = SmartDashboard.getNumber("Algae/Intake Position", self.pivotIntakePositionValue)
+        self.pivotProcessingValue = SmartDashboard.getNumber("Algae/Processing Position", self.pivotProcessingValue)
+        self.pivotIdleValue = SmartDashboard.getNumber("Algae/Idle Position", self.pivotIdleValue)

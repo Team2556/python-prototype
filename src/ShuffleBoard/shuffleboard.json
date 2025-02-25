@@ -1290,6 +1290,84 @@
               "Colors/Color when true": "#7CFC00FF",
               "Colors/Color when false": "#8B0000FF"
             }
+          },
+          "19,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Processing Timer",
+              "_title": "Algae/Processing Timer",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "19,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Position",
+              "_title": "Algae/Pivot Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "19,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Processing Delay",
+              "_title": "Algae/Processing Delay",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "19,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Position",
+              "_title": "Algae/Intake Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "18,4": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Processing Position",
+              "_title": "Algae/Processing Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "19,4": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Idle Position",
+              "_title": "Algae/Idle Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
           }
         }
       }
@@ -1305,7 +1383,7 @@
         "vgap": 16.0,
         "titleType": 0,
         "tiles": {
-          "3,2": {
+          "1,1": {
             "size": [
               3,
               1
@@ -1318,7 +1396,7 @@
               "_showGlyph": false
             }
           },
-          "6,2": {
+          "4,1": {
             "size": [
               3,
               1
@@ -1331,7 +1409,7 @@
               "_showGlyph": false
             }
           },
-          "10,4": {
+          "8,2": {
             "size": [
               2,
               2
@@ -1346,7 +1424,7 @@
               "Colors/Color when false": "#8B0000FF"
             }
           },
-          "3,5": {
+          "1,5": {
             "size": [
               3,
               1
@@ -1359,7 +1437,7 @@
               "_showGlyph": false
             }
           },
-          "6,5": {
+          "4,5": {
             "size": [
               3,
               1
@@ -1372,7 +1450,7 @@
               "_showGlyph": false
             }
           },
-          "10,2": {
+          "8,1": {
             "size": [
               2,
               1
@@ -1384,14 +1462,92 @@
               "_glyph": 148,
               "_showGlyph": false
             }
+          },
+          "4,3": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Processing Timer",
+              "_title": "Processing Timer",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,3": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Position",
+              "_title": "Pivot Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "7,5": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Processing Delay",
+              "_title": "Processing Delay",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "11,2": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Position",
+              "_title": "Intake Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "11,3": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Processing Position",
+              "_title": "Processing Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "11,4": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Idle Position",
+              "_title": "Idle Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
           }
         }
       }
     }
   ],
   "windowGeometry": {
-    "x": -113.0,
-    "y": 236.0,
+    "x": -8.0,
+    "y": -8.0,
     "width": 1382.0,
     "height": 736.0
   }

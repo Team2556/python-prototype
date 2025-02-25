@@ -90,9 +90,6 @@ class RobotContainer:
         self._joystick = commands2.button.CommandXboxController(0)
         # This one's probably used for scoring stuff
         self._joystick2 = commands2.button.CommandXboxController(1)
-        
-        self.algae = algae.AlgaeHandler()
-        self.algaeCommand = algaeCommand.AlgaeCommand(self.algae, self._joystick2)
 
         # Using NetworkButton with a USB keyboard will require running a seperate python program on the driver's station
         # python ../DriverstationUtils/keyboard_to_nt.py
@@ -112,6 +109,10 @@ class RobotContainer:
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
             self._elevator_motors_break = self.elevator.elevator_motors_break
         #endsection elevator
+        
+        self.ENABLE_ALGAE = True
+        if self.ENABLE_ALGAE:
+            self.algae = algae.AlgaeHandler()
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
@@ -224,6 +225,12 @@ class RobotContainer:
             self.elevator.setDefaultCommand(LiftElevatorCommand(self.elevator, self._joystick2))
             (self._joystick2.start() & self._joystick2.a()).whileTrue( self._reset_zero_point_here)#.onFalse(lambda: self._elevator_motors_break) #TODO: fix this to not crash :)
             # (self._joystick2.start() & self._joystick2.x()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
+        
+        if self.ENABLE_ALGAE:
+            self.algae.setDefaultCommand(algaeCommand.AlgaeCommand(self.algae, self._joystick2))
+        
+        # self.algae = algae.AlgaeHandler()
+        # self.algaeCommand = algaeCommand.AlgaeCommand(self.algae, self._joystick2)
         
         #section vision related commands
         

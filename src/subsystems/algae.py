@@ -34,4 +34,5 @@ class AlgaeHandler(Subsystem):
     def spinIntakeMotor(self, speed) -> None:
         '''Spins the intake motor (speed=1 is intake, speed=-1 is discharge hopefully)'''
         # self.intakeMotor.set_control(self.velocityOut.with_output(speed))
-        self.intakeMotor.setVoltage(speed)
+        # self.intakeMotor.setVoltage(speed)
+        self.intakeMotor.set(speed)
