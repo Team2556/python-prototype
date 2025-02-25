@@ -4,23 +4,44 @@ import wpilib
 from commands2 import Command
 from wpimath.geometry import Pose2d, Translation2d
 from wpimath.kinematics import ChassisSpeeds
-from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
+# from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
+from phoenix6 import swerve
 # from robotcontainer import drivetrain  # Replace with your actual drivetrain subsystem name
 
 class DriveToPointForce(Command):
-    def __init__(self, drivetrain:CommandSwerveDrivetrain, target: Pose2d, obstacle: Translation2d):
+    def __init__(self, drivetrain, target: Pose2d, obstacle: Translation2d, 
+                 max_speed: float, 
+                 max_angular_rate: float,
+                 obstacle_radius: float=.95, 
+                 influence_radius: float=1.25, 
+                 k_attr: float=.5, 
+                 k_rep: float = 2.0, 
+                 tolerance: float = .1):
         super().__init__()
         # Store inputs
         self.drivetrain = drivetrain
         self.target = target
         self.obstacle = obstacle
         # Tuning constants
-        self.obstacle_radius = 0.95  # meters (size of obstacle)
-        self.influence_radius = 1.25  # meters (range of repulsive force)
-        self.k_attr = 0.5  # Attractive force gain
-        self.k_rep = 2.0   # Repulsive force gain
-        self.max_speed = 4.0  # m/s (maximum speed of robot)
-        self.tolerance = 0.1  # meters (how close to target to stop)
+        self.max_speed = max_speed  # m/s (maximum speed of robot)
+        self.max_angular_rate = max_angular_rate  # rad/s (maximum rotation rate of robot)
+        self.obstacle_radius = obstacle_radius  # meters (size of obstacle)
+        self.influence_radius = influence_radius  # meters (range of repulsive force)
+        self.k_attr = k_attr  # Attractive force gain
+        self.k_rep = k_rep   # Repulsive force gain
+        self.tolerance = tolerance  # meters (how close to target to stop)
+
+        self._drive = (
+            swerve.requests.FieldCentric()
+            .with_deadband(self.max_speed * 0.05)
+            .with_rotational_deadband(
+                self.max_angular_rate * 0.05
+            )  # Add a 5% deadband on output
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.VELOCITY #OPEN_LOOP_VOLTAGE
+            )  # Use open-loop control for drive
+            
+        )
 
         # Require the drivetrain to prevent other commands from using it
         self.addRequirements(drivetrain)
@@ -55,15 +76,16 @@ class DriveToPointForce(Command):
             velocity = f_total * (self.max_speed / norm)
             print(f'/nf_total: {f_total} norm: {norm} 000--/n--{velocity}/n-00-{velocity.x=}  {velocity.y=}/n')
             # Convert to chassis speeds (no rotation for simplicity)
-            chassis_speeds = ChassisSpeeds(velocity.x, velocity.y, 0.0)
+            # chassis_speeds = ChassisSpeeds(velocity.x, velocity.y, 0.0)
             # Send speeds to drivetrain
             # self.drivetrain.set_speeds(chassis_speeds)  # Adjust method name if different
             self.drivetrain.apply_request(
                 lambda: (
-                    self._drive.with_velocity_x(
-                        1000*velocity.x)
-                    .with_velocity_y(
-                        -1000*velocity.y)
+                        self._drive.with_velocity_x(
+                            1000*velocity.x)
+                        .with_velocity_y(
+                            -1000*velocity.y)
+                        .with_rotational_rate(0)
                 )
             )
                     # shift the center of rotation to opposite front corner, if the driver pulls down on the right stick in addition to the side.
