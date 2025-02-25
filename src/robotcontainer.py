@@ -45,6 +45,7 @@ import math
 from commands.odometrySnap2Line import SnapToLineCommand
 from commands.driveOurOwnWay import DriveOurOwnWay
 from commands.driveWithForceCommand import DriveToPointForce
+from commands.testDriveCommand import TestDriveCommand
 
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
@@ -167,6 +168,7 @@ class RobotContainer:
         # Path follower
         self._auto_chooser = AutoBuilder.buildAutoChooser("SetOdo_DriverWallRtFeeder")
         SmartDashboard.putData("Auto Mode", self._auto_chooser)
+        self.test_drive = TestDriveCommand(self.drivetrain)
 
         self.path_doc_proc_short = PathPlannerPath.fromPathFile("Dock-Processor")
         self.path_doc_proc_midfield = PathPlannerPath.fromPathFile("Dock-Proc-Mid")
@@ -554,11 +556,12 @@ class RobotContainer:
         hex_centers = [Translation2d(x=4.489323, y=4.025900),
                                     Translation2d(x=13.058902, y=4.025900)], 
         hex_sizes = [.831723, .831723], 
-        self.keyboard_goto_position_7_7.onTrue(  DriveToPointForce(drivetrain=self.drivetrain, 
-                                                                 target=Pose2d(7, 7, Rotation2d(0)), 
-                                                                 obstacle=hex_centers[0][0],
-                                                                 max_speed=self._max_speed,
-                                                                 max_angular_rate=self._max_angular_rate,))
+        self.keyboard_goto_position_7_7.onTrue( self.test_drive)
+            #  DriveToPointForce(drivetrain=self.drivetrain, 
+            #                                                      target=Pose2d(7, 7, Rotation2d(0)), 
+            #                                                      obstacle=hex_centers[0][0],
+            #                                                      max_speed=self._max_speed,
+            #                                                      max_angular_rate=self._max_angular_rate,))
 
             # DriveOurOwnWay( #TODO: back to issue of getting odometry
             # finish=Pose2d(7, 7, Rotation2d(0)),

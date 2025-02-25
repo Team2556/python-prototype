@@ -33,10 +33,10 @@ class DriveToPointForce(Command):
 
         self._drive = (
             swerve.requests.FieldCentric()
-            .with_deadband(self.max_speed * 0.05)
-            .with_rotational_deadband(
-                self.max_angular_rate * 0.05
-            )  # Add a 5% deadband on output
+            # .with_deadband(self.max_speed * 0.05)
+            # .with_rotational_deadband(
+                # self.max_angular_rate * 0.05
+            # )  # Add a 5% deadband on output
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.VELOCITY #OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive
@@ -102,6 +102,7 @@ class DriveToPointForce(Command):
     def end(self, interrupted: bool):
         # Stop the robot when the command finishes or is interrupted
         # self.drivetrain.set_speeds(ChassisSpeeds(0, 0, 0))
+        print('end of drive with force!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
         
         self.drivetrain.apply_request(
             lambda: (
