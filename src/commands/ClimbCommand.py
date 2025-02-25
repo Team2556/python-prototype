@@ -22,7 +22,7 @@ class ClimbCommand(commands2.Command):
         self.new_state = state
         self.addRequirements(climb)
 
-    def initialize(self, mode):
+    def initialize(self):
         """Called when the command is initially scheduled."""
         self.state = ClimbSubsystem.SubsystemState.INITIAL
 
@@ -101,7 +101,7 @@ class ResetClimber(ClimbCommand):
 
     def execute(self):
         if self.climb.isClimbed():  # If the switch is pressed move up.
-            self.climb.climbDeploy()
+            self.climb.stop()
             self.touched_switch = True
         elif self.touched_switch:
             self.climb.climbRetract()

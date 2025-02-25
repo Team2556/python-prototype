@@ -7,10 +7,10 @@ from phoenix6.configs import TalonFXConfiguration
 from phoenix6.configs.config_groups import NeutralModeValue, MotorOutputConfigs, FeedbackConfigs
 from phoenix6.controls import VoltageOut
 from constants import ClimbConstants
-from subsystems import StateSubsystem
+#from subsystems import StateSubsystem
 
 
-class ClimbSubsystem(StateSubsystem):
+class ClimbSubsystem(commands2.Subsystem):
     class SubsystemState(Enum):
         INITIAL = auto()
         STOP = auto()
@@ -105,7 +105,7 @@ class ClimbSubsystem(StateSubsystem):
         if self.getPosition() >= 90:
             self.limit_top.setSimDevice()
         else:
-            self.limit_top.__reduce__()
+            self.limit_bottom.setSimDevice()
 
     def isInitial(self):
         return self.SubsystemState == self.SubsystemState.INITIAL
@@ -153,15 +153,15 @@ class ClimbSubsystem(StateSubsystem):
         def setHasReset(value: bool):
             self._has_reset = value
 
-        def noop(x):
-            pass
+        # def noop(x):
+        #     pass
 
-        SmartDashboard.putStringArray("state", lambda: self.SubsystemState, noop)
-        SmartDashboard.putBoolean("motor_input", self.climbmotor.get, noop)
-        SmartDashboard.putBoolean("encoder", self.climbCANcoder.get_position, noop)
-        SmartDashboard.putBoolean("position", self.getPosition, noop)
-        SmartDashboard.putBoolean("offset", lambda: self._offset, lambda x: setOffset(x))
-        SmartDashboard.putBoolean("has_reset", lambda: self._has_reset, setHasReset)
+        SmartDashboard.putStringArray("state", lambda: self.SubsystemState)
+        SmartDashboard.putNumber("motor_input", self.climbmotor.get())
+        SmartDashboard.putNumber("encoder", self.climbCANcoder.get_position())
+        SmartDashboard.putNumber("position", self.getPosition())
+        SmartDashboard.putNumber("offset", lambda: self._offset, lambda x: setOffset(x))
+        SmartDashboard.putNumber("has_reset", lambda: self._has_reset, setHasReset)
 
 
 
