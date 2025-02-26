@@ -8,7 +8,7 @@ from commands2.subsystem import Subsystem
 import phoenix6
 
 class AlgaeHandler(Subsystem):
-    '''This thing does algae intake and discharge. '''
+    '''This thing does algae intake and discharge.'''
     
     def __init__(self):
         # Declare motor controllers
@@ -24,6 +24,7 @@ class AlgaeHandler(Subsystem):
         
         # Creates a "CTRE Control Request Object"
         self.velocityOut = phoenix6.controls.VoltageOut(output=0)
+        # self.intakeMotor.get_acceleration
         
     # Motor spinning functions
     def changePosition(self, position, seconds):
@@ -33,6 +34,12 @@ class AlgaeHandler(Subsystem):
     
     def spinIntakeMotor(self, speed) -> None:
         '''Spins the intake motor (speed=1 is intake, speed=-1 is discharge hopefully)'''
-        # self.intakeMotor.set_control(self.velocityOut.with_output(speed))
-        # self.intakeMotor.setVoltage(speed)
+        # volts = 12
+        # self.intakeMotor.set_control(self.velocityOut.with_output(speed * volts))
+        # self.intakeMotor.setVoltage(speed * 12)
         self.intakeMotor.set(speed)
+        
+    def updateSmartDashboard(self):
+        SmartDashboard.putString("Algae/Pivot Position", self.pivotMotor.get_position().__str__())
+        SmartDashboard.putNumber("Algae/Intake Speed", self.intakeMotor.get())
+        SmartDashboard.putBoolean("Algae/Limit Switch", self.limitSwitch.get())

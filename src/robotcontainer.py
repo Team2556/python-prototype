@@ -113,6 +113,7 @@ class RobotContainer:
         self.ENABLE_ALGAE = True
         if self.ENABLE_ALGAE:
             self.algae = algae.AlgaeHandler()
+            self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
@@ -227,7 +228,7 @@ class RobotContainer:
             # (self._joystick2.start() & self._joystick2.x()).whileTrue(lambda: self._reset_zero_point_here) #TODO: fix this to not crash :)
         
         if self.ENABLE_ALGAE:
-            self.algae.setDefaultCommand(algaeCommand.AlgaeCommand(self.algae, self._joystick2))
+            self.algae.setDefaultCommand(algaeCommand.AlgaeCommand(self.algae, self.elevator, self._joystick2))
         
         # self.algae = algae.AlgaeHandler()
         # self.algaeCommand = algaeCommand.AlgaeCommand(self.algae, self._joystick2)

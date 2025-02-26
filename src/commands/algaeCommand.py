@@ -5,9 +5,12 @@ from wpilib import Timer, SmartDashboard
 # import keyboard # Figure out later
 
 from commands2 import Command, button, cmd
-from subsystems import algae
+from subsystems import algae, ElevatorSubsystem
 
 from constants import AlgaeConstants
+
+# Hopefully temporary
+import phoenix6
 
 '''
 Algae Control (ideal) Pseudocode:
@@ -23,19 +26,36 @@ Algae Control (ideal) Pseudocode:
     - If Down D-pad pressed:
         - Set pivot to discharge position (0deg if 0 is straight down)
         - Set wheels to 0
+        
+Better Cooler Updated Algae Control (more ideal) Pseudocode:
+    - TODO: Do some stuff detecting if holding algae before doing any of the commands
+    - If sent command to process:
+        - Lower Elevator to processor height
+        - Set algae handler to process position
+    - Yeah the rest are self-explanatory actually
 '''
 
 class AlgaeCommand(Command):
     '''Tells the algae all what to do'''
     
-    def __init__(self, algaeSubsystem: algae.AlgaeHandler, joystick: button.CommandXboxController): # Currently using "joystick2" object
+    def __init__(
+        self, 
+        algaeSubsystem: algae.AlgaeHandler, 
+        elevatorSubsystem: ElevatorSubsystem.ElevatorSubsystem,          
+        joystick: button.CommandXboxController
+    ): 
+        # Currently using "_joystick2" object
         
         self.algaeSubsystem = algaeSubsystem
+        self.elevatorSubsystem = elevatorSubsystem
         self.joystick = joystick
         
-        self.addRequirements(self.algaeSubsystem)
+        self.addRequirements(self.algaeSubsystem, self.elevatorSubsystem)
         
-        # CONSTANTS TO TUNE
+        # CONSTANTS TO TUNE (maybe put in constants.py later)
+        self.elevatorProcessingPosition = 0.01
+        self.elevatorL2IntakePosition = 0.02
+        self.elevatorL3IntakePosition = 0.03
         # Values to set pivoting motor to
         self.pivotIntakePositionValue = 0.25 # Pivot position when grabbing algae
         self.pivotProcessingValue = 0.07 # Pivot position when about to send to processor
@@ -85,26 +105,36 @@ class AlgaeCommand(Command):
             self.timer.stop()
             self.timer.reset()
         self.updateSmartDashboard()
+        
+    def grabAlgaeFromL2(self):
+        '''Automatically moves elevator to correct position for L2 and grabs algae'''
+        self.elevatorSubsystem.update_setpoint()
+        self.elevatorSubsystem.moveElevator()
+        # Wait a bit somehows
+        self.intakePosition
+        
+    def grabAlgaeFromL3():
+        '''Automatically moves elevator to correct position for L3 and grabs algae'''
+        
+    def processAlgae():
+        '''Automatically moves elevator to '''
     
     def intakePosition(self):
         '''Sets algae manipulator to intaking position'''
         self.algaePivotPosition = "intaking"
         self.algaeSubsystem.changePosition(self.pivotIntakePositionValue, self.pivotTime)
-        print(self.algaePivotPosition)
     
     def processingPosition(self):
         '''Sets algae manipulator to processing position'''
         self.algaePivotPosition = "processing"
         self.timer.restart()
         self.algaeSubsystem.changePosition(self.pivotProcessingValue, self.pivotTime)
-        print(self.algaePivotPosition)
     
     def idlePosition(self):
         '''Sets algae manipulator to idle position'''
         self.algaePivotPosition = "idle"
         self.algaeSubsystem.changePosition(self.pivotIdleValue, self.pivotTime) 
         self.algaeSubsystem.spinIntakeMotor(0)
-        print(self.algaePivotPosition)
         
     # Do SmartDashboard stuff here
     
@@ -117,34 +147,38 @@ class AlgaeCommand(Command):
         
     def updateSmartDashboard(self):
         '''Updates the NetworkTables stuff for algae info'''
-        
         # Update values TO the Dashboard
         self.updateSDInfo()
         
         # Update values FROM the Dashboard
         self.getTuningInfo()
+        
+        self.algaeSubsystem.updateSmartDashboard()
     
     def updateSDInfo(self):
-        SmartDashboard.putString("Algae/Pivot Motor", self.algaeSubsystem.pivotMotor.get_position().__str__())
-        SmartDashboard.putNumber("Algae/Intake Motor", self.algaeSubsystem.intakeMotor.get())
-        SmartDashboard.putBoolean("Algae/Limit Switch", self.algaeSubsystem.limitSwitch.get())
         SmartDashboard.putNumber("Algae/Processing Timer", round(self.timer.get(), 2))
-        SmartDashboard.putString("Algae/Pivot Position", self.algaePivotPosition)
+        SmartDashboard.putString("Algae/Pivot Instruction", self.algaePivotPosition)
     
     def setupTuningInfo(self):
         SmartDashboard.putNumber("Algae/Pivot Time", self.pivotTime)
         SmartDashboard.putNumber("Algae/Intake Multiplier", self.intakeMultiplier)
         SmartDashboard.putBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
         SmartDashboard.putNumber("Algae/Processing Delay", self.processDelay)
-        SmartDashboard.putNumber("Algae/Intake Position", self.pivotIntakePositionValue)
-        SmartDashboard.putNumber("Algae/Processing Position", self.pivotProcessingValue)
-        SmartDashboard.putNumber("Algae/Idle Position", self.pivotIdleValue)
+        SmartDashboard.putNumber("Algae/Pivot Intake Position", self.pivotIntakePositionValue)
+        SmartDashboard.putNumber("Algae/Pivot Processing Position", self.pivotProcessingValue)
+        SmartDashboard.putNumber("Algae/Pivot Idle Position", self.pivotIdleValue)
+        SmartDashboard.putNumber("Algae/Elevator Processing Position", self.elevatorProcessingPosition)
+        SmartDashboard.putNumber("Algae/Elevator L2 Intaking Position", self.elevatorL2IntakePosition)
+        SmartDashboard.putNumber("Algae/Elevator L3 Intaking Position", self.elevatorL3IntakePosition)
          
     def getTuningInfo(self):
         self.pivotTime = SmartDashboard.getNumber("Algae/Pivot Time", self.pivotTime)
         self.intakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", self.intakeMultiplier)
         self.toggleLimitSwitch = SmartDashboard.getBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
         self.processDelay = SmartDashboard.getNumber("Algae/Processing Delay", self.processDelay)
-        self.pivotIntakePositionValue = SmartDashboard.getNumber("Algae/Intake Position", self.pivotIntakePositionValue)
-        self.pivotProcessingValue = SmartDashboard.getNumber("Algae/Processing Position", self.pivotProcessingValue)
-        self.pivotIdleValue = SmartDashboard.getNumber("Algae/Idle Position", self.pivotIdleValue)
+        self.pivotIntakePositionValue = SmartDashboard.getNumber("Algae/Pivot Intake Position", self.pivotIntakePositionValue)
+        self.pivotProcessingValue = SmartDashboard.getNumber("Algae/Pivot Processing Position", self.pivotProcessingValue)
+        self.pivotIdleValue = SmartDashboard.getNumber("Algae/Pivot Idle Position", self.pivotIdleValue)
+        self.elevatorProcessingPosition = SmartDashboard.getNumber("Algae/Elevator Processing Position", self.elevatorProcessingPosition)
+        self.elevatorL2IntakePosition = SmartDashboard.getNumber("Algae/Elevator L2 Intaking Position", self.elevatorL2IntakePosition)
+        self.elevatorL3IntakePosition = SmartDashboard.getNumber("Algae/Elevator L3 Intaking Position", self.elevatorL3IntakePosition)

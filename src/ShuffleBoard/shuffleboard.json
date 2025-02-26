@@ -1368,6 +1368,123 @@
               "_glyph": 148,
               "_showGlyph": false
             }
+          },
+          "20,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Intake Position",
+              "_title": "Algae/Pivot Intake Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "20,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Processing Position",
+              "_title": "Algae/Pivot Processing Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "20,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Idle Position",
+              "_title": "Algae/Pivot Idle Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "20,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator Processing Position",
+              "_title": "Algae/Elevator Processing Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "20,4": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator L2 Intaking Position",
+              "_title": "Algae/Elevator L2 Intaking Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "19,5": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator L3 Intaking Position",
+              "_title": "Algae/Elevator L3 Intaking Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "21,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator Position",
+              "_title": "Algae/Elevator Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "21,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Instruction",
+              "_title": "Algae/Pivot Instruction",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "21,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Speed",
+              "_title": "Algae/Intake Speed",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
           }
         }
       }
@@ -1383,36 +1500,10 @@
         "vgap": 16.0,
         "titleType": 0,
         "tiles": {
-          "1,1": {
-            "size": [
-              3,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Algae/Pivot Motor",
-              "_title": "Pivot Motor",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "4,1": {
-            "size": [
-              3,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Algae/Intake Motor",
-              "_title": "Intake Motor",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "8,2": {
+          "10,5": {
             "size": [
               2,
-              2
+              1
             ],
             "content": {
               "_type": "Boolean Box",
@@ -1450,7 +1541,7 @@
               "_showGlyph": false
             }
           },
-          "8,1": {
+          "8,5": {
             "size": [
               2,
               1
@@ -1476,20 +1567,7 @@
               "_showGlyph": false
             }
           },
-          "1,3": {
-            "size": [
-              3,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Algae/Pivot Position",
-              "_title": "Pivot Position",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "7,5": {
+          "3,6": {
             "size": [
               3,
               1
@@ -1502,41 +1580,145 @@
               "_showGlyph": false
             }
           },
-          "11,2": {
+          "8,1": {
             "size": [
               3,
               1
             ],
             "content": {
               "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Algae/Intake Position",
-              "_title": "Intake Position",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Intake Position",
+              "_title": "Pivot Intake Position",
               "_glyph": 148,
               "_showGlyph": false
             }
           },
-          "11,3": {
+          "8,2": {
             "size": [
               3,
               1
             ],
             "content": {
               "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Algae/Processing Position",
-              "_title": "Processing Position",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Processing Position",
+              "_title": "Pivot Processing Position",
               "_glyph": 148,
               "_showGlyph": false
             }
           },
-          "11,4": {
+          "8,3": {
             "size": [
               3,
               1
             ],
             "content": {
               "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Algae/Idle Position",
-              "_title": "Idle Position",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Idle Position",
+              "_title": "Pivot Idle Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "12,1": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator Processing Position",
+              "_title": "Elevator Processing Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "12,2": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator L2 Intaking Position",
+              "_title": "Elevator L2 Intaking Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "12,3": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator L3 Intaking Position",
+              "_title": "Elevator L3 Intaking Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "12,4": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Elevator Position",
+              "_title": "Elevator Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "11,0": {
+            "size": [
+              4,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Elevator/Setpoint",
+              "_title": "SmartDashboard/Elevator/Setpoint",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,3": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Instruction",
+              "_title": "Pivot Instruction",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,1": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Pivot Position",
+              "_title": "Pivot Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,1": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Algae/Intake Speed",
+              "_title": "Intake Speed",
               "_glyph": 148,
               "_showGlyph": false
             }

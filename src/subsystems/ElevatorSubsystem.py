@@ -16,7 +16,7 @@ from math import pi
 # Create a new ElevatorSubsystem -- using phonix6 pid
 class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
     def __init__(self) -> None:
-        '''IM AN ELEVATOR'''
+        ''' "IM AN ELEVATOR" - Chase 2025 '''
 
         super().__init__( )
         self.i = 0
@@ -131,13 +131,13 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         if self.cfg_slot0.k_p != k_p: 
             self.cfg_slot0.k_p = k_p
             updated = True
-        if  self.cfg_slot0.k_i != k_i: 
+        if self.cfg_slot0.k_i != k_i: 
             self.cfg_slot0.k_i = k_i
             updated = True
-        if  self.cfg_slot0.k_d != k_d: 
+        if self.cfg_slot0.k_d != k_d: 
             self.cfg_slot0.k_d = k_d
             updated = True
-        if  self.cfg_slot0.k_g != k_g: 
+        if self.cfg_slot0.k_g != k_g: 
             self.cfg_slot0.k_g = k_g
             updated = True
         #TODO: add others, if needed
