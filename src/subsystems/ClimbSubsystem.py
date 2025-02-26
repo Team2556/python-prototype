@@ -7,6 +7,7 @@ from phoenix6.configs import TalonFXConfiguration
 from phoenix6.configs.config_groups import NeutralModeValue, MotorOutputConfigs, FeedbackConfigs
 from phoenix6.controls import VoltageOut
 from constants import ClimbConstants
+from wpimath import units
 #from subsystems import StateSubsystem
 
 
@@ -28,6 +29,15 @@ class ClimbSubsystem(commands2.Subsystem):
                      .with_motor_output(MotorOutputConfigs().with_neutral_mode(NeutralModeValue.BRAKE))
                      .with_feedback(FeedbackConfigs().with_sensor_to_mechanism_ratio(ClimbConstants.GEAR_RATIO))
                      )
+    
+    _state_configs: dict[SubsystemState, tuple[int, units.degrees]] = {
+        SubsystemState.STOP: (0, 180),
+        SubsystemState.CLIMB_POSITIVE: (4, 0),
+        SubsystemState.CLIMB_NEGATIVE: (-4, 0),
+        SubsystemState.INITIAL: (0,0),
+        SubsystemState.RESET: (0,0),
+    }
+    
     def __init__(self) -> None:
         super().__init__("Climb", self.SubsystemState.STOP)
         climbmotor_configurator = self.climbmotor.configurator
@@ -45,18 +55,23 @@ class ClimbSubsystem(commands2.Subsystem):
 
 
     def set_desired_state(self, desired_state: SubsystemState) -> None:
-            self._subsystem_state = desired_state
-            match self._subsystem_state:
-                case self.SubsystemState.STOP:
-                    self.climb_request.output = 0
-                case self.SubsystemState.CLIMB_POSITIVE:
-                    self.climb_request.output = 4
-                    self.isClimbExtended = True
-                case self.SubsystemState.CLIMB_NEGATIVE:
-                    self.climb_request.output = -4
-                    self.isClimbExtended = False
+        # if not super().__setattr__(desired_state):
+        #     return
+            # self._subsystem_state = desired_state
+            # match self._subsystem_state:
+            #     case self.SubsystemState.STOP:
+            #         self.climb_request.output = 0
+            #     case self.SubsystemState.CLIMB_POSITIVE:
+            #         self.climb_request.output = 4
+            #         self.isClimbExtended = True
+            #     case self.SubsystemState.CLIMB_NEGATIVE:
+            #         self.climb_request.output = -4
+            #         self.isClimbExtended = False
 
-            self.climbmotor.set_control(self.climb_request)
+
+        output = self._state_configs.get(desired_state, (0, 180))
+        self.climb_request.output = output
+        self.climbmotor.set_control(self.climb_request)
 
     def getEncoderValue(self):
         return self.climbCANcoder.get_position()
@@ -64,9 +79,6 @@ class ClimbSubsystem(commands2.Subsystem):
 
     def getIsClimbExtended(self):
         return self.isClimbExtended
-    
-
-
     
     def putSmartDashboardControlCommands(self):
         """Puts values on Shuffleboard (via SmartDashboard) for testing"""

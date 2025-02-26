@@ -8,9 +8,7 @@ class ClimbCommand(commands2.Command):
     Command to control the climbing mechanism using button inputs.
     """
 
-    def __init__(self, climb: ClimbSubsystem, 
-                 #Armvert: Callable[[], bool], Armdown: Callable[[], bool], 
-                 state: ClimbSubsystem.SubsystemState): #joystick : XboxController):
+    def __init__(self, climb: ClimbSubsystem, state: ClimbSubsystem.SubsystemState):
         super().__init__()
         self.climb = climb
         # self.deploy = deploy

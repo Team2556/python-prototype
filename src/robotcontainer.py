@@ -15,7 +15,7 @@ from constants import RobotDimensions, ElevatorConstants
 from subsystems import (ElevatorSubsystem,
                         limelight,
                         # oneMotor,
-                        coral, ClimbSubsystem
+                        coral, ClimbSubsystem,
                         )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -253,17 +253,12 @@ class RobotContainer:
             )
         )
         # Climb Controls
-        # self._joystick2.povUp().whileTrue(
-        #     self.climber.set_desired_state_command(ClimbSubsystem.CLIMB_POSITIVE)
-        # ).onFalse(
-        #     self.climber.set_desired_state_command(ClimbSubsystem.STOP)
-        # )
-
-        # self._joystick2.povDown().whileTrue(
-        #     self.climber.set_desired_state_command(ClimbSubsystem.CLIMB_NEGATIVE)
-        # ).onFalse(
-        #     self.climber.set_desired_state_command(ClimbSubsystem.STOP)
-        # )
+        self._joystick2.povUp().whileTrue(
+            ClimbCommand(self.climb, -1 * ClimbConstants.kSpeed)
+        )
+        self._joystick2.povDown().whileTrue(
+            ClimbCommand(self.climb, ClimbConstants.kSpeed)
+        )
         # Algae controls with controller 2 left joystick
         # It's negative because that's how xbox controllers work
         '''self.algae.setDefaultCommand(
