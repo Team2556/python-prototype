@@ -131,6 +131,34 @@ class RobotContainer:
             "/SmartDashboard/keyboard", "a"
         )  # SmartDashboard.getBoolean("/SmartDashboard/keyboard/a", False)
 
+        self._button1 = commands2.button.NetworkButton(
+            "/SmartDashboard/ControlPanel", "1"
+        )
+
+        self._button2 = commands2.button.NetworkButton(
+            "/SmartDashboard/ControlPanel", "2"
+        )
+        
+        self._button3 = commands2.button.NetworkButton(
+            "/SmartDashboard/ControlPanel", "3"
+        )
+
+        self._button4 = commands2.button.NetworkButton(
+            "/SmartDashboard/ControlPanel", "4"
+        )
+
+        self._button5 = commands2.button.NetworkButton(
+            "/SmartDashboard/ControlPanel", "5"
+        )
+
+        self._button6 = commands2.button.NetworkButton(
+            "/SmartDashboard/ControlPanel", "6"
+        )
+
+        self._button7 = commands2.button.NetworkButton(
+            "/SmartDashboard/ControlPanelz", "7"
+        )
+
         self.drivetrain = TunerConstants.create_drivetrain()
 
         self.coral_track = coralSubsystem.CoralTrack()
