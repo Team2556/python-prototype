@@ -26,7 +26,7 @@ from telemetry import Telemetry
 from robotUtils import controlAugment
 
 from pathplannerlib.auto import AutoBuilder, PathfindThenFollowPath, PathPlannerAuto
-from pathplannerlib.path import PathPlannerPath, PathConstraints
+from pathplannerlib.path import PathPlannerPath, PathConstraints, GoalEndState , IdealStartingState
 from phoenix6 import swerve
 from phoenix6.hardware import TalonFX
 import wpilib
@@ -204,6 +204,15 @@ class RobotContainer:
         self.path_doc_feed_left = PathPlannerPath.fromPathFile("Dock-Feed-Left")
         self.pathlist_dock_feed = [self.path_doc_feed_right, self.path_doc_feed_left]
 
+        self.pathfinding_constraints_global = PathConstraints(
+            3 / 5,
+            4 / 4,
+            degreesToRadians(540 / 10),
+            degreesToRadians(720 / 10),
+            12,
+            False,
+        )  # was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
+
         # section TeleAuto coral
         # TODO: implement or replace with a better method
         # define numpy array of coral locations; there are 12 poles with 4 levels available for scoring for a total fof 48 scoring locations
@@ -261,17 +270,58 @@ class RobotContainer:
         self.closest_feed_path_to_robot = self.closest_feed_path_to_robot_lam(
             pose.translation()
         )
+    def calculate_angle(self, p1, p2):
+        """Calculate the angle between two points."""
+        return np.arctan2(p2[1] - p1[1], p2[0] - p1[0])
 
-       
+    def generate_pose2d_path(self, points):
+        """Convert a list of (x, y) points into a list of Pose2d with averaged rotation angles."""
+        poses = []
+        num_points = len(points)
+        
+        for i in range(num_points):
+            if i == 0:
+                angle = self.calculate_angle(points[i], points[i + 1])
+            elif i == num_points - 1:
+                angle = self.calculate_angle(points[i - 1], points[i])
+            else:
+                angle1 = self.calculate_angle(points[i - 1], points[i])
+                angle2 = self.calculate_angle(points[i], points[i + 1])
+                angle = (angle1 + angle2) / 2
+            
+            poses.append(Pose2d(points[i][0], points[i][1], Rotation2d(angle)))
+        
+        return poses
+
     def build_path(self, start: Translation2d, target: Translation2d, obstacle_center: Translation2d, obstacle_radius: float) -> list[Translation2d]:
         print("###################################IS THIS RUNNING AT proram start ##################################")
-        path_points = [start]
+        current_pose = self.drivetrain.get_state().pose
+        start = current_pose
+        path_points = [start.translation()]
         
         path_points.append(Translation2d(x=1, y=1))
         path_points.append(Translation2d(x=2, y=2))
         path_points.append(Translation2d(x=3, y=3))
         path_points.append(target)
-        return path_points
+
+        trajectory = TrajectoryGenerator.generateTrajectory(
+            current_pose,
+            [p for p in path_points[1:-1]],
+            Pose2d(target, current_pose.rotation()), # TODO: figure out way to put proper pose rotation
+            self.config_traj
+        )
+    
+        trajectory.totalTime
+        path_poses = self.generate_pose2d_path(path_points)
+        pp_waypoints = PathPlannerPath.waypointsFromPoses( path_poses)
+        #'constraints', 'ideal_starting_state', and 'goal_end_state'
+        pp_path = PathPlannerPath(pp_waypoints, 
+            constraints=self.pathfinding_constraints_global,
+            ideal_starting_state=IdealStartingState(.5, current_pose.rotation()),
+            goal_end_state= GoalEndState(0.0,Rotation2d(0)),
+            is_reversed= DriverStation.getAlliance() == DriverStation.Alliance.kRed,)
+
+        return pp_path
 
 
 
@@ -538,14 +588,7 @@ class RobotContainer:
         )  # .transformBy(self.rotate_rectangle_by)
         # print(f'{rect_feedArea.contains(AutoBuilder.getCurrentPose().translation())=}')
 
-        pathfinding_constraints_global = PathConstraints(
-            3 / 5,
-            4 / 4,
-            degreesToRadians(540 / 10),
-            degreesToRadians(720 / 10),
-            12,
-            False,
-        )  # was:(3.0, 4.0, degreesToRadians(540), degreesToRadians(720),12,False)
+        
         (
             self._joystick.b()
             & self._joystick.povDown()
@@ -558,7 +601,7 @@ class RobotContainer:
         ).onTrue(
             AutoBuilder.pathfindThenFollowPath(
                 goal_path=self.path_doc_proc_RtWall,
-                pathfinding_constraints=pathfinding_constraints_global,
+                pathfinding_constraints=self.pathfinding_constraints_global,
             )
         )
         rect_midArea = Rectangle2d(
@@ -579,7 +622,7 @@ class RobotContainer:
         ).onTrue(
             AutoBuilder.pathfindThenFollowPath(
                 goal_path=self.path_doc_proc_midfield,
-                pathfinding_constraints=pathfinding_constraints_global,
+                pathfinding_constraints=self.pathfinding_constraints_global,
             )
         )
         # teleAuto to feeders
@@ -597,7 +640,7 @@ class RobotContainer:
         ).onTrue(
             AutoBuilder.pathfindThenFollowPath(
                 goal_path=self.path_doc_feed_right,
-                pathfinding_constraints=pathfinding_constraints_global,
+                pathfinding_constraints=self.pathfinding_constraints_global,
             )
         )
 
@@ -619,7 +662,7 @@ class RobotContainer:
         ).onTrue(
             AutoBuilder.pathfindThenFollowPath(
                 goal_path=self.path_doc_feed_left,
-                pathfinding_constraints=pathfinding_constraints_global,
+                pathfinding_constraints=self.pathfinding_constraints_global,
             )
         )
         # Can make the Networktables button trigger an action
@@ -630,7 +673,14 @@ class RobotContainer:
         )
         
         self.keyboard_goto_position_7_7.onTrue(  
-            self.create_path_following_command(Pose2d(Translation2d(7, 7),Rotation2d(0)))
+            # TODO: see about following our own generated path
+            AutoBuilder.followPath(self.build_path(start=Translation2d(0, 0),
+                                   target= Translation2d(7, 7),
+                                    obstacle_center= self.hex_centers[0][0],
+                                     obstacle_radius= self.hex_sizes[0])
+            )
+
+            #self.create_path_following_command(Pose2d(Translation2d(7, 7),Rotation2d(0)))
             # self.drivetrain.apply_request(
             #     lambda: 
             #         DriveToPointForce(drivetrain=self.drivetrain, 
