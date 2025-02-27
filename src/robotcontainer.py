@@ -113,7 +113,8 @@ class RobotContainer:
         self.ENABLE_ALGAE = True
         if self.ENABLE_ALGAE:
             self.algae = algae.AlgaeHandler()
-            self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+            if not self.ENABLE_ELEVATOR: # So it doesn't reset self.elevator if it's already made
+                self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 
         # Vision
         self.limelight = limelight.LimelightSubsystem()
@@ -176,7 +177,6 @@ class RobotContainer:
         # Configure the button bindings
         self.configureButtonBindings()
 
-
     def set_closest_paths(self, pose: Pose2d) -> None:
         self.closest_proc_path_to_robot = self.closest_proc_path_to_robot_lam(pose.translation())
         self.closest_feed_path_to_robot = self.closest_feed_path_to_robot_lam(pose.translation())
@@ -218,8 +218,6 @@ class RobotContainer:
                 )
             )
         )
-
-        
 
         # self.one_motor.setDefaultCommand(DriveOneMotorCommand(self.one_motor, self._joystick2))
         if self.ENABLE_ELEVATOR: 
