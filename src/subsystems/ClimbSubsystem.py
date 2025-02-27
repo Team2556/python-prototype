@@ -1,11 +1,12 @@
 import commands2
 import wpilib
-from wpilib import SmartDashboard, DriverStation
+from wpilib import SmartDashboard
 from phoenix6 import hardware
 from enum import Enum, auto
 from phoenix6.configs import TalonFXConfiguration
 from phoenix6.configs.config_groups import NeutralModeValue, MotorOutputConfigs, FeedbackConfigs
 from phoenix6.controls import VoltageOut
+from wpiutil import SendableBuilder
 from constants import ClimbConstants
 from wpimath import units
 #from subsystems import StateSubsystem
@@ -39,9 +40,9 @@ class ClimbSubsystem(commands2.Subsystem):
     }
     
     def __init__(self) -> None:
-        super().__init__("Climb", self.SubsystemState.STOP)
-        climbmotor_configurator = self.climbmotor.configurator
+        super().__init__()
         self.climbmotor = hardware.TalonFX(ClimbConstants.kClimbMotorPort, "rio")
+        climbmotor_configurator = self.climbmotor.configurator
         self.climbCANcoder = hardware.CANcoder(ClimbConstants.kClimbMotorPort)
         self.limit_bottom = wpilib.DigitalInput(ClimbConstants.kBottomLimitSwitchChannel)
         self.limit_top = wpilib.DigitalInput(ClimbConstants.kTopLimitSwitchChannel)
@@ -99,6 +100,8 @@ class ClimbSubsystem(commands2.Subsystem):
             if not self.isSmartDashboardTestControlsShown:
                 self.putSmartDashboardControlCommands()
             self.setValuesFromSmartDashboard()
+            
+        self._prev_is_down = self.limit_bottom.get()
 
         if self._prev_is_down and not self.limit_bottom.get():
             self._offset = (
@@ -106,7 +109,7 @@ class ClimbSubsystem(commands2.Subsystem):
                 - self.climbCANcoder.get_position()
             )
             self._has_reset = True
-        self._prev_is_down = self.limit_bottom.get()
+        
 
     def simulationPeriodic(self) -> None:
         distance = self.climbmotor.get()
@@ -156,8 +159,8 @@ class ClimbSubsystem(commands2.Subsystem):
         self.isClimbExtended = False
         self.climbmotor.setVoltage(-speed)
 
-    #def initSendable(self, builder: SendableBuilder) -> None:
-        #super().initSendable(builder)
+    def initSendable(self, builder: SendableBuilder) -> None:
+        super().initSendable(builder)
 
         def setOffset(value: float):
             self._offset = value

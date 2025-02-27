@@ -21,7 +21,6 @@ from phoenix6.unmanaged import feed_enable
 from phoenix6.hardware import TalonFX
 import phoenix6.sim as phoenix6_sim
 import typing
-import wpimath.system.plant
 
 
 from constants import ElevatorConstants
@@ -43,7 +42,7 @@ class PhysicsEngine:
         self.container = self.robot.container
         self.drivetrain = self.container.drivetrain
         self.prev_pose = self.drivetrain.get_state().pose
-        self.elevatorGearbox = wpimath.system.plant.DCMotor.krakenX60(2)
+        self.elevatorGearbox = DCMotor.krakenX60(2)
         self.sim_elevator_model =  sim.DCMotorSim(
             plant= LinearSystemId.DCMotorSystem( self.elevatorGearbox,.0001, ElevatorConstants.kElevatorGearing),
             gearbox=self.elevatorGearbox, measurementStdDevs= [0.01,0]
