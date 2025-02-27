@@ -35,15 +35,15 @@ def point_xy_extractor(point):
         cx, cy = point
     return cx,cy
 
-def hexagon_edges(center, size, angle_offset=30):
-    """Generate the edges of a hexagon given its center and size.
-    Center can be Pose2d, Translation2d, or tuple (x,y).
-    Angles are measured in degrees, with 0 degrees pointing from Blue Alliance to Red Alliance and running counterclockwise."""
-    cx, cy = point_xy_extractor(center)
+# def hexagon_edges(center, size, angle_offset=30):
+#     """Generate the edges of a hexagon given its center and size.
+#     Center can be Pose2d, Translation2d, or tuple (x,y).
+#     Angles are measured in degrees, with 0 degrees pointing from Blue Alliance to Red Alliance and running counterclockwise."""
+#     cx, cy = point_xy_extractor(center)
     
-    vertices = [(cx + size * math.cos(math.radians(angle+angle_offset)), cy + size * math.sin(math.radians(angle+angle_offset)))
-                for angle in range(0, 360, 60)]
-    return [(vertices[i], vertices[(i + 1) % 6]) for i in range(6)]
+#     vertices = [(cx + size * math.cos(math.radians(angle+angle_offset)), cy + size * math.sin(math.radians(angle+angle_offset)))
+#                 for angle in range(0, 360, 60)]
+#     return [(vertices[i], vertices[(i + 1) % 6]) for i in range(6)]
 
 # Function to project a point perpendicular to an edge
 def project_perpendicular(point, edge, distance):
@@ -91,126 +91,126 @@ def generate_pose2d_path(points):
     
     return poses
 
-def adjust_points_to_outside_circle(path, center, radius):
-    """Adjust the points in a path to be outside a circle with the given center and radius; Except the last point."""
+# def adjust_points_to_outside_circle(path, center, radius):
+#     """Adjust the points in a path to be outside a circle with the given center and radius; Except the last point."""
 
-    adjusted_path = []
-    if len(path) == 1:
-        i=0
-        x, y = point_xy_extractor( path[i] )
-        cx, cy = center
-        dx, dy = x - cx, y - cy
-        distance = math.sqrt(dx**2 + dy**2)
-        if distance < radius:
-            scale = radius / distance
-            x = cx + dx * scale
-            y = cy + dy * scale
-        print(f"Adjusting ONLY point {i} at {path[i]} with distance {distance} and radius {radius}:{distance < radius=}/n new point {x},{y}")
-        adjusted_path.append((x, y))
-    else:
-        for i in range(len(path) - 1):
-            print(f"Adjusting point {i} at {path[i]}")
-            x, y = point_xy_extractor( path[i])
-            cx, cy = center
-            dx, dy = x - cx, y - cy
-            distance = math.sqrt(dx**2 + dy**2)
-            if distance < radius:
-                scale = radius / distance
-                x = cx + dx * scale
-                y = cy + dy * scale
-            adjusted_path.append((x, y))
-        # if len(path) > 1:
-        print(f"Adding last point {path[-1]}")
-        adjusted_path.append( point_xy_extractor (path[-1]))
-    return adjusted_path
+#     adjusted_path = []
+#     if len(path) == 1:
+#         i=0
+#         x, y = point_xy_extractor( path[i] )
+#         cx, cy = center
+#         dx, dy = x - cx, y - cy
+#         distance = math.sqrt(dx**2 + dy**2)
+#         if distance < radius:
+#             scale = radius / distance
+#             x = cx + dx * scale
+#             y = cy + dy * scale
+#         print(f"Adjusting ONLY point {i} at {path[i]} with distance {distance} and radius {radius}:{distance < radius=}/n new point {x},{y}")
+#         adjusted_path.append((x, y))
+#     else:
+#         for i in range(len(path) - 1):
+#             print(f"Adjusting point {i} at {path[i]}")
+#             x, y = point_xy_extractor( path[i])
+#             cx, cy = center
+#             dx, dy = x - cx, y - cy
+#             distance = math.sqrt(dx**2 + dy**2)
+#             if distance < radius:
+#                 scale = radius / distance
+#                 x = cx + dx * scale
+#                 y = cy + dy * scale
+#             adjusted_path.append((x, y))
+#         # if len(path) > 1:
+#         print(f"Adding last point {path[-1]}")
+#         adjusted_path.append( point_xy_extractor (path[-1]))
+#     return adjusted_path
     
 
-# Function to iteratively create a path from start to finish
-def create_path_with_projections(start, finish, 
-                                 hex_centers = [Translation2d(x=4.489323, y=4.025900),
-                                                Translation2d(x=13.058902, y=4.025900)], #TODOne: Got from april tag database- update with accurate values for defaults
-                                 hex_sizes = [0.831723, 0.831723], 
-                                 projection_distance = .75): 
-    """Creates a path from start to finish, projecting out perpendicularly at intersections and adjusting iteratively.
-    If a projected point is within the distance_threshold of the current point, the projection is extended by min_step_size.
-    hex_centers and hex_sizes are lists of the centers and sizes of hexagons to avoid.
-    """
-    #((AprilTags[18-1].pose.translation() + AprilTags[21-1].pose.translation() )/2).toTranslation2d()
-    #((AprilTags[7-1].pose.translation() + AprilTags[10-1].pose.translation() )/2).toTranslation2d()
-    #((AprilTags[18-1].pose.translation() - AprilTags[21-1].pose.translation() )/2).toTranslation2d()
-    edges =[]
-    for center, size  in zip(hex_centers, hex_sizes):
-        edges += hexagon_edges(center, size)
-    current_point = point_xy_extractor(start)
-    finish = point_xy_extractor(finish)
-    path = [start]
+# # Function to iteratively create a path from start to finish
+# def create_path_with_projections(start, finish, 
+#                                  hex_centers = [Translation2d(x=4.489323, y=4.025900),
+#                                                 Translation2d(x=13.058902, y=4.025900)], #TODOne: Got from april tag database- update with accurate values for defaults
+#                                  hex_sizes = [0.831723, 0.831723], 
+#                                  projection_distance = .75): 
+#     """Creates a path from start to finish, projecting out perpendicularly at intersections and adjusting iteratively.
+#     If a projected point is within the distance_threshold of the current point, the projection is extended by min_step_size.
+#     hex_centers and hex_sizes are lists of the centers and sizes of hexagons to avoid.
+#     """
+#     #((AprilTags[18-1].pose.translation() + AprilTags[21-1].pose.translation() )/2).toTranslation2d()
+#     #((AprilTags[7-1].pose.translation() + AprilTags[10-1].pose.translation() )/2).toTranslation2d()
+#     #((AprilTags[18-1].pose.translation() - AprilTags[21-1].pose.translation() )/2).toTranslation2d()
+#     edges =[]
+#     for center, size  in zip(hex_centers, hex_sizes):
+#         edges += hexagon_edges(center, size)
+#     current_point = point_xy_extractor(start)
+#     finish = point_xy_extractor(finish)
+#     path = [start]
 
-    max_inc = 100000
-    inc = 0
-    while True and inc < max_inc:
-        inc += 1
-        found_intersection = False
-        closest_edge = None
-        closest_intersection = None
-        min_distance = float('inf')
+#     max_inc = 100000
+#     inc = 0
+#     while True and inc < max_inc:
+#         inc += 1
+#         found_intersection = False
+#         closest_edge = None
+#         closest_intersection = None
+#         min_distance = float('inf')
 
-        for q1, q2 in edges:
-            print(f"Checking edge {q1} -> {q2} for intersection with {current_point} -> {finish}")
-            if is_intersecting(current_point, finish, q1, q2):
-                found_intersection = True
-                intersection_x = (current_point[0] + finish[0]) / 2
-                intersection_y = (current_point[1] + finish[1]) / 2
-                intersection_point = (intersection_x, intersection_y)
+#         for q1, q2 in edges:
+#             print(f"Checking edge {q1} -> {q2} for intersection with {current_point} -> {finish}")
+#             if is_intersecting(current_point, finish, q1, q2):
+#                 found_intersection = True
+#                 intersection_x = (current_point[0] + finish[0]) / 2
+#                 intersection_y = (current_point[1] + finish[1]) / 2
+#                 intersection_point = (intersection_x, intersection_y)
                 
-                distance_to_edge = min(math.dist(current_point, q1), math.dist(current_point, q2))
-                if distance_to_edge < min_distance:
-                    min_distance = distance_to_edge
-                    closest_edge = (q1, q2)
-                    closest_intersection = intersection_point
+#                 distance_to_edge = min(math.dist(current_point, q1), math.dist(current_point, q2))
+#                 if distance_to_edge < min_distance:
+#                     min_distance = distance_to_edge
+#                     closest_edge = (q1, q2)
+#                     closest_intersection = intersection_point
 
-        if not found_intersection:#closest_edge is None:
-            print("No intersection found, breaking")
-            break
-        # projection_distance = 0.75
-        projected_point1 = adjust_points_to_outside_circle([closest_intersection], hex_centers[0], hex_sizes[0]+projection_distance)[0]
-        projected_point = adjust_points_to_outside_circle([projected_point1], hex_centers[1], hex_sizes[1]+projection_distance)[0]
-        # print(f"Projected point is same after second time through :{projected_point1==projected_point=} ")
-        #project_perpendicular(closest_intersection, closest_edge, projection_distance)
+#         if not found_intersection:#closest_edge is None:
+#             print("No intersection found, breaking")
+#             break
+#         # projection_distance = 0.75
+#         projected_point1 = adjust_points_to_outside_circle([closest_intersection], hex_centers[0], hex_sizes[0]+projection_distance)[0]
+#         projected_point = adjust_points_to_outside_circle([projected_point1], hex_centers[1], hex_sizes[1]+projection_distance)[0]
+#         # print(f"Projected point is same after second time through :{projected_point1==projected_point=} ")
+#         #project_perpendicular(closest_intersection, closest_edge, projection_distance)
 
-        # while math.dist(current_point, projected_point) < distance_threshold:
-        #     projected_point = (
-        #         projected_point[0] + min_step_size * (closest_edge[1][0] - closest_edge[0][0]),
-        #         projected_point[1] + min_step_size * (closest_edge[1][1] - closest_edge[0][1])
-        #     )
-        path.append(projected_point)
-        current_point = projected_point
-        print('another iteration')
-        '''found_intersection = True
+#         # while math.dist(current_point, projected_point) < distance_threshold:
+#         #     projected_point = (
+#         #         projected_point[0] + min_step_size * (closest_edge[1][0] - closest_edge[0][0]),
+#         #         projected_point[1] + min_step_size * (closest_edge[1][1] - closest_edge[0][1])
+#         #     )
+#         path.append(projected_point)
+#         current_point = projected_point
+#         print('another iteration')
+#         '''found_intersection = True
         
-        if not found_intersection:
-            break'''
+#         if not found_intersection:
+#             break'''
 
-    path.append(finish)
-    radial_extension = projection_distance + 0.1
-    path = adjust_points_to_outside_circle(path, hex_centers[0], hex_sizes[0]+radial_extension)
-    path = adjust_points_to_outside_circle(path, hex_centers[1], hex_sizes[1]+radial_extension)
-    print(f" Hex centers Red: {hex_centers[1]} Hex sizes Red: {hex_sizes[1]}")
-    # return path
-    print(f"path before midpoints: {path}")
-    def add_midpoints(path):
-        """Add midpoints to the path and check if the path is within the circle."""
-        new_path = []#[path[0]]
-        for i in range(len(path) - 1):
-            new_path.append(path[i])
-            new_path.append(((path[i][0] + path[i + 1][0]) / 2, (path[i][1] + path[i + 1][1]) / 2))
-        new_path.append(path[-1])
-        # new_path = adjust_points_to_outside_circle(new_path,  hex_centers[0], hex_sizes[0]+radial_extension)
-        # new_path = adjust_points_to_outside_circle(new_path,  hex_centers[1], hex_sizes[1]+radial_extension)
-        return new_path
-    path = add_midpoints(path)
-    print(f"Final path: {path}")
+#     path.append(finish)
+#     radial_extension = projection_distance + 0.1
+#     path = adjust_points_to_outside_circle(path, hex_centers[0], hex_sizes[0]+radial_extension)
+#     path = adjust_points_to_outside_circle(path, hex_centers[1], hex_sizes[1]+radial_extension)
+#     print(f" Hex centers Red: {hex_centers[1]} Hex sizes Red: {hex_sizes[1]}")
+#     # return path
+#     print(f"path before midpoints: {path}")
+#     def add_midpoints(path):
+#         """Add midpoints to the path and check if the path is within the circle."""
+#         new_path = []#[path[0]]
+#         for i in range(len(path) - 1):
+#             new_path.append(path[i])
+#             new_path.append(((path[i][0] + path[i + 1][0]) / 2, (path[i][1] + path[i + 1][1]) / 2))
+#         new_path.append(path[-1])
+#         # new_path = adjust_points_to_outside_circle(new_path,  hex_centers[0], hex_sizes[0]+radial_extension)
+#         # new_path = adjust_points_to_outside_circle(new_path,  hex_centers[1], hex_sizes[1]+radial_extension)
+#         return new_path
+#     path = add_midpoints(path)
+#     print(f"Final path: {path}")
 
-    return generate_pose2d_path(path)
+#     return generate_pose2d_path(path)
 
 # Example usage:
 '''p1 = (1, 1)
@@ -241,7 +241,7 @@ def intersect_circle(start, finish, center, radius):
         return None
     t1 = (-b + math.sqrt(discriminant)) / (2 * a)
     t2 = (-b - math.sqrt(discriminant)) / (2 * a)
-    if 0 <= t1 <= 1:
+    if 0 >= t1 >= 1:
         return (px + t1 * dx, py + t1 * dy)
     if 0 <= t2 <= 1:
         return (px + t2 * dx, py + t2 * dy)

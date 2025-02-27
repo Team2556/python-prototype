@@ -9,6 +9,7 @@ import commands2
 import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
+import wpimath.trajectory
 
 from constants import ClimbConstants
 from generated.tuner_constants import TunerConstants
@@ -29,6 +30,7 @@ from pathplannerlib.path import PathPlannerPath, PathConstraints
 from phoenix6 import swerve
 from phoenix6.hardware import TalonFX
 import wpilib
+import wpimath
 from wpilib import SmartDashboard, DriverStation
 from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
 from wpimath.units import (
@@ -54,7 +56,9 @@ from commands.liftElevator import LiftElevatorCommand
 import networktables as nt
 from networktables import util as ntutil
 
-
+from wpimath.kinematics import SwerveDrive4Kinematics, SwerveModuleState, ChassisSpeeds
+from wpimath.trajectory import TrajectoryGenerator, TrajectoryConfig
+from wpimath.controller import HolonomicDriveController, PIDController, ProfiledPIDControllerRadians
 
 # from subsystems import algae
 
@@ -118,7 +122,14 @@ class RobotContainer:
 
         self.hex_centers = [Translation2d(x=4.489323, y=4.025900),
                                     Translation2d(x=13.058902, y=4.025900)], 
-        self.hex_sizes = [.831723, .831723], 
+        self.hex_sizes = [.831723, .831723]
+        self.config_traj = TrajectoryConfig(self._max_speed, 2.0)
+        self.config_traj.setKinematics(self.drivetrain.kinematics)
+        self.holonomic_controller = HolonomicDriveController(
+            PIDController(1.0, 0, 0),
+            PIDController(1.0, 0, 0),
+            ProfiledPIDControllerRadians(1.0, 0, 0, wpimath.trajectory.TrapezoidProfileRadians.Constraints(self._max_speed,self._max_angular_rate))
+        )
         # self._driveToPointForce = DriveToPointForce(drivetrain=self.drivetrain, 
         #                                                          target=Pose2d(2, 2, Rotation2d(0)), 
         #                                                          obstacle=self.hex_centers[0][0],
@@ -250,6 +261,59 @@ class RobotContainer:
         self.closest_feed_path_to_robot = self.closest_feed_path_to_robot_lam(
             pose.translation()
         )
+
+       
+    def build_path(self, start: Translation2d, target: Translation2d, obstacle_center: Translation2d, obstacle_radius: float) -> list[Translation2d]:
+        print("###################################IS THIS RUNNING AT proram start ##################################")
+        path_points = [start]
+        
+        path_points.append(Translation2d(x=1, y=1))
+        path_points.append(Translation2d(x=2, y=2))
+        path_points.append(Translation2d(x=3, y=3))
+        path_points.append(target)
+        return path_points
+
+
+
+    def create_path_following_command(self, target: Pose2d) -> commands2.Command:
+        
+        print(f"Creating path to {target} ================================================____--------")
+        current_pose = self.drivetrain.get_state().pose
+        start = current_pose#.translation()
+        path = self.build_path(start, target, self.hex_centers[0][0], self.hex_sizes[0])
+        print(f"Path: {path}")
+        if not path:
+            wpilib.SmartDashboard.putString("Path Status", "No valid path")
+            return commands2.InstantCommand()
+        
+        trajectory = TrajectoryGenerator.generateTrajectory(
+            current_pose,
+            [p for p in path[1:-1]],
+            target,#Pose2d(target, current_pose.rotation()),
+            self.config_traj
+        )
+        command = commands2.SwerveControllerCommand(
+            trajectory=trajectory,
+            pose=self.drivetrain.get_state(),
+            kinematics=self.drivetrain.kinematics,
+            controller=self.holonomic_controller,
+            outputModuleStates= lambda: self.drivetrain.get_state().speeds,
+            # self.drivetrain.set_module_states,
+            # lambda speeds: #print(speeds
+            # self.drivetrain.set_control(
+            #     self.drivetrain._apply_robot_speeds
+            #     .with_speeds(ChassisSpeeds(speeds,)
+            # ),
+
+            # outputModuleStates=lambda speeds: self.drivetrain.kinematics.toChassisSpeeds(speeds),  # Use kinematics to convert module states to chassis speeds
+            requirements=[self.drivetrain],
+            # desiredRotation=lambda: target.rotation(),
+        
+
+        )
+        wpilib.SmartDashboard.putString("Path Status", f"Following path to {target}")
+        return command
+
 
     def configureButtonBindings(self) -> None:
         """
@@ -564,22 +628,24 @@ class RobotContainer:
                 lambda: self.drivetrain.reset_pose_by_zone(zone="a")
             )
         )
-        self.drivetrain.__subclasshook__
+        
         self.keyboard_goto_position_7_7.onTrue(  
-            self.drivetrain.apply_request(
-                lambda: 
-                    DriveToPointForce(drivetrain=self.drivetrain, 
-                                            target=Pose2d(2, 2, Rotation2d(0)), 
-                                            obstacle=self.hex_centers[0][0],
-                                            obstacle_radius=2.0,
-                                            max_speed=self._max_speed,
-                                            max_angular_rate=self._max_angular_rate,
-                                            k_attr=1.0,
-                                            k_rep=20.0,
-                                            influence_radius=5.25,
-                                            tolerance=.05
-                                            ).execute_it()
-            ))
+            self.create_path_following_command(Pose2d(Translation2d(7, 7),Rotation2d(0)))
+            # self.drivetrain.apply_request(
+            #     lambda: 
+            #         DriveToPointForce(drivetrain=self.drivetrain, 
+            #                                 target=Pose2d(2, 2, Rotation2d(0)), 
+            #                                 obstacle=self.hex_centers[0][0],
+            #                                 obstacle_radius=2.0,
+            #                                 max_speed=self._max_speed,
+            #                                 max_angular_rate=self._max_angular_rate,
+            #                                 k_attr=1.0,
+            #                                 k_rep=20.0,
+            #                                 influence_radius=5.25,
+            #                                 tolerance=.05
+            #                                 ).execute_it()
+            # )
+            )
 
                 
         """#this method uses the robot periodic updated closest path to robot
@@ -608,3 +674,4 @@ class RobotContainer:
         """
         # return commands2.cmd.print_("No autonomous command configured")
         return self._auto_chooser.getSelected()
+ 
