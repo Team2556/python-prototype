@@ -1,6 +1,7 @@
 #CTRE recorded telemetry 
 *.hoot
 ctre_sim/*
+FieldVideos_toCalibrate/*.MOV
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -176,4 +177,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-/.venv
+#needed to clean out index by running this: git rm -r --cached ctre_sim/
+ctre_sim/
+
+
