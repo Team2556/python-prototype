@@ -1,39 +1,36 @@
-import wpilib
-from commands2 import Command, Subsystem
-from commands2.sysid import SysIdRoutine
-import math
-from phoenix6 import SignalLogger, swerve, units, utils
-from typing import Callable, overload
-from wpilib import DriverStation, Notifier, RobotController
-from wpilib.sysid import SysIdRoutineLog
-from wpimath.geometry import Rotation2d
-import photonlibpy
-from constants import Apritag_heights
-from src.constants import CAM_MOUNT_HEIGHT
+import cv2
+import numpy as np
+from limelight import Limelight
+import time   
+import  ntcore
 
-class PhotonCommand(wpilib.TimedRobot):
-    def robotInit(self) -> None:
-        self.controller = wpilib.XboxController(0)
-        self.cam = PhotonCamera("photonvision") # type: ignore
+# Replace '10.TE.AM.11' with the actual IP address of your Limelight
+limelight = Limelight(address='10.TE.AM.11')
 
-    def robotPeriodic(self) -> None:
-        self.swerve.updateOdometry()
-        self.swerve.log()
+while True:
+    def Results():
+    # Get the latest results from the Limelight
+        results = limelight.get_results()
 
-    def teleopPeriodic(self) -> None:
-        # Get information from the camera
-        targetYaw = 0.0
-        targetRange = 0.0
-        targetVisible = False
-        results = self.cam.getAllUnreadResults()
-        if len(results) > 0:
-            result = results[-1]  # take the most recent result the camera had
-            # At least one apriltag was seen by the camera
-            for target in result.getTargets():
-                if target.getFiducialId() == 7:
-                    # Found tag 7, record its information
-                    targetVisible = True
-                    targetYaw = target.getYaw()
-                    heightDelta = CAM_MOUNT_HEIGHT - tag_heights(7)
-                    angleDelta = math.radians(CAM_MOUNT_PITCH_deg - target.getPitch())
-                    targetRange = heightDelta / math.tan(angleDelta)
+        # Check if a target is valid
+        if results.target_valid:
+            # Print target information
+            print("Target X:", results.target_x)
+            print("Target Y:", results.target_y)
+            print("Target Area:", results.target_area)
+        else:
+            print("No target found")
+
+    time.sleep(0.1)
+
+    def center_Robot():
+        Results()
+        result= ntcore.NetworkTable.getTable("limelight").getNumber('tx');
+        centerVal = result/ 2
+        if centerVal >= 360:
+
+
+            #pull results
+            #divide tX by 2, 
+            #If greater than half of camera space, turn to left until within 15 pixels
+            #If less than half, turn to the right until within 15 pixels
