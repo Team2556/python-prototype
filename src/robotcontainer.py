@@ -10,6 +10,8 @@ import commands2.button, commands2.cmd
 import numpy as np
 from commands2.sysid import SysIdRoutine
 
+import commands
+import commands.controlPanel
 import constants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
@@ -18,8 +20,8 @@ from subsystems import (
     coralSubsystem,
     limelight,
     pneumaticSubsystem,
-    # oneMotor,,
-    ultrasonics
+    # oneMotor,
+    ultrasonics,
 )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -120,6 +122,8 @@ class RobotContainer:
         # This one's probably used for scoring stuff
         self._joystick2 = commands2.button.CommandXboxController(1)
 
+        self._keyboard = commands.controlPanel.KeyboardDetection()
+
         # Using NetworkButton with a USB keyboard will require running a seperate python program on the driver's station
         # python ../DriverstationUtils/keyboard_to_nt.py
         # pressing {CTRL+C} will stop the program
@@ -156,7 +160,7 @@ class RobotContainer:
         )
 
         self._button7 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanelz", "7"
+            "/SmartDashboard/ControlPanel", "7"
         )
 
         self.drivetrain = TunerConstants.create_drivetrain()
@@ -334,6 +338,10 @@ class RobotContainer:
         self._joystick.x().onTrue(SnapToLineCommand(self.drivetrain))
 
         # endsection vision related commands
+
+        self._keyboard.detectInputs()
+
+        
 
         # Coral Track controls
         self.coral_track.setDefaultCommand(self.coral_command)

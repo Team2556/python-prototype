@@ -12,6 +12,7 @@ from wpilib import SmartDashboard, DriverStation, Field2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.logging import PathPlannerLogging
 from phoenix6.utils import fpga_to_current_time
+import commands.controlPanel
 
 
 from robotcontainer import RobotContainer
@@ -48,6 +49,13 @@ class MyRobot(commands2.TimedCommandRobot):
         # Logging callback for the active path, this is sent as a list of poses
         PathPlannerLogging.setLogActivePathCallback(lambda poses: self.field.getObject('path').setPoses(poses))
         
+        self._keyboard = commands.controlPanel.KeyboardDetection()
+
+        self._keyboard.setInputFunctions(
+        # TODO add functions to be called when each key is pressed, from 1-7 (for now)
+            
+        )
+
 
  
     def robotPeriodic(self) -> None:
