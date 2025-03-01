@@ -19,8 +19,8 @@ from phoenix6.configs.config_groups import Slot0Configs
 
 
 VISION_DES_ANGLE_deg = 25
-    CAM_MOUNT_HEIGHT = 12
-    CAM_MOUNT_PITCH = 25
+CAM_MOUNT_HEIGHT = 12
+CAM_MOUNT_PITCH = 25
 
 
 AprilTagField = apriltag.AprilTagFieldLayout.loadField(
