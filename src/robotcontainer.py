@@ -135,33 +135,45 @@ class RobotContainer:
             "/SmartDashboard/keyboard", "a"
         )  # SmartDashboard.getBoolean("/SmartDashboard/keyboard/a", False)
 
-        self._button1 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanel", "1"
-        )
 
-        self._button2 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanel", "2"
-        )
-        
-        self._button3 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanel", "3"
-        )
 
-        self._button4 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanel", "4"
-        )
+        self.controlPanelFunctions = {
+            "0": (lambda: print("Activate"), []),  # The activate button, for when we tell the robot to engage with whatever we said to do.
 
-        self._button5 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanel", "5"
-        )
+            "1": (lambda: print("Edge 1"), []),
+            "2": (lambda: print("Edge 2"), []),
+            "3": (lambda: print("Edge 3"), []),
+            "4": (lambda: print("Edge 4"), []),
+            "5": (lambda: print("Edge 5"), []),
+            "6": (lambda: print("Edge 6"), []),
+            "7": (lambda: print("Edge 7"), []),
+            "8": (lambda: print("Edge 8"), []),
+            "9": (lambda: print("Edge 9"), []),
+            "10": (lambda: print("Edge 10"), []),
+            "11": (lambda: print("Edge 11"), []),
+            "12": (lambda: print("Edge 12"), []),  # 1-12 will be edges of the field
 
-        self._button6 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanel", "6"
-        )
+            "13": (lambda: print("Coral Level 1"), []),
+            "14": (lambda: print("Coral Level 2"), []),
+            "15": (lambda: print("Coral Level 3"), []),
+            "16": (lambda: print("Coral Level 4"), []),  # 13-16 will be coral levels on the reef
 
-        self._button7 = commands2.button.NetworkButton(
-            "/SmartDashboard/ControlPanel", "7"
-        )
+            "17": (lambda: print("Algae Level 1"), []),
+            "18": (lambda: print("Algae Level 2"), []),  # 17 & 18 will be algae levels on the reef
+
+            "19": (lambda: print("Feeder Left"), []),
+            "20": (lambda: print("Feeder Right"), [])  # 19 and 20 will be feeders located on the left & right side of the field for our robot
+        }
+
+        self._buttons = []
+        for i in range(21):
+            button = commands2.button.NetworkButton("/SmartDashboard/keyboard", str(i))
+            action, subsystems = self.controlPanelFunctions[str(i)]
+            
+            button.whileTrue(commands2.cmd.run(action, *subsystems))
+            self._buttons.append(button)
+
+
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
@@ -339,7 +351,11 @@ class RobotContainer:
 
         # endsection vision related commands
 
-        self._keyboard.detectInputs()
+        # self._keyboard.setInputFunctions(
+            
+        # )
+
+        # self._keyboard.detectInputs()
 
         
 

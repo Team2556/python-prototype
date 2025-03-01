@@ -131,6 +131,9 @@
         "open": true
       },
       "SmartDashboard": {
+        "Auto Mode": {
+          "open": true
+        },
         "Elevator": {
           "Elevator Root": {
             "open": true
