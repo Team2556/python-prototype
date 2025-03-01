@@ -29,12 +29,20 @@ Algae Control (ideal) Pseudocode:
         - Set wheels to 0
         
 Better Cooler Updated Algae Control (more ideal) Pseudocode:
-    - TODO: Do some stuff detecting if holding algae before doing any of the commands
     - If sent command to process:
         - Lower Elevator to processor height
         - Set algae handler to process position
-    - Yeah the rest are self-explanatory actually
-'''
+    - Yeah the rest are self-explanatory actually so I don't have to type it
+    
+TODO to make this better:
+    - Figure out commands2.SequentialCommandGroup 
+    - Make a more efficient way to make it wait a bit to do something (maybe commands2.WaitCommand)
+        
+    - Get these structured in the final repository
+    - Make it compatable with the new control panel
+    
+    - If subsystem motor code doesn't work, get that to actually work
+''' 
 
 class AlgaeCommand(Command):
     '''Tells the algae all what to do'''
@@ -53,31 +61,12 @@ class AlgaeCommand(Command):
         
         self.addRequirements(self.algaeSubsystem, self.elevatorSubsystem)
         
-        # CONSTANTS TO TUNE (maybe put in constants.py later)
-        self.elevatorProcessingPositionValue = 0.01
-        self.elevatorL2IntakePositionValue = 0.02
-        self.elevatorL3IntakePositionValue = 0.03
-        # Values to set pivoting motor to
-        self.pivotIntakePositionValue = 0.25 # Pivot position when grabbing algae
-        self.pivotProcessingValue = 0.07 # Pivot position when about to send to processor
-        self.pivotIdleValue = 0 # Pivot position when idle
-        # Intake wheels multiply by this speed
-        self.intakeMultiplier = 0.2
-        # The time it takes to switch between pivoting positions
-        self.pivotTime = 1
-        # The delay from spinning the wheels to spit out the algae once processing input is pressed (thats what the timer is for)
-        self.spinProcessDelay = 0.5
-        # The delay from setting the elevator to moving the pivot motor when intaking
-        self.intakeDelay = 0.75
-        # The delay from setting the elevator to moving the pivot motor when processing
-        self.processDelay = 0.75
-        
-        self.timer = Timer() # (from wpilib)
+        # Cool way to wait a bit for something to happen
+        self.pivotWaitingPosition = "intaking"
+        self.pivotDelayTimer = Timer()
+        self.processDelayTimer = Timer() # (class from wpilib)
         
         self.algaePivotPosition = "idle"
-        
-        # Testing variable that ignores limit switches if False (will always be True during games)
-        self.toggleLimitSwitch = True
 
         # These inputs should hopefully be replaced with a keyboard thing
         self.joystick.povUp().whileTrue(
@@ -93,68 +82,89 @@ class AlgaeCommand(Command):
         self.setupSmartDashboard()
         
     def initialize(self):...
-        # Runs when the command is scheduled, not like __init__ that rins when the class is made
+        # Runs when the command is scheduled, not like __init__ that runs when the class is made
         
     def execute(self):
         # Runs periodically (does all the periodic stuffs)
+        
         # Stop intaking if limit switch active
         if self.algaePivotPosition == "intaking":
-            if self.toggleLimitSwitch and self.algaeSubsystem.limitSwitch.get():
+            if self.algaeSubsystem.getLimitSwitchActive(AlgaeConstants.kToggleLimitSwitch):
                 self.algaeSubsystem.spinIntakeMotor(0)
             else: 
-                self.algaeSubsystem.spinIntakeMotor(self.intakeMultiplier)
+                self.algaeSubsystem.spinIntakeMotor(AlgaeConstants.kIntakeMultiplier)
+                
         # Start spinning the wheels the other way (self.pivotProcessingValue) after it starts processing
-        if self.timer.get() > self.spinProcessDelay:
+        if self.processDelayTimer.get() > AlgaeConstants.kSpinProcessDelayValue:
             if self.algaePivotPosition == "processing":
-                self.algaeSubsystem.spinIntakeMotor(-self.intakeMultiplier)
-            self.timer.stop()
-            self.timer.reset()           
+                self.algaeSubsystem.spinIntakeMotor(-AlgaeConstants.kIntakeMultiplier)
+            self.processDelayTimer.stop()
+            self.processDelayTimer.reset()
+        
+        # Changes pivot if self.pivotDelayTimer if higher than any of the delay values
+        if self.pivotWaitingPosition == "intaking" and self.pivotDelayTimer.get() >= AlgaeConstants.kIntakeDelayValue:
+            self.pivotWaitingPosition = "none"
+            self.pivotDelayTimer.stop()
+            self.pivotDelayTimer.reset()
+            self.intakePosition()
+        if self.pivotWaitingPosition == "processing" and self.pivotDelayTimer.get() >= AlgaeConstants.kProcessDelayValue:
+            self.pivotWaitingPosition = "none"
+            self.pivotDelayTimer.stop()
+            self.pivotDelayTimer.reset()
+            self.processingPosition()
+        
         self.updateSmartDashboard()
         
-    
     # Functions that perform complete tasks (probably from control panel)
     
     def grabAlgaeFromL2(self):
         '''Automatically moves elevator to correct position for L2 and grabs algae'''
-        if not self.algaeSubsystem.limitSwitch.get():
-            self.elevatorSubsystem.update_setpoint(self.elevatorL2IntakePositionValue, incremental=False)
+        if not self.algaeSubsystem.getLimitSwitchActive(AlgaeConstants.kToggleLimitSwitch):
+            self.elevatorSubsystem.update_setpoint(AlgaeConstants.kElevatorL2IntakePositionValue, incremental=False)
             self.elevatorSubsystem.moveElevator()
-            # Wait a bit somehow (probably with commands2.WaitCommand)
-            self.intakePosition()
+            # Make it set pivot to intake position after AlgaeConstants.kIntakeDelayValue seconds
+            self.startPivotWaitingTimer("intaking")
         
     def grabAlgaeFromL3(self):
         '''Automatically moves elevator to correct position for L3 and grabs algae'''
-        if not self.algaeSubsystem.limitSwitch.get():
-            self.elevatorSubsystem.update_setpoint(self.elevatorL3IntakePositionValue, incremental=False)
+        if not self.algaeSubsystem.getLimitSwitchActive(AlgaeConstants.kToggleLimitSwitch):
+            self.elevatorSubsystem.update_setpoint(AlgaeConstants.kElevatorL3IntakePositionValue, incremental=False)
             self.elevatorSubsystem.moveElevator()
-            # Wait a bit somehow
-            self.intakePosition()
+            # Make it set pivot to intake position after AlgaeConstants.kIntakeDelayValue seconds
+            self.startPivotWaitingTimer("intaking")
         
     def processAlgae(self):
         '''Automatically moves elevator down to processor and process the algae'''
         if self.algaeSubsystem.limitSwitch.get():
-            self.elevatorSubsystem.update_setpoint(self.elevatorProcessingPositionValue, incremental=False)
+            self.elevatorSubsystem.update_setpoint(AlgaeConstants.kElevatorProcessingPositionValue, incremental=False)
             self.elevatorSubsystem.moveElevator()
-            # Wait a bit somehow
-            self.processingPosition()
+            # Make it set pivot to process position after AlgaeConstants.kProcessDelayValue seconds 
+            self.startPivotWaitingTimer("processing")
+            
+    # Function that starts the timer that delays pivot moving
+    
+    def startPivotWaitingTimer(self, waitingPosition):
+        self.pivotWaitingPosition = waitingPosition
+        self.pivotDelayTimer.reset()
+        self.pivotDelayTimer.start()
     
     # Functions that move the algae pivoter
     
     def intakePosition(self):
         '''Sets algae manipulator to intaking position'''
         self.algaePivotPosition = "intaking"
-        self.algaeSubsystem.changePosition(self.pivotIntakePositionValue, self.pivotTime)
+        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIntakePositionValue, AlgaeConstants.kPivotTime)
     
     def processingPosition(self):
         '''Sets algae manipulator to processing position'''
         self.algaePivotPosition = "processing"
-        self.timer.restart()
-        self.algaeSubsystem.changePosition(self.pivotProcessingValue, self.pivotTime)
+        self.processDelayTimer.restart()
+        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotProcessingValue, AlgaeConstants.kPivotTime)
     
     def idlePosition(self):
         '''Sets algae manipulator to idle position'''
         self.algaePivotPosition = "idle"
-        self.algaeSubsystem.changePosition(self.pivotIdleValue, self.pivotTime) 
+        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIdleValue, AlgaeConstants.kPivotTime) 
         self.algaeSubsystem.spinIntakeMotor(0)
         
     # Do SmartDashboard stuff here
@@ -177,33 +187,35 @@ class AlgaeCommand(Command):
         self.algaeSubsystem.updateSmartDashboard()
     
     def updateSDInfo(self):
-        SmartDashboard.putNumber("Algae/Processing Timer", round(self.timer.get(), 2))
+        SmartDashboard.putNumber("Algae/Processing Delay Timer", round(self.processDelayTimer.get(), 2))
+        SmartDashboard.putString("Algae/Pivot Waiting Position", self.pivotWaitingPosition)
+        SmartDashboard.putNumber("Algae/Pivot Delay Timer", round(self.pivotDelayTimer.get(), 2))
         SmartDashboard.putString("Algae/Pivot Instruction", self.algaePivotPosition)
     
     def setupTuningInfo(self):
-        SmartDashboard.putNumber("Algae/Pivot Time", self.pivotTime)
-        SmartDashboard.putNumber("Algae/Intake Multiplier", self.intakeMultiplier)
-        SmartDashboard.putBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
-        SmartDashboard.putNumber("Algae/Processing Delay", self.spinProcessDelay)
-        SmartDashboard.putNumber("Algae/Pivot Intake Position", self.pivotIntakePositionValue)
-        SmartDashboard.putNumber("Algae/Pivot Processing Position", self.pivotProcessingValue)
-        SmartDashboard.putNumber("Algae/Pivot Idle Position", self.pivotIdleValue)
-        SmartDashboard.putNumber("Algae/Elevator Processing Position", self.elevatorProcessingPositionValue)
-        SmartDashboard.putNumber("Algae/Elevator L2 Intaking Position", self.elevatorL2IntakePositionValue)
-        SmartDashboard.putNumber("Algae/Elevator L3 Intaking Position", self.elevatorL3IntakePositionValue)
-        SmartDashboard.putNumber("Algae/Pivot Intake Delay", self.intakeDelay)
-        SmartDashboard.putNumber("Algae/Pivot Process Delay", self.processDelay)
+        SmartDashboard.putNumber("Algae/Pivot Time", AlgaeConstants.kPivotTime)
+        SmartDashboard.putNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
+        SmartDashboard.putBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
+        SmartDashboard.putNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
+        SmartDashboard.putNumber("Algae/Pivot Intake Position", AlgaeConstants.kPivotIntakePositionValue)
+        SmartDashboard.putNumber("Algae/Pivot Processing Position", AlgaeConstants.kPivotProcessingValue)
+        SmartDashboard.putNumber("Algae/Pivot Idle Position", AlgaeConstants.kPivotIdleValue)
+        SmartDashboard.putNumber("Algae/Elevator Processing Position", AlgaeConstants.kElevatorProcessingPositionValue)
+        SmartDashboard.putNumber("Algae/Elevator L2 Intaking Position", AlgaeConstants.kElevatorL2IntakePositionValue)
+        SmartDashboard.putNumber("Algae/Elevator L3 Intaking Position", AlgaeConstants.kElevatorL3IntakePositionValue)
+        SmartDashboard.putNumber("Algae/Pivot Intake Delay", AlgaeConstants.kIntakeDelayValue)
+        SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)
          
     def getTuningInfo(self):
-        self.pivotTime = SmartDashboard.getNumber("Algae/Pivot Time", self.pivotTime)
-        self.intakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", self.intakeMultiplier)
-        self.toggleLimitSwitch = SmartDashboard.getBoolean("Algae/Toggle Limit Switch", self.toggleLimitSwitch)
-        self.spinProcessDelay = SmartDashboard.getNumber("Algae/Processing Delay", self.spinProcessDelay)
-        self.pivotIntakePositionValue = SmartDashboard.getNumber("Algae/Pivot Intake Position", self.pivotIntakePositionValue)
-        self.pivotProcessingValue = SmartDashboard.getNumber("Algae/Pivot Processing Position", self.pivotProcessingValue)
-        self.pivotIdleValue = SmartDashboard.getNumber("Algae/Pivot Idle Position", self.pivotIdleValue)
-        self.elevatorProcessingPositionValue = SmartDashboard.getNumber("Algae/Elevator Processing Position", self.elevatorProcessingPositionValue)
-        self.elevatorL2IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L2 Intaking Position", self.elevatorL2IntakePositionValue)
-        self.elevatorL3IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L3 Intaking Position", self.elevatorL3IntakePositionValue)
-        self.intakeDelay = SmartDashboard.putNumber("Algae/Pivot Intake Delay", self.intakeDelay)
-        self.processDelay = SmartDashboard.putNumber("Algae/Pivot Process Delay", self.processDelay)
+        AlgaeConstants.kPivotTime = SmartDashboard.getNumber("Algae/Pivot Time", AlgaeConstants.kPivotTime)
+        AlgaeConstants.kIntakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
+        AlgaeConstants.kToggleLimitSwitch = SmartDashboard.getBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
+        AlgaeConstants.kSpinProcessDelayValue = SmartDashboard.getNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
+        AlgaeConstants.kPivotIntakePositionValue = SmartDashboard.getNumber("Algae/Pivot Intake Position", AlgaeConstants.kPivotIntakePositionValue)
+        AlgaeConstants.kPivotProcessingValue = SmartDashboard.getNumber("Algae/Pivot Processing Position", AlgaeConstants.kPivotProcessingValue)
+        AlgaeConstants.kPivotIdleValue = SmartDashboard.getNumber("Algae/Pivot Idle Position", AlgaeConstants.kPivotIdleValue)
+        AlgaeConstants.kElevatorProcessingPositionValue = SmartDashboard.getNumber("Algae/Elevator Processing Position", AlgaeConstants.kElevatorProcessingPositionValue)
+        AlgaeConstants.kElevatorL2IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L2 Intaking Position", AlgaeConstants.kElevatorL2IntakePositionValue)
+        AlgaeConstants.kElevatorL3IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L3 Intaking Position", AlgaeConstants.kElevatorL3IntakePositionValue)
+        AlgaeConstants.kIntakeDelayValue = SmartDashboard.putNumber("Algae/Pivot Intake Delay", AlgaeConstants.kIntakeDelayValue)
+        AlgaeConstants.kProcessDelayValue = SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)

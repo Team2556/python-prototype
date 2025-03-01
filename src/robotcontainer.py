@@ -237,19 +237,6 @@ class RobotContainer:
 
 
         #endsection vision related commands
-        
-        # Coral Track/Flipper controls (GET RID OF THIS WHEN MERGING)
-        # self._joystick2.x().whileTrue(
-        #     commands2.cmd.run(
-        #         lambda: self.coralTrack.dischargeButtonPressed(), self.coralTrack
-        #     )
-        # )
-        
-        # self.coralTrack.setDefaultCommand(
-        #     commands2.cmd.run(
-        #         lambda: self.coralTrack.default(), self.coralTrack
-        #     )
-        # )
 
         # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(

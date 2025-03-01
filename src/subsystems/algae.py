@@ -39,6 +39,10 @@ class AlgaeHandler(Subsystem):
         # self.intakeMotor.setVoltage(speed * 12)
         self.intakeMotor.set(speed)
         
+    def getLimitSwitchActive(self, toggleLimitSwitch: bool) -> bool:
+        '''Returns true if limit switch is active (and parameter is also true)'''
+        return self.limitSwitch.get() and toggleLimitSwitch
+        
     def updateSmartDashboard(self):
         SmartDashboard.putString("Algae/Pivot Position", self.pivotMotor.get_position().__str__())
         SmartDashboard.putNumber("Algae/Intake Speed", self.intakeMotor.get())

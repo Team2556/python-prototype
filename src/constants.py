@@ -48,7 +48,7 @@ class AprilTags_height:
  21 209.49 158.50 12.13 0 0
  22 193.10 130.17 12.13 300 0'''
 
-#region RoboRio Constants
+# region RoboRio Constants
 # included to help with communication and readability
 class Rio_DIO(IntEnum):
     ZERO = 0
@@ -221,6 +221,28 @@ class AlgaeConstants:
     
     # Limit Switch channel (So it doesn't input when limit switch activated)
     kAlgaeLimitSwitchChannel = Rio_DIO.FOUR # TODO: Get the actual IDs
+    
+    kElevatorProcessingPositionValue = 0.01
+    kElevatorL2IntakePositionValue = 0.02
+    kElevatorL3IntakePositionValue = 0.03
+    # Values to set pivoting motor to
+    kPivotIntakePositionValue = 0.25 # Pivot position when grabbing algae
+    kPivotProcessingValue = 0.07 # Pivot position when about to send to processor
+    kPivotIdleValue = 0 # Pivot position when idle
+    # Intake wheels multiply by this speed
+    kIntakeMultiplier = 0.2
+    # The time it takes to switch between pivoting positions
+    kPivotTime = 1
+    
+    # The delay from spinning the wheels to spit out the algae once processing input is pressed (thats what the timer is for)
+    kSpinProcessDelayValue = 0.5
+    # The delay from setting the elevator to moving the pivot motor when intaking
+    kIntakeDelayValue = 0.75
+    # The delay from setting the elevator to moving the pivot motor when processing
+    kProcessDelayValue = 0.75
+    
+    # Change to true later whan actually roboting
+    kToggleLimitSwitch = False
 
 # vvv OUTDATED GET RID OF WHEN MERGING vvv
 # class CoralConstants:
