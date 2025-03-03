@@ -4,6 +4,13 @@ import math
 import numpy as np
 from wpimath.geometry import Pose2d, Rotation2d, Transform2d, Translation2d
 from constants import AprilTags
+from robotUtils.limelight import LimelightHelpers
+from robotUtils import controlAugment, pathGeneratorUtil
+from wpilib import SmartDashboard, DriverStation
+from pathplannerlib.auto import AutoBuilder, PathfindThenFollowPath, PathPlannerAuto
+from pathplannerlib.path import PathPlannerPath, PathConstraints, GoalEndState , IdealStartingState
+
+
 
 # Helper function to check if two line segments intersect
 def is_intersecting(p1, p2, q1, q2):
@@ -72,11 +79,40 @@ def calculate_angle(p1, p2):
     """Calculate the angle between two points."""
     return np.arctan2(p2[1] - p1[1], p2[0] - p1[0])
 
-def generate_pose2d_path(points):
-    """Convert a list of (x, y) points into a list of Pose2d with averaged rotation angles."""
+def points_to_pose2d_path(points):
+    """Convert a list of (x, y) points into a list of Pose2d with averaged heading angles at the turns.
+    
+    To be used in drivetrain?? to generate a path for the robot to follow. EXAMPLE:
+
+    from pathplannerlib.auto import AutoBuilder, PathfindThenFollowPath, PathPlannerAuto
+    from pathplannerlib.path import PathPlannerPath, PathConstraints, GoalEndState , IdealStartingState
+    def build_path(self, target: Translation2d, obstacle_center: Translation2d, obstacle_radius: float) -> list[Translation2d]:
+        current_pose = self.drivetrain.get_state().pose
+        path_points = [current_pose.translation()]
+        
+        #generate points for the path, function or hardcoded
+        path_points.append(Translation2d(x=1, y=1))
+        path_points.append(Translation2d(x=2, y=2))
+        path_points.append(Translation2d(x=3, y=3))
+        path_points.append(target)
+    
+        path_poses = self.points_to_pose2d_path(path_points)
+
+        pp_waypoints = PathPlannerPath.waypointsFromPoses( path_poses)
+
+        pp_path = PathPlannerPath(pp_waypoints, 
+            constraints=self.pathfinding_constraints_global,
+            ideal_starting_state=IdealStartingState(.5, current_pose.rotation()),
+            goal_end_state= GoalEndState(0.0,Rotation2d(0)),
+            is_reversed= DriverStation.getAlliance() == DriverStation.Alliance.kRed,)
+
+        return pp_path
+        """
     poses = []
     num_points = len(points)
     
+    # this should be implementing a 'turn short' path by averaging the angles of the previous and next path legs
+    # but it may lead to a 'fly over' where the robot urns out a little before the turn and goes a little wide after
     for i in range(num_points):
         if i == 0:
             angle = calculate_angle(points[i], points[i + 1])
@@ -91,40 +127,71 @@ def generate_pose2d_path(points):
     
     return poses
 
-# def adjust_points_to_outside_circle(path, center, radius):
-#     """Adjust the points in a path to be outside a circle with the given center and radius; Except the last point."""
+# create a function that takes a line between two points and subdivieds it into segments of a given length
+def subdivide_line(start, finish, segment_length):
+    """Subdivide a line segment from p1 to p2 into segments of a given length, approximately."""
+    p1 = point_xy_extractor(start)
+    p2 = point_xy_extractor(finish)
+    dx, dy = p2[0] - p1[0], p2[1] - p1[1]
+    distance = math.sqrt(dx**2 + dy**2)
+    num_segments = math.ceil(distance / segment_length)
+    return [(p1[0] + dx * i / num_segments, p1[1] + dy * i / num_segments) for i in range(1, num_segments)]
 
-#     adjusted_path = []
-#     if len(path) == 1:
-#         i=0
-#         x, y = point_xy_extractor( path[i] )
-#         cx, cy = center
-#         dx, dy = x - cx, y - cy
-#         distance = math.sqrt(dx**2 + dy**2)
-#         if distance < radius:
-#             scale = radius / distance
-#             x = cx + dx * scale
-#             y = cy + dy * scale
-#         print(f"Adjusting ONLY point {i} at {path[i]} with distance {distance} and radius {radius}:{distance < radius=}/n new point {x},{y}")
-#         adjusted_path.append((x, y))
-#     else:
-#         for i in range(len(path) - 1):
-#             print(f"Adjusting point {i} at {path[i]}")
-#             x, y = point_xy_extractor( path[i])
-#             cx, cy = center
-#             dx, dy = x - cx, y - cy
-#             distance = math.sqrt(dx**2 + dy**2)
-#             if distance < radius:
-#                 scale = radius / distance
-#                 x = cx + dx * scale
-#                 y = cy + dy * scale
-#             adjusted_path.append((x, y))
-#         # if len(path) > 1:
-#         print(f"Adding last point {path[-1]}")
-#         adjusted_path.append( point_xy_extractor (path[-1]))
-#     return adjusted_path
+
+def adjust_points_to_outside_circle(path, center, radius):
+    """Adjust the points in a path to be outside a circle with the given center and radius; Except the last point.
+    path is a list of points, each point can be a Pose2d, Translation2d, or tuple (x,y).
+    center can be a Pose2d, Translation2d, or tuple (x,y).
+    Radius is a float, in meters."""
+
+    center = point_xy_extractor(center)
+    adjusted_path = []
+    if len(path) == 1:
+        i=0
+        x, y = point_xy_extractor( path[i] )
+        cx, cy = center
+        dx, dy = x - cx, y - cy
+        distance = math.sqrt(dx**2 + dy**2)
+        if distance < radius:
+            scale = radius / distance
+            x = cx + dx * scale
+            y = cy + dy * scale
+        # print(f"Adjusting ONLY point {i} at {path[i]} with distance {distance} and radius {radius}:{distance < radius=}/n new point {x},{y}")
+        adjusted_path.append((x, y))
+    else:
+        for i in range(len(path) - 1):
+            # print(f"Adjusting point {i} at {path[i]}")
+            x, y = point_xy_extractor( path[i])
+            cx, cy = center
+            dx, dy = x - cx, y - cy
+            distance = math.sqrt(dx**2 + dy**2)
+            if distance < radius:
+                scale = radius / distance
+                x = cx + dx * scale
+                y = cy + dy * scale
+            adjusted_path.append((x, y))
+
+        adjusted_path.append( point_xy_extractor (path[-1]))
+    return adjusted_path
     
+def build_path( current_pose: Pose2d,  target: Translation2d, obstacle_center: Translation2d, avoidance_radius: float, pathfinding_constraints) -> list[Translation2d]:
+    # current_pose = AutoBuilder.getCurrentPose() # self.get_state().pose
+    # path_points = [current_pose.translation()]
+    
+    #generate points for the path, function or hardcoded
+    path_points = subdivide_line(current_pose,target,.5)
+    path_points = adjust_points_to_outside_circle(path_points, obstacle_center, avoidance_radius)
 
+    path_poses = points_to_pose2d_path(path_points)
+    pp_waypoints = PathPlannerPath.waypointsFromPoses( path_poses)
+    #'constraints', 'ideal_starting_state', and 'goal_end_state'
+    pp_path = PathPlannerPath(pp_waypoints, 
+        constraints=pathfinding_constraints,
+        ideal_starting_state=IdealStartingState(.5, current_pose.rotation()),
+        goal_end_state= GoalEndState(0.0,Rotation2d(0)),
+        is_reversed= DriverStation.getAlliance() == DriverStation.Alliance.kRed,)
+
+    return pp_path
 # # Function to iteratively create a path from start to finish
 # def create_path_with_projections(start, finish, 
 #                                  hex_centers = [Translation2d(x=4.489323, y=4.025900),

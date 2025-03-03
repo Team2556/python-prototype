@@ -23,7 +23,7 @@ from subsystems import (
     ultrasonics, #ClimbSubsystem
 )
 from telemetry import Telemetry
-from robotUtils import controlAugment
+from robotUtils import controlAugment, pathGeneratorUtil
 
 from pathplannerlib.auto import AutoBuilder, PathfindThenFollowPath, PathPlannerAuto
 from pathplannerlib.path import PathPlannerPath, PathConstraints, GoalEndState , IdealStartingState
@@ -59,6 +59,7 @@ from networktables import util as ntutil
 from wpimath.kinematics import SwerveDrive4Kinematics, SwerveModuleState, ChassisSpeeds
 from wpimath.trajectory import TrajectoryGenerator, TrajectoryConfig
 from wpimath.controller import HolonomicDriveController, PIDController, ProfiledPIDControllerRadians
+
 
 # from subsystems import algae
 
@@ -279,6 +280,8 @@ class RobotContainer:
         poses = []
         num_points = len(points)
         
+        # this should be implementing a 'turn short' path by averaging the angles of the previous and next path legs
+        # but it may lead to a 'fly over' where the robot urns out a little before the turn and goes a little wide after
         for i in range(num_points):
             if i == 0:
                 angle = self.calculate_angle(points[i], points[i + 1])
@@ -293,35 +296,24 @@ class RobotContainer:
         
         return poses
 
-    def build_path(self, start: Translation2d, target: Translation2d, obstacle_center: Translation2d, obstacle_radius: float) -> list[Translation2d]:
-        print("###################################IS THIS RUNNING AT proram start ##################################")
-        current_pose = self.drivetrain.get_state().pose
-        start = current_pose
-        path_points = [start.translation()]
+    # def build_path(self,current_pose, target: Translation2d, obstacle_center: Translation2d, obstacle_radius: float) -> list[Translation2d]:
+    #     # current_pose = AutoBuilder.getCurrentPose() # self.drivetrain.get_state().pose
+    #     # path_points = [current_pose.translation()]
         
-        path_points.append(Translation2d(x=1, y=1))
-        path_points.append(Translation2d(x=2, y=2))
-        path_points.append(Translation2d(x=3, y=3))
-        path_points.append(target)
-
-        trajectory = TrajectoryGenerator.generateTrajectory(
-            current_pose,
-            [p for p in path_points[1:-1]],
-            Pose2d(target, current_pose.rotation()), # TODO: figure out way to put proper pose rotation
-            self.config_traj
-        )
+    #     #generate points for the path, function or hardcoded
+    #     path_points = pathGeneratorUtil.subdivide_line(current_pose,target,.5)
+    #     path_points = pathGeneratorUtil.adjust_points_to_outside_circle(path_points, self.hex_centers[0][0], self.hex_sizes[0]+1.0)
     
-        trajectory.totalTime
-        path_poses = self.generate_pose2d_path(path_points)
-        pp_waypoints = PathPlannerPath.waypointsFromPoses( path_poses)
-        #'constraints', 'ideal_starting_state', and 'goal_end_state'
-        pp_path = PathPlannerPath(pp_waypoints, 
-            constraints=self.pathfinding_constraints_global,
-            ideal_starting_state=IdealStartingState(.5, current_pose.rotation()),
-            goal_end_state= GoalEndState(0.0,Rotation2d(0)),
-            is_reversed= DriverStation.getAlliance() == DriverStation.Alliance.kRed,)
+    #     path_poses = self.generate_pose2d_path(path_points)
+    #     pp_waypoints = PathPlannerPath.waypointsFromPoses( path_poses)
+    #     #'constraints', 'ideal_starting_state', and 'goal_end_state'
+    #     pp_path = PathPlannerPath(pp_waypoints, 
+    #         constraints=self.pathfinding_constraints_global,
+    #         ideal_starting_state=IdealStartingState(.5, current_pose.rotation()),
+    #         goal_end_state= GoalEndState(0.0,Rotation2d(0)),
+    #         is_reversed= DriverStation.getAlliance() == DriverStation.Alliance.kRed,)
 
-        return pp_path
+    #     return pp_path
 
 
 
@@ -329,8 +321,7 @@ class RobotContainer:
         
         print(f"Creating path to {target} ================================================____--------")
         current_pose = self.drivetrain.get_state().pose
-        start = current_pose#.translation()
-        path = self.build_path(start, target, self.hex_centers[0][0], self.hex_sizes[0])
+        path = self.drivetrain.build_path( target, self.hex_centers[0][0], self.hex_sizes[0])
         print(f"Path: {path}")
         if not path:
             wpilib.SmartDashboard.putString("Path Status", "No valid path")
@@ -674,10 +665,11 @@ class RobotContainer:
         
         self.keyboard_goto_position_7_7.onTrue(  
             # TODO: see about following our own generated path
-            AutoBuilder.followPath(self.build_path(start=Translation2d(0, 0),
-                                   target= Translation2d(7, 7),
+            AutoBuilder.followPath(pathGeneratorUtil.build_path(current_pose= AutoBuilder.getCurrentPose(),
+                                   target= Translation2d(6, 7),
                                     obstacle_center= self.hex_centers[0][0],
-                                     obstacle_radius= self.hex_sizes[0])
+                                     avoidance_radius= self.hex_sizes[0]+1.0,
+                                     pathfinding_constraints= self.pathfinding_constraints_global)
             )
 
             #self.create_path_following_command(Pose2d(Translation2d(7, 7),Rotation2d(0)))

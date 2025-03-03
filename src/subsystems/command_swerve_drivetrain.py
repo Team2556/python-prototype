@@ -3,14 +3,21 @@ from commands2.sysid import SysIdRoutine
 import math
 from pathplannerlib.auto import AutoBuilder, RobotConfig
 from pathplannerlib.controller import PIDConstants, PPHolonomicDriveController
+from pathplannerlib.path import PathPlannerPath, PathConstraints, GoalEndState , IdealStartingState
+
 from phoenix6 import SignalLogger, swerve, units, utils
 from typing import Callable, overload
 from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, SendableChooser
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Rotation2d, Pose2d
 
+from wpimath.geometry import Rotation2d, Translation2d, Transform2d, Pose2d, Rectangle2d
+
+
 
 from robotUtils.limelight import LimelightHelpers
+from robotUtils import controlAugment, pathGeneratorUtil
+
 import numpy as np
 from constants import AprilTags
 # from archive import odometry_fuse
@@ -457,15 +464,22 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
 
        
-        # self.tare_everything()
-        # self.reset_pose(After_viz_update_odo_pose)
-        # self.container.drivetrain.odometry_thread.set_thread_priority(99)
-        # self.container.drivetrain.OdometryThread.stop(self.container.drivetrain.odometry_thread)
-        # self.container.drivetrain.reset_pose(After_viz_update_odo_pose)
-        # self.container.drivetrain.OdometryThread.start(self.container.drivetrain.odometry_thread)
-        # self.container.drivetrain.odometry_thread.set_thread_priority(20)
-        # After_viz_update_odo_pose = self.container.drivetrain.get_state().pose
-        # self.container.drivetrain.reset_pose(After_viz_update_odo_pose)
-        # self.odometry_thread.set_thread_priority(99)
-        # self.container.drivetrain.OdometryThread.stop(self.container.drivetrain.odometry_thread)
+    def build_path(self, current_pose: Pose2d,  target: Translation2d, obstacle_center: Translation2d, avoidance_radius: float, pathfinding_constraints) -> list[Translation2d]:
+        # current_pose = AutoBuilder.getCurrentPose() # self.get_state().pose
+        # path_points = [current_pose.translation()]
+        
+        #generate points for the path, function or hardcoded
+        path_points = pathGeneratorUtil.subdivide_line(current_pose,target,.5)
+        path_points = pathGeneratorUtil.adjust_points_to_outside_circle(path_points, obstacle_center, avoidance_radius)
+    
+        path_poses = pathGeneratorUtil.points_to_pose2d_path(path_points)
+        pp_waypoints = PathPlannerPath.waypointsFromPoses( path_poses)
+        #'constraints', 'ideal_starting_state', and 'goal_end_state'
+        pp_path = PathPlannerPath(pp_waypoints, 
+            constraints=pathfinding_constraints,
+            ideal_starting_state=IdealStartingState(.5, current_pose.rotation()),
+            goal_end_state= GoalEndState(0.0,Rotation2d(0)),
+            is_reversed= DriverStation.getAlliance() == DriverStation.Alliance.kRed,)
+
+        return pp_path
     

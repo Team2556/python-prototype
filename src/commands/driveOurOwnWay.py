@@ -12,7 +12,7 @@ from pathplannerlib.path import PathPlannerPath, PathConstraints,  GoalEndState
 from pathplannerlib.auto import RobotConfig
 from pathplannerlib.controller import PIDConstants, PPHolonomicDriveController
 from pathplannerlib.commands import FollowPathCommand
-from robotUtils import pathGenerator
+from robotUtils import pathGeneratorUtil
 import math
 
 class DriveOurOwnWay(FollowPathCommand):
@@ -30,7 +30,7 @@ class DriveOurOwnWay(FollowPathCommand):
         self.hex_sizes = hex_sizes
         self.projection_distance = projection_distance
         self.pathfindingConstraints_global = pathfindingConstraints_global
-        self.path = pathGenerator.create_path_with_projections(self.start, self.finish, self.hex_centers, self.hex_sizes, self.projection_distance)
+        self.path = pathGeneratorUtil.create_path_with_projections(self.start, self.finish, self.hex_centers, self.hex_sizes, self.projection_distance)
         self.waypoints = PathPlannerPath.waypointsFromPoses(self.path)
         self.constraints = self.pathfindingConstraints_global
         # self.constraints.addMaxVelocityConstraint(1.0)
@@ -90,7 +90,7 @@ class DriveOurOwnWay(FollowPathCommand):
         # self.hex_sizes = hex_sizes
         # self.projection_distance = projection_distance
         # self.pathfindingConstraints_global = pathfindingConstraints_global
-        self.path = pathGenerator.create_path_with_projections(self.start, self.finish, self.hex_centers, self.hex_sizes, self.projection_distance)
+        self.path = pathGeneratorUtil.create_path_with_projections(self.start, self.finish, self.hex_centers, self.hex_sizes, self.projection_distance)
         self.waypoints = PathPlannerPath.waypointsFromPoses(self.path)
         self.constraints = self.pathfindingConstraints_global
         # self.constraints.addMaxVelocityConstraint(1.0)
@@ -162,7 +162,7 @@ class DriveOurOwnWay2(commands2.Command):
 
     def initialize(self):
         self.start = self.drivetrain.get_state().pose
-        self.path = pathGenerator.create_path_with_projections(self.start, self.finish, self.hex_centers, self.hex_sizes, self.projection_distance)
+        self.path = pathGeneratorUtil.create_path_with_projections(self.start, self.finish, self.hex_centers, self.hex_sizes, self.projection_distance)
         self.waypoints = PathPlannerPath.waypointsFromPoses(self.path)
         self.constraints = self.pathfindingConstraints_global
         # self.constraints.addMaxVelocityConstraint(1.0)
