@@ -234,6 +234,9 @@ class TunerConstants:
             hardware.TalonFX,
             hardware.CANcoder,
             clazz.drivetrain_constants,
+            # TODO: #75 add in odometry and vision initial uncertainties
+            #odometry_standard_deviation: tuple[float, float, float],
+            #vision_standard_deviation: tuple[float, float, float],
             [
                 clazz.front_left,
                 clazz.front_right,
