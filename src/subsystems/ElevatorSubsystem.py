@@ -40,7 +40,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         self.elevCANcoder_left = phoenix6.hardware.CANcoder(ElevatorConstants.kLeftMotorPort)
         self.elevCANcoder_right = phoenix6.hardware.CANcoder(ElevatorConstants.kRightMotorPort)
         
-        # Declare Limit switches (2 on each direction)
+        # Declare Limit switches (2 on each direction) TODO actually there's one on the top we should change that
         self.limit_bottomLeft = wpilib.DigitalInput(ElevatorConstants.kBottomLeftLimitSwitchChannel)
         self.limit_bottomRight = wpilib.DigitalInput(ElevatorConstants.kBottomRightLimitSwitchChannel)
         self.limit_topLeft = wpilib.DigitalInput(ElevatorConstants.kTopLeftLimitSwitchChannel)
@@ -51,7 +51,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         self.limit_top = (self.limit_topLeft.get() and self.limit_topRight.get())
 
         # Setup all the PID stuff
-        cfg = configs.TalonFXConfiguration()
+        cfg = phoenix6.configs.TalonFXConfiguration()
         cfg.slot0.k_p = ElevatorConstants.kElevatorKp
         cfg.slot0.k_i = ElevatorConstants.kElevatorKi
         cfg.slot0.k_d = ElevatorConstants.kElevatorKd
@@ -63,7 +63,6 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
         cfg.slot0.static_feedforward_sign = signals.StaticFeedforwardSignValue.USE_VELOCITY_SIGN
         cfg.slot0.k_g = ElevatorConstants.kGVolts
         
-
         cfg.slot0.k_a = ElevatorConstants.kAVoltSecondSquaredPerMeter
         cfg.slot0.k_v = ElevatorConstants.kVVoltSecondPerMeter
         # cfg.slot0.maxIntegralAccumulator = 0
@@ -142,7 +141,7 @@ class ElevatorSubsystem(commands2.Subsystem):# .ProfiledPIDSubsystem):
             updated = True
         #TODO: add others, if needed
         if updated:
-            #repete up to 5 times
+            #repeat up to 5 times
             status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
             for _ in range(0, 5):
                 status = self.elevmotor_left.configurator.apply(self.cfg_slot0 )

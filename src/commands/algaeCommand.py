@@ -5,43 +5,24 @@ from wpilib import Timer, SmartDashboard
 # import keyboard # Figure out later
 
 from commands2 import Command, button, cmd
-from subsystems import algae, ElevatorSubsystem
+import wpilib.event
+from subsystems import ElevatorSubsystem, algaeSubsystem
 
 from constants import AlgaeConstants
 
 # Hopefully temporarys
 import phoenix6
 import commands2
+import wpilib
 
 '''
-Algae Control (ideal) Pseudocode:
-    - If Up D-pad pressed:
-        - Set pivot to intake position (90deg if 0 is straight down)
-        - If limit switch active:
-            - Set wheels to 0
-        - Else:
-            - Set wheels to intake (1)
-    - If Left (or Right bc why not) D-pad pressed:
-        - Set pivot to discharge position (My guess is like 25deg if 0 is straight down)
-        - Set wheels to discharge (-1)
-    - If Down D-pad pressed:
-        - Set pivot to discharge position (0deg if 0 is straight down)
-        - Set wheels to 0
-        
-Better Cooler Updated Algae Control (more ideal) Pseudocode:
-    - If sent command to process:
-        - Lower Elevator to processor height
-        - Set algae handler to process position
-    - Yeah the rest are self-explanatory actually so I don't have to type it
+Basically all the algae commands have:
+    - Move evevator
+    - Move pivot thing
+    - Update intake motor
+    - Move pivot thing back maybe
     
-TODO to make this better:
-    - Figure out commands2.SequentialCommandGroup 
-    - Make a more efficient way to make it wait a bit to do something (maybe commands2.WaitCommand)
-        
-    - Get these structured in the final repository
-    - Make it compatable with the new control panel
-    
-    - If subsystem motor code doesn't work, get that to actually work
+Also a button to reset algae pivot
 ''' 
 
 class AlgaeCommand(Command):
@@ -49,7 +30,7 @@ class AlgaeCommand(Command):
     
     def __init__(
         self, 
-        algaeSubsystem: algae.AlgaeHandler, 
+        algaeSubsystem: algaeSubsystem.AlgaeSubsystem, 
         elevatorSubsystem: ElevatorSubsystem.ElevatorSubsystem,          
         joystick: button.CommandXboxController
     ): 
@@ -69,6 +50,7 @@ class AlgaeCommand(Command):
         self.algaePivotPosition = "idle"
 
         # These inputs should hopefully be replaced with a keyboard thing
+        # TODO: Replace this with the new commands system
         self.joystick.povUp().whileTrue(
             cmd.runOnce(lambda: self.grabAlgaeFromL3(), self.algaeSubsystem)
         )
@@ -79,11 +61,11 @@ class AlgaeCommand(Command):
             cmd.runOnce(lambda: self.processAlgae(), self.algaeSubsystem)
         )
         
-        self.setupSmartDashboard()
+        commands2.SequentialCommandGroup()
         
     def initialize(self):...
         # Runs when the command is scheduled, not like __init__ that runs when the class is made
-        
+    
     def execute(self):
         # Runs periodically (does all the periodic stuffs)
         
@@ -153,18 +135,18 @@ class AlgaeCommand(Command):
     def intakePosition(self):
         '''Sets algae manipulator to intaking position'''
         self.algaePivotPosition = "intaking"
-        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIntakePositionValue, AlgaeConstants.kPivotTime)
+        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIntakePositionValue)
     
     def processingPosition(self):
         '''Sets algae manipulator to processing position'''
         self.algaePivotPosition = "processing"
         self.processDelayTimer.restart()
-        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotProcessingValue, AlgaeConstants.kPivotTime)
+        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotProcessingValue)
     
     def idlePosition(self):
         '''Sets algae manipulator to idle position'''
         self.algaePivotPosition = "idle"
-        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIdleValue, AlgaeConstants.kPivotTime) 
+        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIdleValue)
         self.algaeSubsystem.spinIntakeMotor(0)
         
     # Do SmartDashboard stuff here
@@ -193,7 +175,7 @@ class AlgaeCommand(Command):
         SmartDashboard.putString("Algae/Pivot Instruction", self.algaePivotPosition)
     
     def setupTuningInfo(self):
-        SmartDashboard.putNumber("Algae/Pivot Time", AlgaeConstants.kPivotTime)
+        SmartDashboard.putNumber("Algae/Pivot Time", AlgaeConstants.kPivotTimeToSwitchPositions)
         SmartDashboard.putNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
         SmartDashboard.putBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
         SmartDashboard.putNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
@@ -207,7 +189,7 @@ class AlgaeCommand(Command):
         SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)
          
     def getTuningInfo(self):
-        AlgaeConstants.kPivotTime = SmartDashboard.getNumber("Algae/Pivot Time", AlgaeConstants.kPivotTime)
+        AlgaeConstants.kPivotRotationsPerSecond = SmartDashboard.getNumber("Algae/Pivot Time", AlgaeConstants.kPivotRotationsPerSecond)
         AlgaeConstants.kIntakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
         AlgaeConstants.kToggleLimitSwitch = SmartDashboard.getBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
         AlgaeConstants.kSpinProcessDelayValue = SmartDashboard.getNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
@@ -219,3 +201,54 @@ class AlgaeCommand(Command):
         AlgaeConstants.kElevatorL3IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L3 Intaking Position", AlgaeConstants.kElevatorL3IntakePositionValue)
         AlgaeConstants.kIntakeDelayValue = SmartDashboard.putNumber("Algae/Pivot Intake Delay", AlgaeConstants.kIntakeDelayValue)
         AlgaeConstants.kProcessDelayValue = SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)
+        
+
+# FOR TESTING COMMANDS2
+z = commands2.Command()
+x = commands2.CommandScheduler()
+y = wpilib.event.EventLoop()
+y.bind()
+x.setActiveButtonLoop()
+x.run()
+x.registerSubsystem()
+commands2.cmd.sequence()
+
+'''
+NOTE: All this here is outdated but I put it on the bottom in case I need to for some reason
+...
+Algae Control (ideal) Pseudocode:
+    - If Up D-pad pressed:
+        - Set pivot to intake position (90deg if 0 is straight down)
+        - If limit switch active:
+            - Set wheels to 0
+        - Else:
+            - Set wheels to intake (1)
+    - If Left (or Right bc why not) D-pad pressed:
+        - Set pivot to discharge position (My guess is like 25deg if 0 is straight down)
+        - Set wheels to discharge (-1)
+    - If Down D-pad pressed:
+        - Set pivot to discharge position (0deg if 0 is straight down)
+        - Set wheels to 0
+        
+Better Cooler Updated Algae Control (more ideal) Pseudocode:
+    - If sent command to process:
+        - Lower Elevator to processor height
+        - Set algae handler to process position
+    - Yeah the rest are self-explanatory actually so I don't have to type it
+    
+What it ACTUALLY needs to do (when intaking) (in order):
+    - Change Elevator to specific level
+    - Change pivot to intake position
+    - Spin intake motors
+    - Now move pivot thingy back
+    - Then move elevator DOWN
+
+TODO to make this better:
+    - Hard Stuff:
+        - What's capping motor speed at 0.25 maybe
+        - Make a more efficient way to make it wait a bit to do something (maybe commands2.WaitCommand)
+        - If subsystem motor code doesn't work, get that to actually work
+        - Figure out commands2.SequentialCommandGroup    
+    - Get these structured in the final repository
+    - Make it compatable with the new control panel
+''' 

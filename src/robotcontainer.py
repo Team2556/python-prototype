@@ -14,9 +14,8 @@ import constants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
 from commands import algaeCommand
-from subsystems import (ElevatorSubsystem,
+from subsystems import (ElevatorSubsystem, algaeSubsystem,
                         limelight,
-                        algae,
                         # oneMotor,
                         )
 from telemetry import Telemetry
@@ -112,7 +111,7 @@ class RobotContainer:
         
         self.ENABLE_ALGAE = True
         if self.ENABLE_ALGAE:
-            self.algae = algae.AlgaeHandler()
+            self.algae = algaeSubsystem.AlgaeSubsystem()
             if not self.ENABLE_ELEVATOR: # So it doesn't reset self.elevator if it's already made
                 self.elevator = ElevatorSubsystem.ElevatorSubsystem()
 

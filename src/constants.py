@@ -214,14 +214,24 @@ class Override_DriveConstant:
 class RobotDimensions:
     WIDTH_w_bumpers = inches(36) # inches inchesToMeters(36)#(26+2*3.25)
 
+#region ALGAE YAY
+
 class AlgaeConstants:
+    # SUBSYSTEM STUFF:
     # Motor Channels
-    kPivotMotorChannel = CAN_Address.FORTY # TODO: Correct the CAN Addresses pls
+    kPivotMotorChannel = CAN_Address.FORTY # TODO: Add the actual CAN IDs
     kIntakeWheelsChannel = CAN_Address.FORTYONE
     
     # Limit Switch channel (So it doesn't input when limit switch activated)
-    kAlgaeLimitSwitchChannel = Rio_DIO.FOUR # TODO: Get the actual IDs
+    kLimitSwitchChannel = Rio_DIO.FOUR # TODO: Add more actual CAN IDs
+    # kOtherLimitSwitchChannel = Rio_DIO.FIVE # TODO: Figure out if there's actually two limit switches
     
+    # Controls so it doesn't move too fast in one way? 
+    # (to disable just set to super high positive/negative numbers)
+    kPeakForwardTorqueCurrent = 10
+    kPeakReverseTorqueCurrent = -10
+    
+    # NOT SUBSYSTEM STUFF
     kElevatorProcessingPositionValue = 0.01
     kElevatorL2IntakePositionValue = 0.02
     kElevatorL3IntakePositionValue = 0.03
@@ -230,9 +240,9 @@ class AlgaeConstants:
     kPivotProcessingValue = 0.07 # Pivot position when about to send to processor
     kPivotIdleValue = 0 # Pivot position when idle
     # Intake wheels multiply by this speed
-    kIntakeMultiplier = 0.2
+    kIntakeMultiplier = 0.8 # CHANGE BACK TO 0.2 WHEN TESTING
     # The time it takes to switch between pivoting positions
-    kPivotTime = 1
+    kPivotRotationsPerSecond = 0.05
     
     # The delay from spinning the wheels to spit out the algae once processing input is pressed (thats what the timer is for)
     kSpinProcessDelayValue = 0.5
