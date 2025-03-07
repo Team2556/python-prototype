@@ -143,7 +143,7 @@ class RobotContainer:
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         # section elevator
-        self.ENABLE_ELEVATOR = False
+        self.ENABLE_ELEVATOR = True
         if self.ENABLE_ELEVATOR:
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
             self._reset_zero_point_here = self.elevator.reset_zero_point_here()
