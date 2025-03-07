@@ -310,3 +310,10 @@ class ClimbConstants:
 
 class PneumaticConstants:
     kHub = 40
+
+class UltrasonicConstants:
+    frontLeft = Rio_DIO.ZERO
+    frontRight = Rio_DIO.ONE
+    backLeft = Rio_DIO.TWO
+    backRight = Rio_DIO.THREE
+    
