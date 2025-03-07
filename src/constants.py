@@ -218,8 +218,8 @@ class CAN_Address(IntEnum):
 
 
 class ElevatorConstants:
-    kLeftMotorPort = CAN_Address.FOURTEEN
-    kRightMotorPort = CAN_Address.FIFTEEN
+    kLeftMotorPort = CAN_Address.THIRTEEN
+    kRightMotorPort = CAN_Address.FOURTEEN
     kJoystickPort = 0
     kpeak_forward_torque_current = 35  # 120
     kpeak_reverse_torque_current = -35  # -120
