@@ -19,7 +19,7 @@ from subsystems import (
     limelight,
     # pneumaticSubsystem,
     # oneMotor,
-    ultrasonics, #ClimbSubsystem
+    ultrasonic, #ClimbSubsystem
 )
 from telemetry import Telemetry
 from robotUtils import controlAugment
@@ -112,7 +112,7 @@ class RobotContainer:
         )
 
         # self.algae = algae.AlgaeHandler()
-        # self.ultrasonic = ultrasonics.Ultrasonics()
+        self.ultrasonic = ultrasonic.Ultrasonic()
 
         self._logger = Telemetry(self._max_speed)
 
