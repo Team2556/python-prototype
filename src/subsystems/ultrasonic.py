@@ -24,13 +24,17 @@
 import wpilib
 import commands2
 from wpilib import AnalogInput, SmartDashboard
+from constants import UltrasonicConstants
+
 
 
 class Ultrasonic(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.ultrasonic = AnalogInput(0)
-        self.ultrasonic2 = AnalogInput(1)
+        self.frontLeft_ultrasonic = AnalogInput(UltrasonicConstants.frontLeft)
+        self.frontRight_ultrasonic = AnalogInput(UltrasonicConstants.frontRight)
+        self.backLeft_ultrasonic = AnalogInput(UltrasonicConstants.backLeft)
+        self.backRight_ultrasonic = AnalogInput(UltrasonicConstants.backRight)
 
         
         # '/dev/ttyUSB0'
@@ -49,8 +53,22 @@ class Ultrasonic(commands2.Subsystem):
     #     return None
     
     def periodic(self):
-        distance = self.ultrasonic.getVoltage() * 1000 *.042
-        wpilib.SmartDashboard.putNumber("Ultrasonic Distance", float(distance))
-        distance2 = self.ultrasonic2.getVoltage() * 1000 *.042
-        wpilib.SmartDashboard.putNumber("Ultrasonic Distance 2", float(distance2))
+        frontLeft_distance = self.frontLeft_ultrasonic.getVoltage() * 1000 *.042
+        frontLeft_distance_valid = frontLeft_distance >12.5 and frontLeft_distance < 250
+        SmartDashboard.putBoolean("Front Left Ultrasonic Distance Valid", frontLeft_distance_valid)
+        SmartDashboard.putNumber("Front Left Ultrasonic Distance", float(frontLeft_distance))
+        frontRight_distance = self.frontRight_ultrasonic.getVoltage() * 1000 *.042
+        frontRight_distance_valid = frontRight_distance >12.5 and frontRight_distance < 250 
+        SmartDashboard.putBoolean("Front Right Ultrasonic Distance Valid", frontRight_distance_valid)
+        SmartDashboard.putNumber("Front Right Ultrasonic Distance", float(frontRight_distance))
+        backLeft_distance = self.backLeft_ultrasonic.getVoltage() * 1000 *.042
+        backLeft_distance_valid = backLeft_distance >12.5 and backLeft_distance < 250
+        SmartDashboard.putBoolean("Back Left Ultrasonic Distance Valid", backLeft_distance_valid)
+        SmartDashboard.putNumber("Back Left Ultrasonic Distance", float(backLeft_distance))
+        backRight_distance = self.backRight_ultrasonic.getVoltage() * 1000 *.042
+        backRight_distance_valid = backRight_distance >12.5 and backRight_distance < 250
+        SmartDashboard.putBoolean("Back Right Ultrasonic Distance Valid", backRight_distance_valid)
+        SmartDashboard.putNumber("Back Right Ultrasonic Distance", float(backRight_distance))
+
+     
 
