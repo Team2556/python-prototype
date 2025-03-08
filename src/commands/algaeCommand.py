@@ -16,31 +16,68 @@ import commands2
 import wpilib
 
 '''
-Basically all the algae commands have:
-    - Move evevator
-    - Move pivot thing
-    - Update intake motor
-    - Move pivot thing back maybe
+Control inputs to commands pseudocode:
+TODO: For the commands that interact with the reef, maybe somehow center with the apriltag first
+    - if L2: SequentialCommand(
+        moveElevatorToL2, 
+        (algaeIntakePosition and spinMotorsToIntake), 
+        wait(timeItTakesToIntake), 
+        stopSpinMotors, 
+        algaeIdlePosition
+    )
+    - if L3: SequentialCommand(
+        moveElevatorToL3, 
+        (algaeIntakePosition and spinMotorsToIntake), 
+        wait(timeItTakesToIntake), 
+        stopSpinMotors, 
+        algaeIdlePosition
+    )
+    - if Ground Intake: SequentialCommand(
+        moveElevatorToGroundPosition, 
+        (algaeIntakePosition and spinMotorsToIntake), 
+        wait(timeItTakesToIntake), 
+        stopSpinMotors, 
+        algaeIdlePosition
+    )
+    - if Processing: SequentialCommand(
+        moveElevatorToProcessing, 
+        algaeProcessingPosition, 
+        spinMotorsToProcess, 
+        wait(timeItTakesToProcess), 
+        stopSpinMotors, 
+        algaeIdlePosition
+    )
+    - if idle: SequentialCommand(
+        stopSpinMotors, 
+        algaeIdlePosition
+    )
     
-Also a button to reset algae pivot
+So Commands Needed:
+    - Move elevator to (all the values)
+    - Move Pivot to (all the values)
+    - Change Intake Motor Speed (using runOnce)
+    - Parallel and Sequential Comamnds and WaitCommands
 ''' 
 
+# commands2.SequentialCommandGroup
+
 class AlgaeCommand(Command):
-    '''Tells the algae all what to do'''
+    '''Parent class for all the more specified algae commands'''
     
     def __init__(
         self, 
         algaeSubsystem: algaeSubsystem.AlgaeSubsystem, 
-        elevatorSubsystem: ElevatorSubsystem.ElevatorSubsystem,          
-        joystick: button.CommandXboxController
+        elevatorSubsystem: ElevatorSubsystem.ElevatorSubsystem,
     ): 
-        # Currently using "_joystick2" object
+        # NOT Currently using "_joystick2" object because new commands system
         
         self.algaeSubsystem = algaeSubsystem
         self.elevatorSubsystem = elevatorSubsystem
-        self.joystick = joystick
+        # self.joystick = joystick
         
+        # Hopefully makes it so if another command is trying to move elevator or algae, STOP IT HAHAHHAHAHA
         self.addRequirements(self.algaeSubsystem, self.elevatorSubsystem)
+        self.InterruptionBehavior = commands2.InterruptionBehavior.kCancelIncoming
         
         # Cool way to wait a bit for something to happen
         self.pivotWaitingPosition = "intaking"
@@ -51,15 +88,15 @@ class AlgaeCommand(Command):
 
         # These inputs should hopefully be replaced with a keyboard thing
         # TODO: Replace this with the new commands system
-        self.joystick.povUp().whileTrue(
-            cmd.runOnce(lambda: self.grabAlgaeFromL3(), self.algaeSubsystem)
-        )
-        self.joystick.povRight().whileTrue(
-            cmd.runOnce(lambda: self.grabAlgaeFromL2(), self.algaeSubsystem)
-        )
-        self.joystick.povDown().whileTrue(
-            cmd.runOnce(lambda: self.processAlgae(), self.algaeSubsystem)
-        )
+        # self.joystick.povUp().whileTrue(
+        #     cmd.runOnce(lambda: self.grabAlgaeFromL3(), self.algaeSubsystem)
+        # )
+        # self.joystick.povRight().whileTrue(
+        #     cmd.runOnce(lambda: self.grabAlgaeFromL2(), self.algaeSubsystem)
+        # )
+        # self.joystick.povDown().whileTrue(
+        #     cmd.runOnce(lambda: self.processAlgae(), self.algaeSubsystem)
+        # )
         
         commands2.SequentialCommandGroup()
         
@@ -68,7 +105,8 @@ class AlgaeCommand(Command):
     
     def execute(self):
         # Runs periodically (does all the periodic stuffs)
-        
+        self.updateSmartDashboard()
+        return "So the rest of the function doesn't run"
         # Stop intaking if limit switch active
         if self.algaePivotPosition == "intaking":
             if self.algaeSubsystem.getLimitSwitchActive(AlgaeConstants.kToggleLimitSwitch):
@@ -94,8 +132,6 @@ class AlgaeCommand(Command):
             self.pivotDelayTimer.stop()
             self.pivotDelayTimer.reset()
             self.processingPosition()
-        
-        self.updateSmartDashboard()
         
     # Functions that perform complete tasks (probably from control panel)
     
@@ -135,7 +171,7 @@ class AlgaeCommand(Command):
     def intakePosition(self):
         '''Sets algae manipulator to intaking position'''
         self.algaePivotPosition = "intaking"
-        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIntakePositionValue)
+        self.algaeSubsystem.changePosition(AlgaeConstants.kPivotReefIntakingValue)
     
     def processingPosition(self):
         '''Sets algae manipulator to processing position'''
@@ -148,70 +184,58 @@ class AlgaeCommand(Command):
         self.algaePivotPosition = "idle"
         self.algaeSubsystem.changePosition(AlgaeConstants.kPivotIdleValue)
         self.algaeSubsystem.spinIntakeMotor(0)
-        
-    # Do SmartDashboard stuff here
     
-    def setupSmartDashboard(self):
-        '''Sets up the NetworkTables stuff for algae info'''
-        
-        # Setup values TO the Dashboard
-        self.updateSDInfo()
-        self.setupTuningInfo()
-        
-    def updateSmartDashboard(self):
-        '''Updates the NetworkTables stuff for algae info'''
-        # Update values TO the Dashboard
-        self.updateSDInfo()
-        
-        # Update values FROM the Dashboard
-        self.getTuningInfo()
-        
-        self.algaeSubsystem.updateSmartDashboard()
+class AlgaePivotCommand(AlgaeCommand):
+    '''Sets algae pivot to reef intake position'''
+    def __init__(self, algaeSubsystem: algaeSubsystem.AlgaeSubsystem, elevatorSubsystem: ElevatorSubsystem.ElevatorSubsystem):
+        self.algaeSubsystem = algaeSubsystem
+        self.elevatorSubsystem = elevatorSubsystem
+        self.addRequirements(self.algaeSubsystem, self.elevatorSubsystem)
     
-    def updateSDInfo(self):
-        SmartDashboard.putNumber("Algae/Processing Delay Timer", round(self.processDelayTimer.get(), 2))
-        SmartDashboard.putString("Algae/Pivot Waiting Position", self.pivotWaitingPosition)
-        SmartDashboard.putNumber("Algae/Pivot Delay Timer", round(self.pivotDelayTimer.get(), 2))
-        SmartDashboard.putString("Algae/Pivot Instruction", self.algaePivotPosition)
-    
-    def setupTuningInfo(self):
-        SmartDashboard.putNumber("Algae/Pivot Time", AlgaeConstants.kPivotTimeToSwitchPositions)
-        SmartDashboard.putNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
-        SmartDashboard.putBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
-        SmartDashboard.putNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
-        SmartDashboard.putNumber("Algae/Pivot Intake Position", AlgaeConstants.kPivotIntakePositionValue)
-        SmartDashboard.putNumber("Algae/Pivot Processing Position", AlgaeConstants.kPivotProcessingValue)
-        SmartDashboard.putNumber("Algae/Pivot Idle Position", AlgaeConstants.kPivotIdleValue)
-        SmartDashboard.putNumber("Algae/Elevator Processing Position", AlgaeConstants.kElevatorProcessingPositionValue)
-        SmartDashboard.putNumber("Algae/Elevator L2 Intaking Position", AlgaeConstants.kElevatorL2IntakePositionValue)
-        SmartDashboard.putNumber("Algae/Elevator L3 Intaking Position", AlgaeConstants.kElevatorL3IntakePositionValue)
-        SmartDashboard.putNumber("Algae/Pivot Intake Delay", AlgaeConstants.kIntakeDelayValue)
-        SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)
-         
-    def getTuningInfo(self):
-        AlgaeConstants.kPivotRotationsPerSecond = SmartDashboard.getNumber("Algae/Pivot Time", AlgaeConstants.kPivotRotationsPerSecond)
-        AlgaeConstants.kIntakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
-        AlgaeConstants.kToggleLimitSwitch = SmartDashboard.getBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
-        AlgaeConstants.kSpinProcessDelayValue = SmartDashboard.getNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
-        AlgaeConstants.kPivotIntakePositionValue = SmartDashboard.getNumber("Algae/Pivot Intake Position", AlgaeConstants.kPivotIntakePositionValue)
-        AlgaeConstants.kPivotProcessingValue = SmartDashboard.getNumber("Algae/Pivot Processing Position", AlgaeConstants.kPivotProcessingValue)
-        AlgaeConstants.kPivotIdleValue = SmartDashboard.getNumber("Algae/Pivot Idle Position", AlgaeConstants.kPivotIdleValue)
-        AlgaeConstants.kElevatorProcessingPositionValue = SmartDashboard.getNumber("Algae/Elevator Processing Position", AlgaeConstants.kElevatorProcessingPositionValue)
-        AlgaeConstants.kElevatorL2IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L2 Intaking Position", AlgaeConstants.kElevatorL2IntakePositionValue)
-        AlgaeConstants.kElevatorL3IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L3 Intaking Position", AlgaeConstants.kElevatorL3IntakePositionValue)
-        AlgaeConstants.kIntakeDelayValue = SmartDashboard.putNumber("Algae/Pivot Intake Delay", AlgaeConstants.kIntakeDelayValue)
-        AlgaeConstants.kProcessDelayValue = SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)
+    def initialize(self):
+        self.algaeSubsystem.updatePivotSetpoint((AlgaeConstants.kPivotReefIntakingValue))
+        self.algaeSubsystem.changePivotPosition()
+        self.algaeSubsystem.spinIntakeMotor(1 * AlgaeConstants.kIntakeMultiplier)
         
+    def isFinished(self):
+        return self.isAccurateEnough(
+            value=self.algaeSubsystem.pivotMotor.get_position(),
+            targetedValue=AlgaeConstants.kPivotGroundIntakingValue
+        )
+        
+    def end(self): pass
 
-# FOR TESTING COMMANDS2
-z = commands2.Command()
-x = commands2.CommandScheduler()
-y = wpilib.event.EventLoop()
-y.bind()
-x.setActiveButtonLoop()
-x.run()
-x.registerSubsystem()
-commands2.cmd.sequence()
+# # FOR TESTING COMMANDS2
+# z = commands2.Command()
+# x = commands2.CommandScheduler()
+# y = wpilib.event.EventLoop()
+# y.bind()
+# x.setActiveButtonLoop()
+# x.run()
+# x.registerSubsystem()
+# commands2.cmd.sequence()
+# commands2.cmd.sequence()
+# commands2.command
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 '''
 NOTE: All this here is outdated but I put it on the bottom in case I need to for some reason

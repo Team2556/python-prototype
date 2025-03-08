@@ -217,7 +217,6 @@ class RobotDimensions:
 #region ALGAE YAY
 
 class AlgaeConstants:
-    # SUBSYSTEM STUFF:
     # Motor Channels
     kPivotMotorChannel = CAN_Address.FORTY # TODO: Add the actual CAN IDs
     kIntakeWheelsChannel = CAN_Address.FORTYONE
@@ -226,17 +225,30 @@ class AlgaeConstants:
     kLimitSwitchChannel = Rio_DIO.FOUR # TODO: Add more actual CAN IDs
     # kOtherLimitSwitchChannel = Rio_DIO.FIVE # TODO: Figure out if there's actually two limit switches
     
-    # Controls so it doesn't move too fast in one way? 
+    # This is so it doesn't move too fast in one way? 
     # (to disable just set to super high positive/negative numbers)
     kPeakForwardTorqueCurrent = 10
     kPeakReverseTorqueCurrent = -10
     
-    # NOT SUBSYSTEM STUFF
+    # PID tuning stuff here
+    # TODO: THIS THINGY
+    
+    # When setting a setpoint, the setting is "finished" 
+    kTargetValueAccuracy = 0.01
+    
+    # If the motor is stalled then it's trying to intake an algae more than it can
+    # To detect if it shouldn't spin anymore
+    kAmpValueToDetectIfMotorStalled = 90
+    
+    kPivotMaxHeight = 0.25
+    kPivotMinHeight = 0
+    
     kElevatorProcessingPositionValue = 0.01
     kElevatorL2IntakePositionValue = 0.02
     kElevatorL3IntakePositionValue = 0.03
     # Values to set pivoting motor to
-    kPivotIntakePositionValue = 0.25 # Pivot position when grabbing algae
+    kPivotReefIntakingValue = 0.25 # Pivot position when grabbing algae
+    kPivotGroundIntakingValue = 0.03 # Pivot position when grabbing algae from the FLOOR
     kPivotProcessingValue = 0.07 # Pivot position when about to send to processor
     kPivotIdleValue = 0 # Pivot position when idle
     # Intake wheels multiply by this speed
