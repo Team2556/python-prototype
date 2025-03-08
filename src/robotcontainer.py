@@ -14,10 +14,10 @@ from constants import ClimbConstants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
 from subsystems import (
-    # ElevatorSubsystem,
-    #coralSubsystem,
+    ElevatorSubsystem,
+    coralSubsystem,
     limelight,
-    # pneumaticSubsystem,
+    pneumaticSubsystem,
     # oneMotor,
     ultrasonic, #ClimbSubsystem
 )
@@ -112,7 +112,9 @@ class RobotContainer:
         )
 
         # self.algae = algae.AlgaeHandler()
-        self.ultrasonic = ultrasonic.Ultrasonic()
+        self.ultrasonicENABLE = False
+        if self.ultrasonicENABLE:
+            self.ultrasonic = ultrasonic.Ultrasonic()
 
         self._logger = Telemetry(self._max_speed)
 
@@ -134,7 +136,10 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        # self.coral_track = coralSubsystem.CoralTrack()
+        self.coralENABLE = False
+        if self.coralENABLE:
+            self.coral_track = coralSubsystem.CoralTrack()
+            
         pneumaticENABLE = False
         if pneumaticENABLE:
             self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()

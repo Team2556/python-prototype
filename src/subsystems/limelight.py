@@ -23,6 +23,9 @@ import ntcore as nt
 import numpy as np
 from phoenix6.utils import get_current_time_seconds
 from phoenix6 import SignalLogger
+from wpilib import SmartDashboard
+from constants import LimelightConstants
+
 
 class LimelightSubsystem(Subsystem):
     def __init__(self):
@@ -31,6 +34,8 @@ class LimelightSubsystem(Subsystem):
 
         self.discovered_limelights = limelight.discover_limelights()#debug=True)
         print("discovered limelights:", self.discovered_limelights)
+        with open(LimelightConstants.field_map_address,'r') as mapjson:
+            self.field_map =   mapjson.read()
 
         if self.discovered_limelights:
             self.qty_limelights = len(self.discovered_limelights)
@@ -41,15 +46,18 @@ class LimelightSubsystem(Subsystem):
             # 0 : use external submitted via set_robot_orientation; ignore interal completely
             # 1 : use external submitted via set_robot_orientation; use internal fused yaw
             # 2 : use internal yaw; ignore external completely
-            LimelightHelpers.set_imu_mode('limelight', mode=1)
-            self.ll.upload_fieldmap('src/WPIcalFieldToUse/Practice_Blue_field_calibration.fmap', index=None)
+            
+            LimelightHelpers.set_imu_mode('limelight', mode=1) #1 is align, 2 is independent
+            LL3_FIELD_UPLOAD_STATUS = self.ll.upload_fieldmap(self.field_map, index=None)
+            SmartDashboard.putString('Limelight 3 map upload attempt', LL3_FIELD_UPLOAD_STATUS.reason)
             # self.ll.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
             
             if self.qty_limelights > 1:
                 limelight_address_2 = self.discovered_limelights[1]
                 self.ll2 = limelight.Limelight(limelight_address_2)
-                LimelightHelpers.set_imu_mode('limelight-four', mode=1)
-                self.ll2.upload_fieldmap('src/WPIcalFieldToUse/Practice_Red_field_calibration.fmap', index=None)
+                LimelightHelpers.set_imu_mode('limelight-four', mode=1)  #1 is align, 2 is independent
+                LL4_FIELD_UPLOAD_STATUS = self.ll2.upload_fieldmap(self.field_map, index=None)
+                SmartDashboard.putString('Limelight 4 map upload attempt', LL4_FIELD_UPLOAD_STATUS.reason)
                 # self.ll2.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
             results = self.ll.get_results()
             status = self.ll.get_status()

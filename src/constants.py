@@ -316,4 +316,9 @@ class UltrasonicConstants:
     frontRight = Rio_DIO.ONE
     backLeft = Rio_DIO.TWO
     backRight = Rio_DIO.THREE
+
+class LimelightConstants:
+    # for field map replacr src with /home/lvuser/py/
+    field_map_address = '/home/lvuser/py/WPIcalFieldToUse/field_calibration-PracticeBluemissing14-15.fmap'
+
     
