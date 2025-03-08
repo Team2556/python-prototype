@@ -332,6 +332,37 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         # This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
         self.skip_counter +=1
 
+        LimelightHelpers.set_robot_orientation(
+            'limelight',
+            # self.get_state().pose.rotation().degrees(),  # OR
+            self.pigeon2.get_yaw().value % (360),
+            # 0,  #
+            self.pigeon2.get_angular_velocity_z_world().value,
+            0,  #
+            # self.pigeon2.get_pitch().value,
+            0,  #
+            # self.pigeon2.get_angular_velocity_y_world().value,
+            0,  #
+            # self.pigeon2.get_roll().value,
+            0,  #
+            # self.pigeon2.get_angular_velocity_x_world().value
+        )
+        LimelightHelpers.set_robot_orientation(
+            'limelight-four',
+            # self.get_state().pose.rotation().degrees(),  # OR
+            self.pigeon2.get_yaw().value % (360),
+            # 0,  #
+            self.pigeon2.get_angular_velocity_z_world().value,
+            0,  #
+            # self.pigeon2.get_pitch().value,
+            0,  #
+            # self.pigeon2.get_angular_velocity_y_world().value,
+            0,  #
+            # self.pigeon2.get_roll().value,
+            0,  #
+            # self.pigeon2.get_angular_velocity_x_world().value
+        )
+
         if not self._has_applied_operator_perspective or DriverStation.isDisabled():
             alliance_color = DriverStation.getAlliance()
             if alliance_color is not None:
@@ -349,11 +380,11 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             # with this and all sub part of use_vision..., robot is still responsive when skipped at 1/1000
             self.use_vision_odometry_update(limelight_to_use='limelight')
 
-        if (self.skip_counter+skip_tripper_base/2) % skip_tripper_base ==0:
+        if (self.skip_counter+skip_tripper_base/2 + 2) % skip_tripper_base ==0:
             self.use_vision_odometry_update(limelight_to_use='limelight-four')
 
         #TODO:  is this taking too long ? yeah, sort of:: Try with skipping
-        if (self.skip_counter + skip_tripper_base/4) % skip_tripper_base ==0:
+        if (self.skip_counter + skip_tripper_base/4 + 3) % skip_tripper_base ==0:
             self.ignore_backs_of_AprilTags('limelight')
             self.ignore_backs_of_AprilTags('limelight-four')
 
@@ -376,21 +407,23 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         Add vision measurement to MegaTag 1 or 2
         """
         # with this, robot is still responsive when skipped at 1/1000
-        LimelightHelpers.set_robot_orientation(
-            limelight_to_use,
-            # self.get_state().pose.rotation().degrees(),  # OR
-            self.pigeon2.get_yaw().value % (360),
-            # 0,  #
-            self.pigeon2.get_angular_velocity_z_world().value,
-            # 0,  #
-            self.pigeon2.get_pitch().value,
-            # 0,  #
-            self.pigeon2.get_angular_velocity_y_world().value,
-            # 0,  #
-            self.pigeon2.get_roll().value,
-            # 0,  #
-            self.pigeon2.get_angular_velocity_x_world().value
-        )
+        #have the pigon her so not moving this to limelight subsytem periodic
+        # Rather move it to periodic here, needs to happen every frame
+        #  LimelightHelpers.set_robot_orientation(
+        #     limelight_to_use,
+        #     # self.get_state().pose.rotation().degrees(),  # OR
+        #     self.pigeon2.get_yaw().value % (360),
+        #     # 0,  #
+        #     self.pigeon2.get_angular_velocity_z_world().value,
+        #     0,  #
+        #     # self.pigeon2.get_pitch().value,
+        #     0,  #
+        #     # self.pigeon2.get_angular_velocity_y_world().value,
+        #     0,  #
+        #     # self.pigeon2.get_roll().value,
+        #     0,  #
+        #     # self.pigeon2.get_angular_velocity_x_world().value
+        # )
         
         # get botpose estimate with origin on blue side of field; MegaTag1 seems to be working better
         mega_tag_choice = {'MegaTag2': LimelightHelpers.get_botpose_estimate_wpiblue_megatag2(limelight_to_use),
@@ -436,24 +469,31 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         alliance_color = DriverStation.getAlliance()
         # use a match statement to get the correct pose
         if alliance_color == DriverStation.Alliance.kRed:
-            straight_ahaead = Rotation2d.fromDegrees(180)
+            straight_ahead = Rotation2d.fromDegrees(180)
+            
             if zone == 'y':
-                self.reset_pose(Pose2d(10.75, 4, straight_ahaead))
+                set_pose = Pose2d(10.75, 4, straight_ahead)
             elif zone == 'b':
-                self.reset_pose(Pose2d(13.0, 6.0,straight_ahaead))
+                set_pose = Pose2d(13.0, 6.0,straight_ahead)
             elif zone == 'a':
-                self.reset_pose(Pose2d(16, 4, straight_ahaead))
+                set_pose = Pose2d(16, 4, straight_ahead)
             elif zone == 'x':
-                self.reset_pose(Pose2d(13, 1.7, straight_ahaead))
+                set_pose = Pose2d(13, 1.7, straight_ahead)
         else:
+            straight_ahead = Rotation2d.fromDegrees(0)
             if zone == 'y':
-                self.reset_pose(Pose2d(6.5, 4, Rotation2d.fromDegrees(0)))
+                set_pose = Pose2d(6.5, 4, straight_ahead)
             elif zone == 'b':
-                self.reset_pose(Pose2d(4.5, 1.7, Rotation2d.fromDegrees(0)))
+                set_pose = Pose2d(4.5, 1.7, Rotation2d.fromDegrees(0))
             elif zone == 'a':
-                self.reset_pose(Pose2d(2, 4, Rotation2d.fromDegrees(0)))
+                set_pose = Pose2d(2, 4, Rotation2d.fromDegrees(0))
             elif zone == 'x':
-                self.reset_pose(Pose2d(4.5, 6, Rotation2d.fromDegrees(0)))
+                set_pose = Pose2d(4.5, 6, Rotation2d.fromDegrees(0))
+        self.reset_pose(set_pose)
+        LimelightHelpers.set_robot_orientation('limelight', yaw=straight_ahead.degrees(), 
+                                               yaw_rate=0, pitch=0, pitch_rate=0, roll=0, roll_rate=0)
+        LimelightHelpers.set_robot_orientation('limelight-four', yaw=straight_ahead.degrees(),
+                                               yaw_rate=0, pitch=0, pitch_rate=0, roll=0, roll_rate=0)
 
 
        

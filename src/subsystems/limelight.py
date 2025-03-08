@@ -50,15 +50,25 @@ class LimelightSubsystem(Subsystem):
             LimelightHelpers.set_imu_mode('limelight', mode=1) #1 is align, 2 is independent
             LL3_FIELD_UPLOAD_STATUS = self.ll.upload_fieldmap(self.field_map, index=None)
             SmartDashboard.putString('Limelight 3 map upload attempt', LL3_FIELD_UPLOAD_STATUS.reason)
-            # self.ll.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
-            
+            LimelightHelpers.set_camerapose_robotspace('limelight', forward=LimelightConstants.kLL3forward,
+                                                       side=LimelightConstants.kLL3side,
+                                                       up=LimelightConstants.kLL3up,
+                                                       roll=LimelightConstants.kLL3roll,
+                                                       pitch=LimelightConstants.kLL3pitch,
+                                                       yaw=LimelightConstants.kLL3yaw)
+                                                                   
             if self.qty_limelights > 1:
                 limelight_address_2 = self.discovered_limelights[1]
                 self.ll2 = limelight.Limelight(limelight_address_2)
                 LimelightHelpers.set_imu_mode('limelight-four', mode=1)  #1 is align, 2 is independent
                 LL4_FIELD_UPLOAD_STATUS = self.ll2.upload_fieldmap(self.field_map, index=None)
                 SmartDashboard.putString('Limelight 4 map upload attempt', LL4_FIELD_UPLOAD_STATUS.reason)
-                # self.ll2.setCameraPose_RobotSpace(0, 0, 0, 0, 0, 0)
+                LimelightHelpers.set_camerapose_robotspace('limelight', forward=LimelightConstants.kLL4forward,
+                                                       side=LimelightConstants.kLL4side,
+                                                       up=LimelightConstants.kLL4up,
+                                                       roll=LimelightConstants.kLL4roll,
+                                                       pitch=LimelightConstants.kLL4pitch,
+                                                       yaw=LimelightConstants.kLL4yaw)
             results = self.ll.get_results()
             status = self.ll.get_status()
             print("-----")

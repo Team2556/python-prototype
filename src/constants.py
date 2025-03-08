@@ -317,8 +317,28 @@ class UltrasonicConstants:
     backLeft = Rio_DIO.TWO
     backRight = Rio_DIO.THREE
 
+from pathlib import Path
 class LimelightConstants:
     # for field map replacr src with /home/lvuser/py/
-    field_map_address = '/home/lvuser/py/WPIcalFieldToUse/field_calibration-PracticeBluemissing14-15.fmap'
+    if Path('/').resolve() == Path('/'):  # Check if root is actually root (Linux/RoboRIO)
+        field_map_folder = Path('/home/lvuser/py/WPIcalFieldToUse/')
+    else:  # We're on Windows
+        field_map_folder = Path('WPIcalFieldToUse/')
+    # field_map_folder = Path('/home/lvuser/py/WPIcalFieldToUse/')
+    field_map_address = str([i for i in field_map_folder.glob(pattern='*fmap', case_sensitive=False)][0])
+    #TODO Update the location values
+    kLL3forward = -0.383
+    kLL3side = 0.0
+    kLL3up = 0.167
+    kLL3roll = 0.0
+    kLL3pitch = 25.1
+    kLL3yaw = 180
+    
+    kLL4forward = 0.0
+    kLL4side = -0.365
+    kLL4up = 0.217
+    kLL4roll = 2.8
+    kLL4pitch = 37.6
+    kLL4yaw = 90
 
     
