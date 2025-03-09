@@ -133,54 +133,53 @@ class AlgaeSubsystem(Subsystem):
         '''Returns true if limit switch is active (and toggleLimitSwitch is also true)'''
         return self.limitSwitch.get() and toggleLimitSwitch
         
-    # TODO: New commands system probably has different tuning values
     # TODO: Add a cool list/grid layout with the new values to ShuffleBoard
     def setupSmartDashboard(self):
-        '''Sets up all the SmartDashboard valuess'''
-        SmartDashboard.putNumber("Algae/Pivot Time", AlgaeConstants.kPivotRotationsPerSecond)
+        '''Sets up all the SmartDashboard (tuning) valuess'''
+        SmartDashboard.putNumber("Algae/Pivot P", AlgaeConstants.kPivotp)
+        SmartDashboard.putNumber("Algae/Pivot I", AlgaeConstants.kPivoti)
+        SmartDashboard.putNumber("Algae/Pivot D", AlgaeConstants.kPivotd)
+        SmartDashboard.putNumber("Algae/Pivot G", AlgaeConstants.kPivotg)
+        SmartDashboard.putNumber("Algae/Amp Value to Detect if Stalled", AlgaeConstants.kAmpValueToDetectIfMotorStalled)
+        SmartDashboard.putNumber("Algae/Target Value Accuracy", AlgaeConstants.kTargetValueAccuracy)
+        SmartDashboard.putNumber("Algae/Pivot Max Height", AlgaeConstants.kPivotMaxHeight)
+        SmartDashboard.putNumber("Algae/Pivot Min Height", AlgaeConstants.kPivotMinHeight)
+        SmartDashboard.putNumber("Algae/Pivot Reef Intaking Value", AlgaeConstants.kPivotReefIntakingValue)
+        SmartDashboard.putNumber("Algae/Pivot Ground Intaking Value", AlgaeConstants.kPivotGroundIntakingValue)
+        SmartDashboard.putNumber("Algae/Pivot Processing Value", AlgaeConstants.kPivotProcessingValue)
+        SmartDashboard.putNumber("Algae/Pivot Idle Value", AlgaeConstants.kPivotIdleValue)
+        SmartDashboard.putNumber("Algae/Pivot Rotations Per Second", AlgaeConstants.kPivotRotationsPerSecond)
         SmartDashboard.putNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
-        SmartDashboard.putBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
-        SmartDashboard.putNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
-        SmartDashboard.putNumber("Algae/Pivot Intake Position", AlgaeConstants.kPivotReefIntakingValue)
-        SmartDashboard.putNumber("Algae/Pivot Processing Position", AlgaeConstants.kPivotProcessingValue)
-        SmartDashboard.putNumber("Algae/Pivot Idle Position", AlgaeConstants.kPivotIdleValue)
-        SmartDashboard.putNumber("Algae/Elevator Processing Position", AlgaeConstants.kElevatorProcessingPositionValue)
-        SmartDashboard.putNumber("Algae/Elevator L2 Intaking Position", AlgaeConstants.kElevatorL2IntakePositionValue)
-        SmartDashboard.putNumber("Algae/Elevator L3 Intaking Position", AlgaeConstants.kElevatorL3IntakePositionValue)
-        SmartDashboard.putNumber("Algae/Pivot Intake Delay", AlgaeConstants.kIntakeDelayValue)
-        SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)
+        SmartDashboard.putNumber("Algae/Intaking Delay", AlgaeConstants.kTimeItTakesToIntake)
+        SmartDashboard.putNumber("Algae/Processing Delay", AlgaeConstants.kTimeItTakesToProcess)
         
     def updateSmartDashboard(self):
         '''Put all SmartDashboard stuff for this subsystem here'''
         self.updatePIDvalues(
-            SmartDashboard.getNumber("Algae/k_p"),
-            SmartDashboard.getNumber("Algae/k_i"),
-            SmartDashboard.getNumber("Algae/k_d"),
-            SmartDashboard.getNumber("Algae/k_g"),
+            SmartDashboard.getNumber("Algae/Pivot P"),
+            SmartDashboard.getNumber("Algae/Pivot I"),
+            SmartDashboard.getNumber("Algae/Pivot D"),
+            SmartDashboard.getNumber("Algae/Pivot G"),
         )
         # Output values
-        SmartDashboard.putNumber("Algae/Processing Delay Timer", round(self.processDelayTimer.get(), 2))
-        SmartDashboard.putString("Algae/Pivot Waiting Position", self.pivotWaitingPosition)
-        SmartDashboard.putNumber("Algae/Pivot Delay Timer", round(self.pivotDelayTimer.get(), 2))
-        SmartDashboard.putString("Algae/Pivot Instruction", self.algaePivotPosition)
-        SmartDashboard.putString("Algae/Pivot Position", self.pivotMotor.get_rotor_position().__str__())
-        SmartDashboard.putString("Algae/Intake Speed", self.intakeMotor.get_motor_voltage().__str__())
+        SmartDashboard.putString("Algae/Pivot Position", self.pivotMotor.get_position())
+        SmartDashboard.putString("Algae/Intake Speed", self.intakeMotor.get())
         SmartDashboard.putBoolean("Algae/Limit Switch", self.limitSwitch.get())
         
         # Tuning values
-        AlgaeConstants.kPivotRotationsPerSecond = SmartDashboard.getNumber("Algae/Pivot Time", AlgaeConstants.kPivotRotationsPerSecond)
+        AlgaeConstants.kAmpValueToDetectIfMotorStalled = SmartDashboard.getNumber("Algae/Amp Value to Detect if Stalled", AlgaeConstants.kAmpValueToDetectIfMotorStalled)
+        AlgaeConstants.kTargetValueAccuracy = SmartDashboard.getNumber("Algae/Target Value Accuracy", AlgaeConstants.kTargetValueAccuracy)
+        AlgaeConstants.kPivotMaxHeight = SmartDashboard.getNumber("Algae/Pivot Max Height", AlgaeConstants.kPivotMaxHeight)
+        AlgaeConstants.kPivotMinHeigh = SmartDashboard.getNumber("Algae/Pivot Min Height", AlgaeConstants.kPivotMinHeight)
+        AlgaeConstants.kPivotReefIntakingValue = SmartDashboard.getNumber("Algae/Pivot Reef Intaking Value", AlgaeConstants.kPivotReefIntakingValue)
+        AlgaeConstants.kPivotGroundIntakingValue = SmartDashboard.getNumber("Algae/Pivot Ground Intaking Value", AlgaeConstants.kPivotGroundIntakingValue)
+        AlgaeConstants.kPivotProcessingValue = SmartDashboard.getNumber("Algae/Pivot Processing Value", AlgaeConstants.kPivotProcessingValue)
+        AlgaeConstants.kPivotIdleValue = SmartDashboard.getNumber("Algae/Pivot Idle Value", AlgaeConstants.kPivotIdleValue)
+        AlgaeConstants.kPivotRotationsPerSecond = SmartDashboard.getNumber("Algae/Pivot Rotations Per Second", AlgaeConstants.kPivotRotationsPerSecond)
         AlgaeConstants.kIntakeMultiplier = SmartDashboard.getNumber("Algae/Intake Multiplier", AlgaeConstants.kIntakeMultiplier)
-        AlgaeConstants.kToggleLimitSwitch = SmartDashboard.getBoolean("Algae/Toggle Limit Switch", AlgaeConstants.kToggleLimitSwitch)
-        AlgaeConstants.kSpinProcessDelayValue = SmartDashboard.getNumber("Algae/Processing Delay", AlgaeConstants.kSpinProcessDelayValue)
-        AlgaeConstants.kPivotReefIntakingValue = SmartDashboard.getNumber("Algae/Pivot Intake Position", AlgaeConstants.kPivotReefIntakingValue)
-        AlgaeConstants.kPivotProcessingValue = SmartDashboard.getNumber("Algae/Pivot Processing Position", AlgaeConstants.kPivotProcessingValue)
-        AlgaeConstants.kPivotIdleValue = SmartDashboard.getNumber("Algae/Pivot Idle Position", AlgaeConstants.kPivotIdleValue)
-        AlgaeConstants.kElevatorProcessingPositionValue = SmartDashboard.getNumber("Algae/Elevator Processing Position", AlgaeConstants.kElevatorProcessingPositionValue)
-        AlgaeConstants.kElevatorL2IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L2 Intaking Position", AlgaeConstants.kElevatorL2IntakePositionValue)
-        AlgaeConstants.kElevatorL3IntakePositionValue = SmartDashboard.getNumber("Algae/Elevator L3 Intaking Position", AlgaeConstants.kElevatorL3IntakePositionValue)
-        AlgaeConstants.kIntakeDelayValue = SmartDashboard.putNumber("Algae/Pivot Intake Delay", AlgaeConstants.kIntakeDelayValue)
-        AlgaeConstants.kProcessDelayValue = SmartDashboard.putNumber("Algae/Pivot Process Delay", AlgaeConstants.kProcessDelayValue)
-    
+        AlgaeConstants.kTimeItTakesToIntake = SmartDashboard.getNumber("Algae/Intaking Delay", AlgaeConstants.kTimeItTakesToIntake)
+        AlgaeConstants.kTimeItTakesToProcess = SmartDashboard.getNumber("Algae/Processing Delay", AlgaeConstants.kTimeItTakesToProcess)
+        
     def periodic(self) -> None:
         # Sets setpoint to 0 if bottom limit switch active. No top limit switch though so umm...
         if self.limitSwitch.get():

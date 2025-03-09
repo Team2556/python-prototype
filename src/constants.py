@@ -168,9 +168,11 @@ class CAN_Address(IntEnum):
 #region Elevator Constants
 
 class ElevatorConstants():
+        # Motor CAN ID's
         kLeftMotorPort = CAN_Address.FOURTEEN
         kRightMotorPort = CAN_Address.FIFTEEN
-        kJoystickPort = 0
+        # kJoystickPort = 0
+        
         kpeak_forward_torque_current = 35 #120
         kpeak_reverse_torque_current = -35 #-120
         kincrement_m_per_sec_held = .25
@@ -186,10 +188,21 @@ class ElevatorConstants():
         kMinElevatorHeight = 0.00 #0.0508  # 2 inches
         kMaxElevatorHeight = inchesToMeters(26)  # 50 inches TODO: make this smaller
         kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.00002
-        ScaredSafetyFactor = 200
-        kCoralLv1 = 0.1/ScaredSafetyFactor #height in meters
-        kCoralLv2 = 0.32/ScaredSafetyFactor#556
-        kCoralLv3 = 0.5588/ScaredSafetyFactor
+        
+        ScaredSafetyFactor = 200 # Set ScaredSafetyFactor to 1 once we get SUPER confident
+        # All the elevator levels to do stuff
+        kCoralLv1 = 0.1 / ScaredSafetyFactor # Height in meters
+        kCoralLv2 = 0.32 / ScaredSafetyFactor # 556
+        kCoralLv3 = 0.5588 / ScaredSafetyFactor
+        kCoralLv4 = 0.6 / ScaredSafetyFactor # All the elevator levels below aren't tuned
+        kAlgaeProcess = 0.15 / ScaredSafetyFactor
+        kAlgaeGroundIntake = 0.21 / ScaredSafetyFactor
+        kAlgaeLv2 = 0.2 / ScaredSafetyFactor
+        kAlgaeLv3 = 0.4 / ScaredSafetyFactor
+        kZero = 0
+
+        # The command decides the position's close enough if it's within this range (in meters?)
+        kTargetValueAccuracy = 0.02
 
         kMaxVelocityMetersPerSecond = 1.5/ScaredSafetyFactor
         kMaxAccelerationMetersPerSecSquared = 0.5/ScaredSafetyFactor
@@ -230,41 +243,36 @@ class AlgaeConstants:
     kPeakForwardTorqueCurrent = 10
     kPeakReverseTorqueCurrent = -10
     
-    # PID tuning stuff here
-    # TODO: THIS THINGY
-    
-    # When setting a setpoint, the setting is "finished" 
-    kTargetValueAccuracy = 0.01
+    # All the following stuff are tunable in SmartDashboard
+    kPivotp = 0.3
+    kPivoti = 0
+    kPivotd = 0
+    kPivotg = 0
     
     # If the motor is stalled then it's trying to intake an algae more than it can
-    # To detect if it shouldn't spin anymore
+    # So this detects if it shouldn't spin anymore
     kAmpValueToDetectIfMotorStalled = 90
+    
+    # The command decides the position's close enough if it's within this range (in rotations)
+    kTargetValueAccuracy = 0.01
     
     kPivotMaxHeight = 0.25
     kPivotMinHeight = 0
     
-    kElevatorProcessingPositionValue = 0.01
-    kElevatorL2IntakePositionValue = 0.02
-    kElevatorL3IntakePositionValue = 0.03
     # Values to set pivoting motor to
     kPivotReefIntakingValue = 0.25 # Pivot position when grabbing algae
     kPivotGroundIntakingValue = 0.03 # Pivot position when grabbing algae from the FLOOR
     kPivotProcessingValue = 0.07 # Pivot position when about to send to processor
     kPivotIdleValue = 0 # Pivot position when idle
-    # Intake wheels multiply by this speed
-    kIntakeMultiplier = 0.8 # CHANGE BACK TO 0.2 WHEN TESTING
     # The time it takes to switch between pivoting positions
     kPivotRotationsPerSecond = 0.05
     
-    # The delay from spinning the wheels to spit out the algae once processing input is pressed (thats what the timer is for)
-    kSpinProcessDelayValue = 0.5
-    # The delay from setting the elevator to moving the pivot motor when intaking
-    kIntakeDelayValue = 0.75
-    # The delay from setting the elevator to moving the pivot motor when processing
-    kProcessDelayValue = 0.75
+    # Intake wheels multiply by this speed
+    kIntakeMultiplier = 0.8 # CHANGE BACK TO 0.2 WHEN TESTING
     
-    # Change to true later whan actually roboting
-    kToggleLimitSwitch = False
+    # The code waits this many seconds between intaking/processing
+    kTimeItTakesToIntake = 1
+    kTimeItTakesToProcess = 1
 
 # vvv OUTDATED GET RID OF WHEN MERGING vvv
 # class CoralConstants:
