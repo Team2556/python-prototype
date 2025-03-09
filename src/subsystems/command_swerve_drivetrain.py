@@ -12,7 +12,7 @@ from wpimath.geometry import Rotation2d, Pose2d
 
 from robotUtils.limelight import LimelightHelpers
 import numpy as np
-from constants import AprilTags
+from constants import AprilTags, LimelightConstants
 # from archive import odometry_fuse
 
 
@@ -164,6 +164,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         """Keep track if we've ever applied the operator perspective before or not"""
 
         SmartDashboard.putBoolean("HighConfidence_VisionUpdate", False)
+        SmartDashboard.putNumber("VisionUpdate_StdDev_XandY", 0.07)
+        SmartDashboard.putNumber("VisionUpdate_StdDev_Theta", 9999999)
         self.megatag_chooser = SendableChooser()
         self.megatag_chooser.setDefaultOption('MegaTag1', "MegaTag1")
         self.megatag_chooser.addOption('MegaTag2', "MegaTag2")
@@ -335,30 +337,30 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         LimelightHelpers.set_robot_orientation(
             'limelight',
             # self.get_state().pose.rotation().degrees(),  # OR
-            self.pigeon2.get_yaw().value % (360),
+            self.pigeon2.get_yaw().value + LimelightConstants.kLL3yaw,
             # 0,  #
             self.pigeon2.get_angular_velocity_z_world().value,
-            0,  #
-            # self.pigeon2.get_pitch().value,
+            # 0,  #
+            self.pigeon2.get_pitch().value + LimelightConstants.kLL3pitch,
             0,  #
             # self.pigeon2.get_angular_velocity_y_world().value,
-            0,  #
-            # self.pigeon2.get_roll().value,
+            # 0,  #
+            self.pigeon2.get_roll().value + LimelightConstants.kLL3roll,
             0,  #
             # self.pigeon2.get_angular_velocity_x_world().value
         )
         LimelightHelpers.set_robot_orientation(
             'limelight-four',
             # self.get_state().pose.rotation().degrees(),  # OR
-            self.pigeon2.get_yaw().value % (360),
+            self.pigeon2.get_yaw().value + LimelightConstants.kLL4yaw,
             # 0,  #
             self.pigeon2.get_angular_velocity_z_world().value,
-            0,  #
-            # self.pigeon2.get_pitch().value,
+            # 0,  #
+            self.pigeon2.get_pitch().value + LimelightConstants.kLL4pitch,
             0,  #
             # self.pigeon2.get_angular_velocity_y_world().value,
-            0,  #
-            # self.pigeon2.get_roll().value,
+            # 0,  #
+            self.pigeon2.get_roll().value + LimelightConstants.kLL4roll,
             0,  #
             # self.pigeon2.get_angular_velocity_x_world().value
         )
@@ -433,11 +435,15 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         #if we are spinning slower than 720 deg/sec and we see tags    
         if abs(self.pigeon2.get_angular_velocity_z_world().value) <= 720 and mega_tag.tag_count > 0:
             self.VisionUpdateOn_bool = SmartDashboard.getBoolean("HighConfidence_VisionUpdate", True)
+            self.VisionUncertainty_XY_low_confidence = SmartDashboard.getNumber("VisionUpdate_StdDev_XandY", 0.07)
+            self.VisionUncertainty_Theta_low_confidence = SmartDashboard.getNumber("VisionUpdate_StdDev_Theta", 9999999)
             # set and add vision measurement
             if self.VisionUpdateOn_bool:
-                self.set_vision_measurement_std_devs((0.0095, 0.0095, 1)) #originally: (0.7, 0.7, 9999999)
+                self.set_vision_measurement_std_devs((0.0095, 0.0095, 100)) #originally: (0.7, 0.7, 9999999)
             else:
-                self.set_vision_measurement_std_devs((0.0701737, 0.0701737, 9999999)) #originally: (0.7, 0.7, 9999999)
+                self.set_vision_measurement_std_devs((self.VisionUncertainty_XY_low_confidence, 
+                                                      self.VisionUncertainty_XY_low_confidence, 
+                                                      self.VisionUncertainty_Theta_low_confidence)) #originally: (0.7, 0.7, 9999999)
 
             self.add_vision_measurement(mega_tag.pose, utils.fpga_to_current_time(mega_tag.timestamp_seconds))
         
@@ -490,10 +496,13 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             elif zone == 'x':
                 set_pose = Pose2d(4.5, 6, Rotation2d.fromDegrees(0))
         self.reset_pose(set_pose)
-        LimelightHelpers.set_robot_orientation('limelight', yaw=straight_ahead.degrees(), 
-                                               yaw_rate=0, pitch=0, pitch_rate=0, roll=0, roll_rate=0)
-        LimelightHelpers.set_robot_orientation('limelight-four', yaw=straight_ahead.degrees(),
-                                               yaw_rate=0, pitch=0, pitch_rate=0, roll=0, roll_rate=0)
+        # Should happen each itteration (with propper angles)
+        # LimelightHelpers.set_robot_orientation('limelight', yaw=straight_ahead.degrees(), 
+        #                                        yaw_rate=0, pitch=0, pitch_rate=0, roll=0, roll_rate=0)
+        # LimelightHelpers.set_robot_orientation('limelight-four', yaw=straight_ahead.degrees(),
+        #                                        yaw_rate=0, pitch=0, pitch_rate=0, roll=0, roll_rate=0)
+        # self.pigeon2.reset()
+        self.pigeon2.set_yaw(straight_ahead.degrees())
 
 
        

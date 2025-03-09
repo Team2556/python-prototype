@@ -11,6 +11,8 @@
 
 import limelight
 import limelightresults
+
+from ntcore import NetworkTable
 from robotUtils.limelight import LimelightHelpers
 # import limelightHelpers (only in Java/C++ so far; could write it up)
 import json
@@ -30,7 +32,9 @@ from constants import LimelightConstants
 class LimelightSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
-        
+        # self.NTinstance = NetworkTable.getInstance()
+        # self.ll3Table = self.NTinstance.getTable("limelight")
+        # self.ll4Table = self.NTinstance.getTable("limelight-four")
 
         self.discovered_limelights = limelight.discover_limelights()#debug=True)
         print("discovered limelights:", self.discovered_limelights)
@@ -40,35 +44,49 @@ class LimelightSubsystem(Subsystem):
         if self.discovered_limelights:
             self.qty_limelights = len(self.discovered_limelights)
             print("'\n-------------\n------------------\n'qty limelights:", self.qty_limelights,'\n-------------\n------------------\n')
+            
             limelight_address_1 = self.discovered_limelights[0] #TODO make us able to use multiple limelights; maybe a second subsystem
             self.ll = limelight.Limelight(limelight_address_1)
+            First_limelight_name = self.ll.get_name()
+            SmartDashboard.putString('First Limelight Name', First_limelight_name)
+            First_LL_FIELD_UPLOAD_STATUS = self.ll.upload_fieldmap(self.field_map, index=None)
+            SmartDashboard.putString(f'{First_limelight_name} Limelight map upload attempt', First_LL_FIELD_UPLOAD_STATUS.reason)
+
+            if self.qty_limelights > 1:
+                limelight_address_2 = self.discovered_limelights[1]
+                self.ll2 = limelight.Limelight(limelight_address_2)
+                Second_limelight_name = self.ll2.get_name()
+                SmartDashboard.putString('Second Limelight Name', Second_limelight_name)
+                Second_LL_FIELD_UPLOAD_STATUS = self.ll2.upload_fieldmap(self.field_map, index=None)
+                SmartDashboard.putString(f'{Second_limelight_name} Limelight map upload attempt', Second_LL_FIELD_UPLOAD_STATUS.reason)
+
             # LL4 IMU Modes:
             # 0 : use external submitted via set_robot_orientation; ignore interal completely
             # 1 : use external submitted via set_robot_orientation; use internal fused yaw
             # 2 : use internal yaw; ignore external completely
+            # IMU Mode 3 - IMU_ASSIST_MT1 - The internal IMU will utilize filtered MT1 yaw estimates for continuous heading correction
+            # IMU Mode 4 - IMU_ASSIST_EXTERNALIMU - The internal IMU will utilize the external IMU for continuous heading correction
             
-            LimelightHelpers.set_imu_mode('limelight', mode=1) #1 is align, 2 is independent
-            LL3_FIELD_UPLOAD_STATUS = self.ll.upload_fieldmap(self.field_map, index=None)
-            SmartDashboard.putString('Limelight 3 map upload attempt', LL3_FIELD_UPLOAD_STATUS.reason)
+            LimelightHelpers.set_imu_mode('limelight', mode=1) #TODO: this doesn't make sense for a LL3
             LimelightHelpers.set_camerapose_robotspace('limelight', forward=LimelightConstants.kLL3forward,
                                                        side=LimelightConstants.kLL3side,
                                                        up=LimelightConstants.kLL3up,
                                                        roll=LimelightConstants.kLL3roll,
                                                        pitch=LimelightConstants.kLL3pitch,
-                                                       yaw=LimelightConstants.kLL3yaw)
+                                                       yaw=-LimelightConstants.kLL3yaw)
                                                                    
             if self.qty_limelights > 1:
-                limelight_address_2 = self.discovered_limelights[1]
-                self.ll2 = limelight.Limelight(limelight_address_2)
-                LimelightHelpers.set_imu_mode('limelight-four', mode=1)  #1 is align, 2 is independent
-                LL4_FIELD_UPLOAD_STATUS = self.ll2.upload_fieldmap(self.field_map, index=None)
-                SmartDashboard.putString('Limelight 4 map upload attempt', LL4_FIELD_UPLOAD_STATUS.reason)
-                LimelightHelpers.set_camerapose_robotspace('limelight', forward=LimelightConstants.kLL4forward,
+                
+                LimelightHelpers.set_imu_mode('limelight-four', mode=1)
+                LimelightHelpers.set_limelight_NTDouble("limelight-four", "imuassistalpha_set", 0.01) # default is 0.001
+                SmartDashboard.putNumber('LL4 IMU mode', LimelightHelpers.get_limelight_NTDouble("limelight-four", "imumode_set"))
+                LimelightHelpers.set_camerapose_robotspace('limelight-four', forward=LimelightConstants.kLL4forward,
                                                        side=LimelightConstants.kLL4side,
                                                        up=LimelightConstants.kLL4up,
                                                        roll=LimelightConstants.kLL4roll,
                                                        pitch=LimelightConstants.kLL4pitch,
-                                                       yaw=LimelightConstants.kLL4yaw)
+                                                       yaw=-LimelightConstants.kLL4yaw)
+                LimelightHelpers.set_limelight_NTDouble("limelight-four", 'throttle_set',100)
             results = self.ll.get_results()
             status = self.ll.get_status()
             print("-----")
@@ -213,8 +231,37 @@ class LimelightSubsystem(Subsystem):
     #endsection specialty utilities
 
     def periodic(self):
-        pass
+        LL3_botPoseArrayBlue = LimelightHelpers.get_botpose_2d_wpiblue('limelight')
+        LL3_botPoseArrayBlue =LimelightHelpers.pose_2d_to_array(LL3_botPoseArrayBlue)
+        LL3_botPoseArrayBlueMT2 = LimelightHelpers.get_botpose_estimate_wpiblue_megatag2('limelight')
+        LL3_botPoseArrayBlueMT2 = LimelightHelpers.pose_2d_to_array(LL3_botPoseArrayBlueMT2.pose)
+        LL4_botPoseArrayBlue = LimelightHelpers.get_botpose_2d_wpiblue('limelight-four')
+        LL4_botPoseArrayBlue = LimelightHelpers.pose_2d_to_array(LL4_botPoseArrayBlue)
+        LL4_botPoseArrayBlueMT2 = LimelightHelpers.get_botpose_estimate_wpiblue_megatag2('limelight-four')
+        LL4_botPoseArrayBlueMT2 = LimelightHelpers.pose_2d_to_array(LL4_botPoseArrayBlueMT2.pose)
+        SmartDashboard.putNumberArray("LL3 Pose Blue", 
+                                      LL3_botPoseArrayBlue)
+        SmartDashboard.putNumberArray("LL3 Pose Blue MT2", 
+                                      LL3_botPoseArrayBlueMT2)
+        SmartDashboard.putNumberArray("LL4 Pose Blue", 
+                                      LL4_botPoseArrayBlue)
+        SmartDashboard.putNumberArray("LL4 Pose Blue MT2", 
+                                      LL4_botPoseArrayBlueMT2)
+        
+        
+        
 
+    # This would not execute.. only commands have these methods
+    # def autonoumousPeriodic(self):
+    #     # LimelightHelpers.set_imu_mode('limelight', mode=2)
+    #     LimelightHelpers.set_imu_mode('limelight-four', mode=0)
+    #     SmartDashboard.putNumber('LL4 IMU mode', LimelightHelpers.get_limelight_NTDouble("limelight-four",  "imumode_set"))
+    #     pass
+    
+    # def teleopPeriodic(self):
+    #     # LimelightHelpers.set_imu_mode('limelight', mode=2)
+    #     LimelightHelpers.set_imu_mode('limelight-four', mode=0)
+    #     pass
 
     def end(self):
         if self.discovered_limelights: 

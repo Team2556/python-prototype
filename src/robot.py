@@ -13,6 +13,9 @@ from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.logging import PathPlannerLogging
 from phoenix6.utils import fpga_to_current_time
 
+from robotUtils.limelight import LimelightHelpers
+
+
 
 from robotcontainer import RobotContainer
 
@@ -99,6 +102,8 @@ class MyRobot(commands2.TimedCommandRobot):
     def autonomousInit(self) -> None:
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.autonomousCommand = self.container.getAutonomousCommand()
+        LimelightHelpers.set_imu_mode('limelight-four', mode=0)
+        SmartDashboard.putNumber('LL4 IMU mode', LimelightHelpers.get_limelight_NTDouble("limelight-four",  "imumode_set"))
 
 
         if self.autonomousCommand:
@@ -113,9 +118,11 @@ class MyRobot(commands2.TimedCommandRobot):
         # This makes sure that the autonomous stops running when
         # teleop starts running. If you want the autonomous to
         # continue until interrupted by another command, remove
-        # this line or comment it out.
+        # this line or comment it out.        
         if self.autonomousCommand:
             self.autonomousCommand.cancel()
+        LimelightHelpers.set_imu_mode('limelight-four', mode=0)
+        SmartDashboard.putNumber('LL4 IMU mode', LimelightHelpers.get_limelight_NTDouble("limelight-four",  "imumode_set"))
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""

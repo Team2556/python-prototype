@@ -8,7 +8,7 @@ def smooth(joystick_value: float, exponential_for_curving: int = 3, blend: float
     else:
         exponential_for_curving = int(exponential_for_curving)
     # EVEN WITH voltage deadbands, need to trim of crudy controller noise
-    if joystick_value < .03 and joystick_value > -.03:
+    if joystick_value < .093 and joystick_value > -.093:
         joystick_value = 0
 
     blend_value = joystick_value * blend

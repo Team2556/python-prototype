@@ -339,6 +339,6 @@ class LimelightConstants:
     kLL4up = 0.217
     kLL4roll = 2.8
     kLL4pitch = 37.6
-    kLL4yaw = 90
+    kLL4yaw = -90
 
     
