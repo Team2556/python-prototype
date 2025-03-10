@@ -17,7 +17,6 @@ class CoralTrack(commands2.Subsystem):
         )
 
         self.left_detector = wpilib.DigitalInput(CoralConstants.kLeftBreakerLight)
-        self.center_detector = wpilib.DigitalInput(CoralConstants.kCenterBreakerLight)
         self.right_detector = wpilib.DigitalInput(CoralConstants.kRightBreakerLight)
 
     def set_motor(self, speed):
@@ -33,10 +32,9 @@ class CoralTrack(commands2.Subsystem):
         # Not currently being used
         return [
             self.left_detector.get(),
-            self.center_detector.get(),
             self.right_detector.get(),
         ]
     
     def detect_coral(self):
         """Returns True if Coral detected on track"""
-        return self.left_detector.get() or self.center_detector.get() or self.right_detector.get()
+        return self.left_detector.get() or self.right_detector.get()

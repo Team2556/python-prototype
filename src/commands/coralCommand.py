@@ -37,7 +37,7 @@ class DischargeCoralCommand(commands2.Command):
         if not self.coralTrack.detect_coral:
             self.timer.start()
         # Activate flippers
-        if not self.coralTrack.center_detector.get() and self.activateFlippers:
+        if not self.coralTrack.detect_coral and self.activateFlippers:
             self.pneumaticHub.pulse_solenoid(self.right_solenoid_channel, CoralConstants.kSolenoidPulseDuration)
             self.pneumaticHub.pulse_solenoid(self.left_solenoid_channel, CoralConstants.kSolenoidPulseDuration)
     

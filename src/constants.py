@@ -277,8 +277,7 @@ class CoralConstants:
     kCoralMotorPort = CAN_Address.THIRTY
     
     kLeftBreakerLight = 8  # TODO: Get the actual IDs
-    kCenterBreakerLight = 9
-    kRightBreakerLight = 10
+    kRightBreakerLight = 9
     
     kIntakeMultiplier = 0.06
     kDischargeMultiplier = 0.08
