@@ -21,7 +21,7 @@ class CoralTrack(commands2.Subsystem):
         self.right_detector = wpilib.DigitalInput(CoralConstants.kRightBreakerLight)
 
     def center_coral(self, speed=0.08):
-        """Centers Coral on track using left and right sensor"""
+        """Centers Coral on track using left and right sensor (the default command)"""
         is_Left = self.left_detector.get()
         is_Right = self.right_detector.get()
 
@@ -46,6 +46,7 @@ class CoralTrack(commands2.Subsystem):
 
     def get_detectors(self):
         """Returns a list of the states of the three sensors"""
+        # Not currently being used
         return [
             self.left_detector.get(),
             self.center_detector.get(),

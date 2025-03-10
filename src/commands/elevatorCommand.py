@@ -8,6 +8,23 @@ from math import pi
 import numpy as np
 import time
 from robotUtils import controlAugment
+from subsystems import ElevatorSubsystem
+
+class SetElevatorCommand(Command):
+    def __init__(self, elevatorSubsystem: ElevatorSubsystem.ElevatorSubsystem, position, increment=False):
+        self.elevatorSubsystem = elevatorSubsystem
+        self.addRequirements(self.elevatorSubsystem)
+        self.position = position
+        self.increment = increment
+        
+    def initialize(self):
+        self.elevatorSubsystem.update_setpoint(self.position, incremental=self.increment)
+        self.elevatorSubsystem.moveElevator()
+    
+    def isFinished(self):
+        value = self.elevatorSubsystem.elevmotor_left.get_position()
+        return (value <= self.position + ElevatorConstants.kTargetValueAccuracy
+            and value >= self.position - ElevatorConstants.kTargetValueAccuracy)
 
 class LiftElevatorCommand(Command):
     def __init__(self, sub_elevator, joystick: XboxController):

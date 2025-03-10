@@ -14,10 +14,10 @@ from constants import ClimbConstants
 from generated.tuner_constants import TunerConstants
 from constants import RobotDimensions, ElevatorConstants
 from subsystems import (
-    # ElevatorSubsystem,
-    #coralSubsystem,
+    ElevatorSubsystem,
+    coralSubsystem,
     limelight,
-    # pneumaticSubsystem,
+    pneumaticSubsystem,
     # oneMotor,
     ultrasonic, #ClimbSubsystem
 )
@@ -46,8 +46,8 @@ from commands.odometrySnap2Line import SnapToLineCommand
 
 # from commands.gotoClosestPath import GotoClosestPath
 # from commands.drive_one_motor import DriveOneMotorCommand
-from commands.liftElevator import LiftElevatorCommand
-# from commands import coralCommand
+from commands.elevatorCommand import LiftElevatorCommand
+from commands import coralCommand, elevatorCommand
 import networktables as nt
 from networktables import util as ntutil
 
@@ -134,7 +134,7 @@ class RobotContainer:
 
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        # self.coral_track = coralSubsystem.CoralTrack()
+        self.coralTrack = coralSubsystem.CoralTrack()
         pneumaticENABLE = False
         if pneumaticENABLE:
             self.pneumaticsHub = pneumaticSubsystem.PneumaticSubsystem()
@@ -143,6 +143,9 @@ class RobotContainer:
         # self.one_motor = oneMotor.OneMotor(
         #     motor=[TalonFX(constants.CAN_Address.FOURTEEN),TalonFX(constants.CAN_Address.FIFTEEN)]   )
         # section elevator
+        # LINE BELOW FOR CORAL TESTING
+        self.elevator = ElevatorSubsystem.ElevatorSubsystem()
+        
         self.ENABLE_ELEVATOR = False
         if self.ENABLE_ELEVATOR:
             self.elevator = ElevatorSubsystem.ElevatorSubsystem()
@@ -200,7 +203,7 @@ class RobotContainer:
 
             return None
 
-        # endsection TeleAuto coral
+        # endsection TeleAuto coral     
 
         # self.path_dock_processing_command = AutoBuilder.pathfindThenFollowPath(
         #     goal_path= self.closest_path_to_robot,
@@ -311,14 +314,13 @@ class RobotContainer:
 
         # endsection vision related commands
 
-        # Coral Track controls
-        # self.coral_track.setDefaultCommand(self.coral_command)
-
-        # self._joystick2.x().whileTrue(
-        #     commands2.cmd.run(
-        #         lambda: self.coral_command.enable_discharge(), self.coral_track
-        #     )
-        # )
+        self.coralTrack.setDefaultCommand(coralCommand.CoralDefaultCommand)
+        self.coralL1, self.coralL2, self.coralL3, self.coralL4 = (
+            commands2.SequentialCommandGroup(
+                elevatorCommand.SetElevatorCommand(self.elevator, ElevatorConstants[f"kCoralLv{i}"]),
+                coralCommand.DischargeCoralCommand(self.coralTrack, self.pneumaticsHub, activateFlippers = (i == 4))
+            )
+        for i in range(1, 5)) # range(1, 5) = [1, 2, 3, 4]
 
         # self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
         self._joystick.b().whileTrue(

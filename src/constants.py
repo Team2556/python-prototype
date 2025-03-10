@@ -273,11 +273,18 @@ class AlgaeConstants:
 class RobotDimensions:
     WIDTH_w_bumpers = inches(36)  # inches inchesToMeters(36)#(26+2*3.25)
 
-
 class CoralConstants:
     kCoralMotorPort = CAN_Address.THIRTY
+    
     kLeftBreakerLight = 8  # TODO: Get the actual IDs
-    kRightBreakerLight = 9
+    kCenterBreakerLight = 9
+    kRightBreakerLight = 10
+    
+    kIntakeMultiplier = 0.06
+    kDischargeMultiplier = 0.08
+    
+    kSolenoidPulseDuration = 0.5
+    kTimeBetweenLeavingBeamBreaksAndDischargingCoral = 0.3
 
 class ClimbConstants:
     kClimbMotorPort = CAN_Address.FIFTYONE
