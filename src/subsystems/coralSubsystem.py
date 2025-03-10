@@ -20,22 +20,6 @@ class CoralTrack(commands2.Subsystem):
         self.center_detector = wpilib.DigitalInput(CoralConstants.kCenterBreakerLight)
         self.right_detector = wpilib.DigitalInput(CoralConstants.kRightBreakerLight)
 
-    def center_coral(self, speed=0.08):
-        """Centers Coral on track using left and right sensor (the default command)"""
-        is_Left = self.left_detector.get()
-        is_Right = self.right_detector.get()
-
-        if is_Left and not is_Right:
-            self.set_motor(speed)
-            return
-
-        if is_Right and not is_Left:
-            self.set_motor(-speed)
-            return
-        
-        # If Neither or Both detectors return True
-        self.disable_motor()
-
     def set_motor(self, speed):
         """Sets Coral Track motor to a specific speed"""
         self.motor_controller.set(speed)
