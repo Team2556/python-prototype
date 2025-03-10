@@ -218,8 +218,8 @@ class CAN_Address(IntEnum):
 
 
 class ElevatorConstants:
-    kLeftMotorPort = CAN_Address.FOURTEEN
-    kRightMotorPort = CAN_Address.FIFTEEN
+    kLeftMotorPort = CAN_Address.THIRTEEN
+    kRightMotorPort = CAN_Address.FOURTEEN
     kJoystickPort = 0
     kpeak_forward_torque_current = 35  # 120
     kpeak_reverse_torque_current = -35  # -120
@@ -231,15 +231,15 @@ class ElevatorConstants:
     kElevatorKd = 0.0
     kElevatorGearing = 6  # 10.0
     kElevatorDrumRadius = 0.035 / 2  # half of 35mm in meters
-    kCarriageMass = 4  # 4 kg
+    kCarriageMass = 22.68  # 4 kg
 
     kMinElevatorHeight = 0.00  # 0.0508  # 2 inches
-    kMaxElevatorHeight = inchesToMeters(26)  # 50 inches TODO: make this smaller
-    kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.00002
+    kMaxElevatorHeight = .558 #inchesToMeters(26)  # 50 inches TODO: make this smaller
+    kElevatorDistanceMovedAfterContactWithLimitSwitch = 0.00000
     ScaredSafetyFactor = 200
-    kCoralLv1 = 0.1 / ScaredSafetyFactor  # height in meters
-    kCoralLv2 = 0.32 / ScaredSafetyFactor  # 556
-    kCoralLv3 = 0.5588 / ScaredSafetyFactor
+    kCoralLv1 = 0.025 / ScaredSafetyFactor  # height in meters
+    kCoralLv2 = 0.25 / ScaredSafetyFactor  # 556
+    kCoralLv3 = 0.55 / ScaredSafetyFactor
 
     kMaxVelocityMetersPerSecond = 1.5 / ScaredSafetyFactor
     kMaxAccelerationMetersPerSecSquared = 0.5 / ScaredSafetyFactor
@@ -252,10 +252,10 @@ class ElevatorConstants:
 
     kElevatorOffsetMeters = 0  # Used in softlimit minimum
 
-    kBottomLeftLimitSwitchChannel = Rio_DIO.ZERO
-    kBottomRightLimitSwitchChannel = Rio_DIO.ONE
-    kTopLeftLimitSwitchChannel = Rio_DIO.TWO
-    kTopRightLimitSwitchChannel = Rio_DIO.THREE  # TODO: ? two on top also?
+    kBottomLeftLimitSwitchChannel = Rio_DIO.EIGHT
+    kBottomRightLimitSwitchChannel = Rio_DIO.NINE
+    # kTopLeftLimitSwitchChannel = Rio_DIO.TWO
+    kTopRightLimitSwitchChannel = Rio_DIO.SEVEN  # TODO: ? two on top also?
 
 
 # endregion
@@ -263,24 +263,26 @@ class Override_DriveConstant: ...
 
 
 class AlgaeConstants:
-    kIntakeCANAddress1 = CAN_Address.FORTY  # TODO: Correct the CAN Addresses pls
-    kIntakeCANAddress2 = CAN_Address.FORTYONE
+    kIntakeCANAddress1 = CAN_Address.TWENTYTWO  # TODO: Correct the CAN Addresses pls
+    kIntakeCANAddress2 = CAN_Address.TWENTYTHREE
+    kAlgaeArmLowerLimitSwitchChannel = Rio_DIO.FIVE
     kAlgaeLimitSwitchChannel = (
-        Rio_DIO.FOUR
-    )  # So it doesn't input when limit switch activated
+        Rio_DIO.FIVE
+    )  #TODO: remove/ update code that uses this -- not in design (yet) So it doesn't input when limit switch activated
 
 
 class RobotDimensions:
-    WIDTH_w_bumpers = inches(36)  # inches inchesToMeters(36)#(26+2*3.25)
+    WIDTH_wo_bumpers = meter(.712)  # inches inchesToMeters(26)#(26)
+    WIDTH_w_bumpers = inches(36)  # TODO Update this value
 
 
 class CoralConstants:
-    kCoralMotorPort = CAN_Address.THIRTY
+    kCoralMotorPort = CAN_Address.SEVENTEEN
     kLeftBreakerLight = 8  # TODO: Get the actual IDs
     kRightBreakerLight = 9
 
 class ClimbConstants:
-    kClimbMotorPort = CAN_Address.FIFTYONE
+    kClimbMotorPort = CAN_Address.TWENTYSEVEN
     kTopLimitSwitchChannel = Rio_DIO.FIVE
     kBottomLimitSwitchChannel = Rio_DIO.SIX
     kClimbHookZeroEntry = 1
